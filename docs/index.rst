@@ -15,7 +15,9 @@ provides classes to represent time series as well as tools to read these in from
 files and to manipulate the time series.
 
 This package is still in development, but it is already possible to try out some
-of the functionality.
+of the functionality. If you run into any issues or would like to request
+features, please head over to our `issue tracker
+<https://github.com/aperiosoftware/aas-timeseries/issues>`_.
 
 User guide
 ----------
