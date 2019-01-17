@@ -1,7 +1,7 @@
 Experimental package to make interactive visualizations for time series, for AAS Publications
 ---------------------------------------------------------------------------------------------
 
-|Powered by Astropy| |Travis Status| |AppVeyor Status| |Coverage Status|
+|Powered by Astropy| |Travis Status| |AppVeyor Status| |Coverage Status| |Docs|
 
 
 License
@@ -58,3 +58,8 @@ aas-timeseries based on its use in the README file for the
 
 .. |Coverage Status| image:: https://codecov.io/gh/aperiosoftware/aas-timeseries/branch/master/graph/badge.svg
    :target: https://codecov.io/gh/aperiosoftware/aas-timeseries
+
+.. |Docs| image:: https://readthedocs.org/projects/aas-timeseries/badge/?version=latest
+   :target: https://aas-timeseries.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status
+                
