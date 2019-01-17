@@ -1,11 +1,7 @@
 Experimental package to make interactive visualizations for time series, for AAS Publications
 ---------------------------------------------------------------------------------------------
 
-.. image:: http://img.shields.io/badge/powered%20by-AstroPy-orange.svg?style=flat
-    :target: http://www.astropy.org
-    :alt: Powered by Astropy Badge
-
-
+|Powered by Astropy| |Travis Status| |AppVeyor Status| |Coverage Status|
 
 
 License
@@ -49,3 +45,16 @@ the errors and assumptions that seasoned contributors have glossed over.
 `PyCon talk <https://www.youtube.com/watch?v=6Uj746j9Heo>`_, and was adapted by
 aas-timeseries based on its use in the README file for the
 `MetPy project <https://github.com/Unidata/MetPy>`_.*
+
+.. |Powered by Astropy| image:: http://img.shields.io/badge/powered%20by-AstroPy-orange.svg?style=flat
+    :target: http://www.astropy.org
+    :alt: Powered by Astropy Badge
+
+.. |Travis Status| image:: https://travis-ci.org/aperiosoftware/aas-timeseries.svg?branch=master
+   :target: https://travis-ci.org/aperiosoftware/aas-timeseries
+
+.. |AppVeyor Status| image:: https://img.shields.io/appveyor/ci/astrofrog/aas-timeseries/master.svg
+   :target: https://ci.appveyor.com/project/astrofrog/aas-timeseries/branch/master
+
+.. |Coverage Status| image:: https://codecov.io/gh/aperiosoftware/aas-timeseries/branch/master/graph/badge.svg
+   :target: https://codecov.io/gh/aperiosoftware/aas-timeseries
