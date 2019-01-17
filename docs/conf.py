@@ -28,6 +28,7 @@
 import datetime
 import os
 import sys
+sys.path.insert(0, '..')
 
 try:
     from sphinx_astropy.conf.v1 import *  # noqa
@@ -107,7 +108,8 @@ release = package.__version__
 #html_theme = None
 
 
-html_theme = "alabaster"
+html_theme = "sphinx_rtd_theme"
+html_logo = 'images/logo.png'
 
 
 # Custom sidebar templates, maps document names to template names.
