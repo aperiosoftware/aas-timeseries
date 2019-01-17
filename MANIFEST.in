@@ -3,9 +3,9 @@ include CHANGES.rst
 
 include ah_bootstrap.py
 include setup.cfg
-include aas_time_series/tests/coveragerc
+include aas_timeseries/tests/coveragerc
 
-recursive-include aas_time_series *.pyx *.c *.pxd
+recursive-include aas_timeseries *.pyx *.c *.pxd
 recursive-include docs *
 recursive-include licenses *
 recursive-include cextern *

@@ -16,7 +16,7 @@ class UnsupportedPythonError(Exception):
     pass
 
 if sys.version_info < tuple((int(val) for val in __minimum_python_version__.split('.'))):
-    raise UnsupportedPythonError("aas_time_series does not support Python < {}".format(__minimum_python_version__))
+    raise UnsupportedPythonError("aas_timeseries does not support Python < {}".format(__minimum_python_version__))
 
 if not _ASTROPY_SETUP_:
     # For egg_info test builds to pass, put package imports here.

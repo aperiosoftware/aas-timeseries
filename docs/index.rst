@@ -1,4 +1,4 @@
 Documentation
 =============
 
-This is the documentation for aas-time-series.
+This is the documentation for aas-timeseries.

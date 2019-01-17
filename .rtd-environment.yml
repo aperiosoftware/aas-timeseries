@@ -1,4 +1,4 @@
-name: aas_time_series
+name: aas_timeseries
 
 channels:
     - astropy
