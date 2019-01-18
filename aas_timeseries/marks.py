@@ -79,7 +79,6 @@ class Line(BaseMark):
 
 class VerticalLine(BaseMark):
 
-    data = Any()
     label = Unicode()
     time = Any()
     color = Unicode('#000000')
@@ -106,7 +105,6 @@ class VerticalLine(BaseMark):
 
 class VerticalRange(BaseMark):
 
-    data = Any()
     label = Unicode()
     from_time = Any()
     to_time = Any()
