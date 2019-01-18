@@ -1,8 +1,7 @@
 from json import dump
-from io import StringIO
 
-from astropy.table import Table
-
+from aas_timeseries.data import Data
+from aas_timeseries.marks import Symbol, Line
 
 __all__ = ['InteractiveTimeSeriesFigure']
 
@@ -11,13 +10,28 @@ class InteractiveTimeSeriesFigure:
 
     def __init__(self):
         self._data = {}
+        self._markers = []
 
-    def add_markers(self, ts, column, label):
-        self._data[label] = (ts.time, ts[column])
+    def add_data_markers(self, ts, column, label):
+        if id(ts) not in self._data:
+            self._data[id(ts)] = Data(ts)
+        self._markers.append(Symbol(data=self._data[id(ts)],
+                                    column=column,
+                                    label=label))
+
+    def add_data_line(self, ts, column, label):
+        if id(ts) not in self._data:
+            self._data[id(ts)] = Data(ts)
+        self._markers.append(Line(data=self._data[id(ts)],
+                                  column=column,
+                                  label=label))
+
+    def add_model_line(self, callable):
+        raise NotImplementedError()
 
     def save_interactive(self, filename):
         with open(filename, 'w') as f:
-            dump(self._to_json(), f)
+            dump(self._to_json(), f, indent='  ')
 
     def _to_json(self):
 
@@ -34,32 +48,8 @@ class InteractiveTimeSeriesFigure:
         json['autosize'] = {'type': 'fit', 'resize': True}
 
         # Data
-        json['data'] = []
-        json['marks'] = []
-        for label, (time, column) in self._data.items():
-
-            # Create basic table with time and values
-            table = Table()
-            table['MJD'] = time.mjd
-            table[column.info.name] = column
-
-            s = StringIO()
-            table.write(s, format='ascii.basic', delimiter=',')
-            s.seek(0)
-            csv_string = s.read()
-
-            json['data'].append({'name': label,
-                                 'values': csv_string,
-                                 'format': {'type': 'csv',
-                                            'parse': {'MJD': 'number',
-                                                      column.info.name: 'number'}}})
-
-            # Markers
-            json['marks'].append({'type': 'symbol',
-                                  'from': {'data': label},
-                                  'encode': {'enter': {'x': {'scale': 'xscale', 'field': 'MJD'},
-                                                       'y': {'scale': 'yscale', 'field': column.info.name},
-                                                       'shape': {'value': 'circle'}}}})
+        json['data'] = [data.to_vega() for data in self._data.values()]
+        json['marks'] = [mark.to_vega() for mark in self._markers]
 
         # Axes
         json['axes'] = [{'orient': 'bottom', 'scale': 'xscale', 'title': 'Time'},
