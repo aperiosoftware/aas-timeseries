@@ -75,10 +75,64 @@ class Line(BaseMark):
                                      'fill': {'value': self.color},
                                      'fillOpacity': {'value': self.opacity}}}}
         return [vega]
-#
-# class Rule(BaseMark):
-#     pass
-#
+
+
+class VerticalLine(BaseMark):
+
+    data = Any()
+    label = Unicode()
+    time = Any()
+    color = Unicode('#000000')
+    opacity = Float(1)
+    width = Float(1)
+
+    def to_vega(self):
+
+        # FIXME: this is just a quick shortcut hack
+        datetime = 'datetime' + str(tuple(self.time.datetime.timetuple()[:6]))
+
+        vega = {'type': 'rule',
+                'description': self.label,
+                # FIXME: find a way to represent an infinite vertical line
+                'encode': {'enter': {'x': {'scale': 'xscale', 'signal': datetime},
+                                     'y': {'scale': 'yscale', 'value': -1e8},
+                                     'y2': {'scale': 'yscale', 'value': 1e8},
+                                     'zindex': {'value': self.zindex},
+                                     'strokeWidth': {'value': self.width},
+                                     'stroke': {'value': self.color},
+                                     'strokeOpacity': {'value': self.opacity}}}}
+        return [vega]
+
+
+class VerticalRange(BaseMark):
+
+    data = Any()
+    label = Unicode()
+    from_time = Any()
+    to_time = Any()
+    color = Unicode('#000000')
+    opacity = Float(1)
+    width = Float(1)
+
+    def to_vega(self):
+
+        # FIXME: this is just a quick shortcut hack
+        from_time = 'datetime' + str(tuple(self.from_time.datetime.timetuple()[:6]))
+        to_time = 'datetime' + str(tuple(self.to_time.datetime.timetuple()[:6]))
+
+        vega = {'type': 'rect',
+                'description': self.label,
+                # FIXME: find a way to represent an infinite vertical line
+                'encode': {'enter': {'x': {'scale': 'xscale', 'signal': from_time},
+                                     'x2': {'scale': 'xscale', 'signal': to_time},
+                                     'y': {'scale': 'yscale', 'value': -1e8},
+                                     'y2': {'scale': 'yscale', 'value': 1e8},
+                                     'zindex': {'value': self.zindex},
+                                     'fill': {'value': self.color},
+                                     'fillOpacity': {'value': self.opacity}}}}
+        return [vega]
+
+        #
 #
 # class Area(BaseMark):
 #     pass

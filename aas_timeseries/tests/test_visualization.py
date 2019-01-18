@@ -13,7 +13,9 @@ def test_basic(tmpdir):
     filename = tmpdir.join('figure.json').strpath
 
     figure = InteractiveTimeSeriesFigure()
-    figure.add_markers(time_series=ts, column='flux', label='Flux Markers')
-    figure.add_line(time_series=ts, column='flux', label='Flux Line')
-    figure.add_markers(time_series=ts, column='flux', error='error', label='Flux Markers')
+    figure.add_markers(time_series=ts, column='flux', label='Markers')
+    figure.add_line(time_series=ts, column='flux', label='Line')
+    figure.add_markers(time_series=ts, column='flux', error='error', label='Markers with Errors')
+    figure.add_vertical_line(ts.time[3], label='Vertical Line')
+    figure.add_vertical_range(ts.time[0], ts.time[-1], label='Vertical Range')
     figure.save_interactive(filename)
