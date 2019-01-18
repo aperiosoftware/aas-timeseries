@@ -23,7 +23,7 @@ env:
         # List runtime dependencies for the package that are available as conda
         # packages here.
         - CONDA_DEPENDENCIES=''
-        - CONDA_DEPENDENCIES_DOC='sphinx-astropy'
+        - CONDA_DEPENDENCIES_DOC='sphinx-astropy sphinx_rtd_theme'
 
         # List other runtime dependencies for the package that are available as
         # pip packages here.
@@ -70,20 +70,11 @@ matrix:
           env: SETUP_CMD='build_docs -w'
                CONDA_DEPENDENCIES=$CONDA_DEPENDENCIES_DOC
 
-        # Now try Astropy dev with the latest Python and LTS with Python 2.7 and 3.x.
-        - os: linux
-          env: ASTROPY_VERSION=development
-               EVENT_TYPE='pull_request push cron'
-        - os: linux
-          env: ASTROPY_VERSION=lts
-
         # Try all python versions and Numpy versions. Since we can assume that
         # the Numpy developers have taken care of testing Numpy with different
         # versions of Python, we can vary Python and Numpy versions at the same
         # time.
 
-        - os: linux
-          env: PYTHON_VERSION=3.5 NUMPY_VERSION=1.12
         - os: linux
           env: PYTHON_VERSION=3.6 NUMPY_VERSION=1.13
         - os: linux
