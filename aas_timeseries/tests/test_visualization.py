@@ -12,5 +12,7 @@ def test_basic(tmpdir):
     filename = tmpdir.join('figure.json').strpath
 
     figure = InteractiveTimeSeriesFigure()
-    figure.add_data_markers(ts, 'flux', 'flux')
+    figure.add_markers(ts, 'flux', 'Flux Markers')
+    figure.add_line(ts, 'flux', 'Flux Line')
+    figure.add_model(lambda x: 3, 'Model Fit')
     figure.save_interactive(filename)

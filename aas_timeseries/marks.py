@@ -4,8 +4,6 @@ from traitlets import Unicode, Float, Any, validate, HasTraits
 # Get color from pywwt
 
 
-
-
 class BaseMark(HasTraits):
     """
     Base class for any mark object

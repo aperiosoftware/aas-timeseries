@@ -12,22 +12,19 @@ class InteractiveTimeSeriesFigure:
         self._data = {}
         self._markers = []
 
-    def add_data_markers(self, ts, column, label):
-        if id(ts) not in self._data:
-            self._data[id(ts)] = Data(ts)
-        self._markers.append(Symbol(data=self._data[id(ts)],
+    def add_markers(self, *, time_series=None, column=None, label=None):
+        if id(time_series) not in self._data:
+            self._data[id(time_series)] = Data(time_series)
+        self._markers.append(Symbol(data=self._data[id(time_series)],
                                     column=column,
                                     label=label))
 
-    def add_data_line(self, ts, column, label):
-        if id(ts) not in self._data:
-            self._data[id(ts)] = Data(ts)
-        self._markers.append(Line(data=self._data[id(ts)],
+    def add_line(self, *, time_series=None, column=None, label=None):
+        if id(time_series) not in self._data:
+            self._data[id(time_series)] = Data(time_series)
+        self._markers.append(Line(data=self._data[id(time_series)],
                                   column=column,
                                   label=label))
-
-    def add_model_line(self, callable):
-        raise NotImplementedError()
 
     def save_interactive(self, filename):
         with open(filename, 'w') as f:

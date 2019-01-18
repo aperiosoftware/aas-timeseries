@@ -26,4 +26,22 @@ and reading it in::
     2009-05-02T00:44:36.894  6.631350e-04 ...  1.5586632e-03 -1.4692718e-03
     2009-05-02T00:45:35.752  6.631597e-04 ...  1.5508028e-03 -1.4769078e-03
 
-We now take a look at how to make an interactive figure of this lightcurve.
+We now take a look at how to make an interactive figure of this lightcurve. To
+initialize a figure, use the :class:`aas_timeseries.InteractiveTimeSeriesFigure`
+class::
+
+    >>> from aas_timeseries import InteractiveTimeSeriesFigure
+    >>> fig = InteractiveTimeSeriesFigure()
+
+We can now add markers using::
+
+    fig.add_markers(time_series=ts, column='sap_flux', label='SAP Flux')
+
+The first argument is the whole time series object, while the second is the name
+of the column to use for the specific markers, while the latter is used in the
+legend of the plot. At this point, you could also add other time series, model
+overlays, define different views, and so on - we will look at these shortly, but
+for now let's assume we want to save the interactive figure. You can save the
+figure to a JSON file using::
+
+    fig.save_interactive('my-figure.json')
