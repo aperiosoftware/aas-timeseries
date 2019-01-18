@@ -152,19 +152,33 @@ class VerticalRange(BaseMark):
                                      'fillOpacity': {'value': self.opacity}}}}
         return [vega]
 
-        #
-#
-# class Area(BaseMark):
-#     pass
-#
-#
-# class Rect(BaseMark):  # used for error bars
-#     pass
-#
-#
-# class Text(BaseMark):
-#
-#     color = Unicode()
-#     opacity = Float()
-#
-#     pass
+
+class Text(BaseMark):
+
+    label = Unicode()
+    text = Unicode()
+    x = Any()
+    y = Float()
+    color = Unicode('#000000')
+    opacity = Float(1)
+    weight = Unicode('normal')
+    baseline = Unicode('middle')
+    align = Unicode('left')
+    angle = Float(0)
+
+    def to_vega(self):
+
+        datetime = 'datetime' + str(tuple(self.x.datetime.timetuple()[:6]))
+
+        vega = {'type': 'text',
+                'description': self.label,
+                'encode': {'enter': {'x': {'scale': 'xscale', 'signal': datetime},
+                                     'y': {'scale': 'yscale', 'value': self.y},
+                                     'zindex': {'value': self.zindex},
+                                     'fill': {'value': self.color},
+                                     'fillOpacity': {'value': self.opacity},
+                                     'fontWeigth': {'value': self.weight},
+                                     'baseline': {'value': self.baseline},
+                                     'align': {'value': self.align},
+                                     'angle': {'value': self.angle}}}}
+        return [vega]
