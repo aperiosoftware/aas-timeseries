@@ -16,23 +16,42 @@ class Symbol(BaseMark):
     data = Any()
     label = Unicode()
     column = Unicode()
+    error = Unicode(allow_none=True)
     shape = Unicode('circle')
     color = Unicode('#000000')
     opacity = Float(1)
     size = Float(10)
 
     def to_vega(self):
-        vega = {'type': 'symbol',
-                'description': self.label,
-                'from': {'data': self.data.uuid},
-                'encode': {'enter': {'x': {'scale': 'xscale', 'field': self.data.time_column},
-                                     'y': {'scale': 'yscale', 'field': self.column},
-                                     'shape': {'value': self.shape}},
-                           'update':{'shape': {'value': self.shape},
-                                     'zindex': {'value': self.zindex},
-                                     'size': {'value': self.size},
-                                     'fill': {'value': self.color},
-                                     'fillOpacity': {'value': self.opacity}}}}
+
+        # The main markers
+        vega = [{'type': 'symbol',
+                 'description': self.label,
+                 'from': {'data': self.data.uuid},
+                 'encode': {'enter': {'x': {'scale': 'xscale', 'field': self.data.time_column},
+                                      'y': {'scale': 'yscale', 'field': self.column},
+                                      'shape': {'value': self.shape}},
+                            'update':{'shape': {'value': self.shape},
+                                      'zindex': {'value': self.zindex},
+                                      'size': {'value': self.size},
+                                      'fill': {'value': self.color},
+                                      'fillOpacity': {'value': self.opacity}}}}]
+
+        # The error bars (if requested)
+        if self.error:
+            vega.append({'type': 'rect',
+                         'description': self.label,
+                         'from': {'data': self.data.uuid},
+                         'encode': {'enter': {'x': {'scale': 'xscale', 'field': self.data.time_column},
+                                         'y': {'scale': 'yscale', 'signal': f"datum['{self.column}'] - datum['{self.error}']"},
+                                         'y2': {'scale': 'yscale', 'signal': f"datum['{self.column}'] + datum['{self.error}']"}},
+                               'update':{'shape': {'value': self.shape},
+                                         'zindex': {'value': self.zindex},
+                                         'width': {'value': 1},
+                                         'fill': {'value': self.color},
+                                         'fillOpacity': {'value': self.opacity}}}})
+
+
         return vega
 
 
@@ -55,7 +74,7 @@ class Line(BaseMark):
                                      'strokeWidth': {'value': self.width},
                                      'fill': {'value': self.color},
                                      'fillOpacity': {'value': self.opacity}}}}
-        return vega
+        return [vega]
 #
 # class Rule(BaseMark):
 #     pass

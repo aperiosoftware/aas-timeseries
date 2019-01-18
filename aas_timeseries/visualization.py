@@ -12,11 +12,12 @@ class InteractiveTimeSeriesFigure:
         self._data = {}
         self._markers = []
 
-    def add_markers(self, *, time_series=None, column=None, label=None):
+    def add_markers(self, *, time_series=None, column=None, error=None, label=None):
         if id(time_series) not in self._data:
             self._data[id(time_series)] = Data(time_series)
         self._markers.append(Symbol(data=self._data[id(time_series)],
                                     column=column,
+                                    error=error,
                                     label=label))
 
     def add_line(self, *, time_series=None, column=None, label=None):
@@ -46,7 +47,9 @@ class InteractiveTimeSeriesFigure:
 
         # Data
         json['data'] = [data.to_vega() for data in self._data.values()]
-        json['marks'] = [mark.to_vega() for mark in self._markers]
+        json['marks'] = []
+        for mark in self._markers:
+            json['marks'].extend(mark.to_vega())
 
         # Axes
         json['axes'] = [{'orient': 'bottom', 'scale': 'xscale', 'title': 'Time'},
