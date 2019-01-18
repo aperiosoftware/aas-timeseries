@@ -72,6 +72,28 @@ class Line(BaseMark):
                                      'y': {'scale': 'yscale', 'field': self.column},
                                      'zindex': {'value': self.zindex},
                                      'strokeWidth': {'value': self.width},
+                                     'stroke': {'value': self.color},
+                                     'strokeOpacity': {'value': self.opacity}}}}
+        return [vega]
+
+
+class Range(BaseMark):
+
+    data = Any()
+    label = Unicode()
+    column_lower = Unicode()
+    column_upper = Unicode()
+    color = Unicode('#000000')
+    opacity = Float(1)
+
+    def to_vega(self):
+        vega = {'type': 'area',
+                'description': self.label,
+                'from': {'data': self.data.uuid},
+                'encode': {'enter': {'x': {'scale': 'xscale', 'field': self.data.time_column},
+                                     'y': {'scale': 'yscale', 'field': self.column_lower},
+                                     'y2': {'scale': 'yscale', 'field': self.column_upper},
+                                     'zindex': {'value': self.zindex},
                                      'fill': {'value': self.color},
                                      'fillOpacity': {'value': self.opacity}}}}
         return [vega]

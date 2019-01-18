@@ -1,7 +1,7 @@
 from json import dump
 
 from aas_timeseries.data import Data
-from aas_timeseries.marks import Symbol, Line, VerticalLine, VerticalRange
+from aas_timeseries.marks import Symbol, Line, VerticalLine, VerticalRange, Range
 
 __all__ = ['InteractiveTimeSeriesFigure']
 
@@ -26,6 +26,13 @@ class InteractiveTimeSeriesFigure:
         self._markers.append(Line(data=self._data[id(time_series)],
                                   column=column,
                                   label=label, **kwargs))
+
+    def add_range(self, *, time_series=None, column_lower=None, column_upper=None, label=None, **kwargs):
+        if id(time_series) not in self._data:
+            self._data[id(time_series)] = Data(time_series)
+        self._markers.append(Range(data=self._data[id(time_series)],
+                                   column_lower=column_lower, column_upper=column_upper,
+                                   label=label, **kwargs))
 
     def add_vertical_line(self, time, label=None, **kwargs):
         self._markers.append(VerticalLine(time=time, label=label, **kwargs))
