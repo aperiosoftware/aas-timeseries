@@ -32,7 +32,7 @@ class Symbol(BaseMark):
     shape = Unicode('circle')
     color = Unicode('#000000')
     opacity = Float(1)
-    size = Float(10)
+    size = Float(5)
 
     def to_vega(self):
 

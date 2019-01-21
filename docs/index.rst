@@ -26,5 +26,5 @@ User guide
    :maxdepth: 1
 
    installing.rst
-   getting_started.rst
+   getting_started
    api.rst

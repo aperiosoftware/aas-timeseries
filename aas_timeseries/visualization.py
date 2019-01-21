@@ -1,4 +1,7 @@
+import tempfile
 from json import dump
+
+from jupyter_aas_timeseries import TimeSeriesWidget
 
 from aas_timeseries.data import Data
 from aas_timeseries.marks import Symbol, Line, VerticalLine, VerticalRange, HorizontalLine, Range, Text
@@ -52,6 +55,13 @@ class InteractiveTimeSeriesFigure:
     def save_interactive(self, filename):
         with open(filename, 'w') as f:
             dump(self._to_json(), f, indent='  ')
+
+    def preview_interactive(self):
+        # FIXME: should be able to do without a file
+        tmpfile = tempfile.mktemp()
+        self.save_interactive(tmpfile)
+        widget = TimeSeriesWidget(tmpfile)
+        return widget
 
     def _to_json(self):
 
