@@ -114,10 +114,7 @@ class VerticalLine(BaseMark):
 
         vega = {'type': 'rule',
                 'description': self.label,
-                # FIXME: find a way to represent an infinite vertical line
                 'encode': {'enter': {'x': {'scale': 'xscale', 'signal': datetime},
-                                     'y': {'scale': 'yscale', 'value': -1e8},
-                                     'y2': {'scale': 'yscale', 'value': 1e8},
                                      'zindex': {'value': self.zindex},
                                      'strokeWidth': {'value': self.width},
                                      'stroke': {'value': self.color},
@@ -150,6 +147,26 @@ class VerticalRange(BaseMark):
                                      'zindex': {'value': self.zindex},
                                      'fill': {'value': self.color},
                                      'fillOpacity': {'value': self.opacity}}}}
+        return [vega]
+
+
+class HorizontalLine(BaseMark):
+
+    label = Unicode()
+    value = Any()
+    color = Unicode('#000000')
+    opacity = Float(1)
+    width = Float(1)
+
+    def to_vega(self):
+
+        vega = {'type': 'rule',
+                'description': self.label,
+                'encode': {'enter': {'y': {'scale': 'yscale', 'value': self.value},
+                                     'zindex': {'value': self.zindex},
+                                     'strokeWidth': {'value': self.width},
+                                     'stroke': {'value': self.color},
+                                     'strokeOpacity': {'value': self.opacity}}}}
         return [vega]
 
 

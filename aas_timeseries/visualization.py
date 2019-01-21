@@ -1,7 +1,7 @@
 from json import dump
 
 from aas_timeseries.data import Data
-from aas_timeseries.marks import Symbol, Line, VerticalLine, VerticalRange, Range, Text
+from aas_timeseries.marks import Symbol, Line, VerticalLine, VerticalRange, HorizontalLine, Range, Text
 
 __all__ = ['InteractiveTimeSeriesFigure']
 
@@ -39,6 +39,9 @@ class InteractiveTimeSeriesFigure:
 
     def add_vertical_range(self, from_time, to_time, label=None, **kwargs):
         self._markers.append(VerticalRange(from_time=from_time, to_time=to_time, label=label, **kwargs))
+
+    def add_horizontal_line(self, value, label=None, **kwargs):
+        self._markers.append(HorizontalLine(value=value, label=label, **kwargs))
 
     def add_text(self, **kwargs):
         self._markers.append(Text(**kwargs))
