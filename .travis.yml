@@ -23,7 +23,7 @@ env:
         # List runtime dependencies for the package that are available as conda
         # packages here.
         - CONDA_DEPENDENCIES=''
-        - CONDA_DEPENDENCIES_DOC='sphinx-astropy sphinx_rtd_theme'
+        - CONDA_DEPENDENCIES_DOC='sphinx-astropy sphinx_rtd_theme pandoc'
 
         # List other runtime dependencies for the package that are available as
         # pip packages here.
