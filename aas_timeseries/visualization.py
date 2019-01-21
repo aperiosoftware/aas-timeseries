@@ -11,7 +11,7 @@ __all__ = ['InteractiveTimeSeriesFigure']
 
 class InteractiveTimeSeriesFigure:
 
-    def __init__(self, width=800, height=600, resize=True):
+    def __init__(self, width=600, height=400, resize=False):
         self._data = {}
         self._markers = []
         self._width = width
