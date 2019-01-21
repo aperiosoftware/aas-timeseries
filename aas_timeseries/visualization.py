@@ -8,9 +8,12 @@ __all__ = ['InteractiveTimeSeriesFigure']
 
 class InteractiveTimeSeriesFigure:
 
-    def __init__(self):
+    def __init__(self, width=800, height=600, resize=True):
         self._data = {}
         self._markers = []
+        self._width = width
+        self._height = height
+        self._resize = resize
 
     def add_markers(self, *, time_series=None, column=None, error=None, label=None, **kwargs):
         if id(time_series) not in self._data:
@@ -59,10 +62,10 @@ class InteractiveTimeSeriesFigure:
         json['$schema'] = 'https://vega.github.io/schema/vega/v4.json'
 
         # Layout
-        json['width'] = 800
-        json['height'] = 450
+        json['width'] = self._width
+        json['height'] = self._height
         json['padding'] = 0
-        json['autosize'] = {'type': 'fit', 'resize': True}
+        json['autosize'] = {'type': 'fit', 'resize': self._resize}
 
         # Data
         json['data'] = [data.to_vega() for data in self._data.values()]
