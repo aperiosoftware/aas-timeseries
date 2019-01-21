@@ -3,6 +3,18 @@ from traitlets import Unicode, Float, Any, validate, HasTraits
 
 # Get color from pywwt
 
+def time_to_vega(time):
+    """
+    Convert an `~astropy.time.Time` object into a string compatible with Vega.
+    """
+
+    year, month, day, hour, minute, second = time.datetime.timetuple()[:6]
+
+    # Note that Vega assumes months are zero-based.
+    month -= 1
+
+    return f'datetime({year}, {month}, {day}, {hour}, {minute}, {second})'
+
 
 class BaseMark(HasTraits):
     """
@@ -109,12 +121,9 @@ class VerticalLine(BaseMark):
 
     def to_vega(self):
 
-        # FIXME: this is just a quick shortcut hack
-        datetime = 'datetime' + str(tuple(self.time.datetime.timetuple()[:6]))
-
         vega = {'type': 'rule',
                 'description': self.label,
-                'encode': {'enter': {'x': {'scale': 'xscale', 'signal': datetime},
+                'encode': {'enter': {'x': {'scale': 'xscale', 'signal': time_to_vega(self.time)},
                                      'zindex': {'value': self.zindex},
                                      'strokeWidth': {'value': self.width},
                                      'stroke': {'value': self.color},
@@ -133,15 +142,11 @@ class VerticalRange(BaseMark):
 
     def to_vega(self):
 
-        # FIXME: this is just a quick shortcut hack
-        from_time = 'datetime' + str(tuple(self.from_time.datetime.timetuple()[:6]))
-        to_time = 'datetime' + str(tuple(self.to_time.datetime.timetuple()[:6]))
-
         vega = {'type': 'rect',
                 'description': self.label,
                 # FIXME: find a way to represent an infinite vertical line
-                'encode': {'enter': {'x': {'scale': 'xscale', 'signal': from_time},
-                                     'x2': {'scale': 'xscale', 'signal': to_time},
+                'encode': {'enter': {'x': {'scale': 'xscale', 'signal': time_to_vega(self.from_time)},
+                                     'x2': {'scale': 'xscale', 'signal': time_to_vega(self.to_time)},
                                      'y': {'scale': 'yscale', 'value': -1e8},
                                      'y2': {'scale': 'yscale', 'value': 1e8},
                                      'zindex': {'value': self.zindex},
@@ -185,11 +190,9 @@ class Text(BaseMark):
 
     def to_vega(self):
 
-        datetime = 'datetime' + str(tuple(self.x.datetime.timetuple()[:6]))
-
         vega = {'type': 'text',
                 'description': self.label,
-                'encode': {'enter': {'x': {'scale': 'xscale', 'signal': datetime},
+                'encode': {'enter': {'x': {'scale': 'xscale', 'signal': time_to_vega(self.x)},
                                      'y': {'scale': 'yscale', 'value': self.y},
                                      'zindex': {'value': self.zindex},
                                      'fill': {'value': self.color},
