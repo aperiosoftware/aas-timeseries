@@ -74,4 +74,8 @@ class InteractiveTimeSeriesFigure:
         json['axes'] = [{'orient': 'bottom', 'scale': 'xscale', 'title': 'Time'},
                         {'orient': 'left', 'scale': 'yscale', 'title': 'Intensity'}]
 
+        # Scales
+        json['scales'] = [{'name': 'xscale', 'type': 'time', 'range': 'width', 'zero': False},
+                          {'name': 'yscale', 'type': 'linear', 'range': 'width', 'zero': False}]
+
         return json
