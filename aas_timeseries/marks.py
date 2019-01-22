@@ -1,7 +1,6 @@
-import uuid
-
-from traitlets import validate, HasTraits, TraitError
-from aas_timeseries.traits import Unicode, Float, Any, Opacity, Color, UnicodeChoice
+from traitlets import HasTraits
+from aas_timeseries.traits import (Unicode, Float, Any, Opacity, Color,
+                                   UnicodeChoice, DataTrait, AstropyTime)
 
 __all__ = ['Symbol', 'Line', 'Range', 'VerticalLine', 'VerticalRange',
            'HorizontalLine', 'Text']
@@ -41,7 +40,7 @@ class Symbol(BaseMark):
     A set of time series data points represented by markers.
     """
 
-    data = Any(help='The time series object containing the data.')
+    data = DataTrait(help='The time series object containing the data.')
     column = Unicode(help='The field in the time series containing the data.')
     error = Unicode(allow_none=True, help='The field in the time series '
                                           'containing the data uncertainties.')
@@ -93,7 +92,7 @@ class Line(BaseMark):
     A set of time series data points connected by a line.
     """
 
-    data = Any(help='The time series object containing the data.')
+    data = DataTrait(help='The time series object containing the data.')
     column = Unicode(help='The field in the time series containing the data.')
     width = Float(1, help='The width of the line, in pixels.')
 
@@ -119,7 +118,7 @@ class Range(BaseMark):
     An interval defined by lower and upper values as a function of time.
     """
 
-    data = Any(help='The time series object containing the data.')
+    data = DataTrait(help='The time series object containing the data.')
     column_lower = Unicode(help='The field in the time series containing the lower value of the data range.')
     column_upper = Unicode(help='The field in the time series containing the upper value of the data range.')
 
@@ -145,8 +144,7 @@ class VerticalLine(BaseMark):
     A vertical line at a specific time.
     """
 
-    # TODO: validate time
-    time = Any(help='The date/time at which the vertical line is shown.')
+    time = AstropyTime(help='The date/time at which the vertical line is shown.')
     width = Float(1, help='The width of the line, in pixels.')
 
     # NOTE: for now we implement a single color rather than a separate edge and
@@ -170,9 +168,8 @@ class VerticalRange(BaseMark):
     A continuous range specified by a lower and upper time.
     """
 
-    # TODO: validate time
-    time_lower = Any(help='The date/time at which the range starts.')
-    time_upper = Any(help='The date/time at which the range ends.')
+    time_lower = AstropyTime(help='The date/time at which the range starts.')
+    time_upper = AstropyTime(help='The date/time at which the range ends.')
 
     # NOTE: for now we implement a single color rather than a separate edge and
     # fill color
@@ -224,7 +221,7 @@ class Text(BaseMark):
     """
 
     text = Unicode(help='The text label to show.')
-    time = Any(help='The date/time at which the text is shown.')
+    time = AstropyTime(help='The date/time at which the text is shown.')
     value = Float(help='The y value at which the text is shown.')
     weight = UnicodeChoice('normal', help='The weight of the text.',
                            choices=['normal', 'bold'])
