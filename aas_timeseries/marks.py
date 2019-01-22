@@ -1,6 +1,6 @@
 from traitlets import HasTraits
 from aas_timeseries.traits import (Unicode, Float, PositiveFloat, Any, Opacity, Color,
-                                   UnicodeChoice, DataTrait, AstropyTime)
+                                   UnicodeChoice, DataTrait, ColumnTrait, AstropyTime)
 
 __all__ = ['Symbol', 'Line', 'Range', 'VerticalLine', 'VerticalRange',
            'HorizontalLine', 'Text']
@@ -41,9 +41,9 @@ class Symbol(BaseMark):
     """
 
     data = DataTrait(help='The time series object containing the data.')
-    column = Unicode(help='The field in the time series containing the data.')
-    error = Unicode(allow_none=True, help='The field in the time series '
-                                          'containing the data uncertainties.')
+    column = ColumnTrait(None, help='The field in the time series containing the data.')
+    error = ColumnTrait(None, help='The field in the time series '
+                                   'containing the data uncertainties.')
 
     shape = UnicodeChoice('circle', help='The symbol shape.', choices=SYMBOL_SHAPES)
 
@@ -92,8 +92,8 @@ class Line(BaseMark):
     A set of time series data points connected by a line.
     """
 
-    data = DataTrait(help='The time series object containing the data.')
-    column = Unicode(help='The field in the time series containing the data.')
+    data = DataTrait(Nhelp='The time series object containing the data.')
+    column = ColumnTrait(None, help='The field in the time series containing the data.')
     width = PositiveFloat(1, help='The width of the line, in pixels.')
 
     # NOTE: for now we implement a single color rather than a separate edge and
@@ -119,8 +119,8 @@ class Range(BaseMark):
     """
 
     data = DataTrait(help='The time series object containing the data.')
-    column_lower = Unicode(help='The field in the time series containing the lower value of the data range.')
-    column_upper = Unicode(help='The field in the time series containing the upper value of the data range.')
+    column_lower = ColumnTrait(None, help='The field in the time series containing the lower value of the data range.')
+    column_upper = ColumnTrait(None, help='The field in the time series containing the upper value of the data range.')
 
     # NOTE: for now we implement a single color rather than a separate edge and
     # fill color
