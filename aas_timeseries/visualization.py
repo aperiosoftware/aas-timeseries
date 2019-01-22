@@ -46,8 +46,8 @@ class InteractiveTimeSeriesFigure:
     def add_vertical_line(self, time, label=None, **kwargs):
         self._markers.append(VerticalLine(time=time, label=label, **kwargs))
 
-    def add_vertical_range(self, from_time, to_time, label=None, **kwargs):
-        self._markers.append(VerticalRange(from_time=from_time, to_time=to_time, label=label, **kwargs))
+    def add_vertical_range(self, time_lower, time_upper, label=None, **kwargs):
+        self._markers.append(VerticalRange(time_lower=time_lower, time_upper=time_upper, label=label, **kwargs))
 
     def add_horizontal_line(self, value, label=None, **kwargs):
         self._markers.append(HorizontalLine(value=value, label=label, **kwargs))
