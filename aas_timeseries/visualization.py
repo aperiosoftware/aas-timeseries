@@ -10,6 +10,9 @@ __all__ = ['InteractiveTimeSeriesFigure']
 
 
 class InteractiveTimeSeriesFigure:
+    """
+    An interactive time series figure.
+    """
 
     def __init__(self, width=600, height=400, resize=False):
         self._data = {}

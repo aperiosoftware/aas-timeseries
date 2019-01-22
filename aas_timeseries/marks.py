@@ -1,7 +1,11 @@
 import uuid
-from traitlets import Unicode, Float, Any, validate, HasTraits
 
-# Get color from pywwt
+from traitlets import validate, HasTraits, TraitError
+from aas_timeseries.traits import Unicode, Float, Any, Opacity, Color, UnicodeChoice
+
+__all__ = ['Symbol', 'Line', 'Range', 'VerticalLine', 'VerticalRange',
+           'HorizontalLine', 'Text']
+
 
 def time_to_vega(time):
     """
@@ -20,19 +24,39 @@ class BaseMark(HasTraits):
     """
     Base class for any mark object
     """
-    zindex = Float()
+    label = Unicode(help='The label to use to designate the marks in the legend.')
+
+    def to_vega(self):
+        """
+        Convert the mark to its Vega representation.
+        """
+
+
+SYMBOL_SHAPES = ['circle', 'square', 'cross', 'diamond', 'triangle-up',
+                 'triangle-down', 'triangle-right', 'triangle-left']
 
 
 class Symbol(BaseMark):
+    """
+    A set of time series data points represented by markers.
+    """
 
-    data = Any()
-    label = Unicode()
-    column = Unicode()
-    error = Unicode(allow_none=True)
-    shape = Unicode('circle')
-    color = Unicode('#000000')
-    opacity = Float(1)
-    size = Float(5)
+    data = Any(help='The time series object containing the data.')
+    column = Unicode(help='The field in the time series containing the data.')
+    error = Unicode(allow_none=True, help='The field in the time series '
+                                          'containing the data uncertainties.')
+
+    shape = UnicodeChoice('circle', help='The symbol shape.', choices=SYMBOL_SHAPES)
+
+    size = Float(5, help='The area in pixels of the bounding box of the symbols.\n\n'
+                         'Note that this value sets the area of the symbol; the '
+                         'side lengths will increase with the square root of this '
+                         'value.')
+
+    # NOTE: for now we implement a single color rather than a separate edge and
+    # fill color
+    color = Color('black', help='The color of the symbols.')
+    opacity = Opacity(1, help='The opacity of the symbol from 0 (transparent) to 1 (opaque).')
 
     def to_vega(self):
 
@@ -63,18 +87,22 @@ class Symbol(BaseMark):
                                          'fill': {'value': self.color},
                                          'fillOpacity': {'value': self.opacity}}}})
 
-
         return vega
 
 
 class Line(BaseMark):
+    """
+    A set of time series data points connected by a line.
+    """
 
-    data = Any()
-    label = Unicode()
-    column = Unicode()
-    color = Unicode('#000000')
-    opacity = Float(1)
-    width = Float(1)
+    data = Any(help='The time series object containing the data.')
+    column = Unicode(help='The field in the time series containing the data.')
+    width = Float(1, help='The width of the line, in pixels.')
+
+    # NOTE: for now we implement a single color rather than a separate edge and
+    # fill color
+    color = Color('black', help='The color of the line.')
+    opacity = Opacity(1, help='The opacity of the line from 0 (transparent) to 1 (opaque).')
 
     def to_vega(self):
         vega = {'type': 'line',
@@ -90,13 +118,18 @@ class Line(BaseMark):
 
 
 class Range(BaseMark):
+    """
+    An interval defined by lower and upper values as a function of time.
+    """
 
-    data = Any()
-    label = Unicode()
-    column_lower = Unicode()
-    column_upper = Unicode()
-    color = Unicode('#000000')
-    opacity = Float(1)
+    data = Any(help='The time series object containing the data.')
+    column_lower = Unicode(help='The field in the time series containing the lower value of the data range.')
+    column_upper = Unicode(help='The field in the time series containing the upper value of the data range.')
+
+    # NOTE: for now we implement a single color rather than a separate edge and
+    # fill color
+    color = Color('black', help='The color of the range.')
+    opacity = Opacity(1, help='The opacity of the range from 0 (transparent) to 1 (opaque).')
 
     def to_vega(self):
         vega = {'type': 'area',
@@ -112,12 +145,18 @@ class Range(BaseMark):
 
 
 class VerticalLine(BaseMark):
+    """
+    A vertical line at a specific time.
+    """
 
-    label = Unicode()
-    time = Any()
-    color = Unicode('#000000')
-    opacity = Float(1)
-    width = Float(1)
+    # TODO: validate time
+    time = Any(help='The date/time at which the vertical line is shown.')
+    width = Float(1, help='The width of the line, in pixels.')
+
+    # NOTE: for now we implement a single color rather than a separate edge and
+    # fill color
+    color = Color('black', help='The color of the line.')
+    opacity = Opacity(1, help='The opacity of the line from 0 (transparent) to 1 (opaque).')
 
     def to_vega(self):
 
@@ -132,21 +171,26 @@ class VerticalLine(BaseMark):
 
 
 class VerticalRange(BaseMark):
+    """
+    A continuous range specified by a lower and upper time.
+    """
 
-    label = Unicode()
-    from_time = Any()
-    to_time = Any()
-    color = Unicode('#000000')
-    opacity = Float(1)
-    width = Float(1)
+    # TODO: validate time
+    time_lower = Any(help='The date/time at which the range starts.')
+    time_upper = Any(help='The date/time at which the range ends.')
+
+    # NOTE: for now we implement a single color rather than a separate edge and
+    # fill color
+    color = Color('black', help='The color of the range.')
+    opacity = Opacity(1, help='The opacity of the range from 0 (transparent) to 1 (opaque).')
 
     def to_vega(self):
 
         vega = {'type': 'rect',
                 'description': self.label,
                 # FIXME: find a way to represent an infinite vertical line
-                'encode': {'enter': {'x': {'scale': 'xscale', 'signal': time_to_vega(self.from_time)},
-                                     'x2': {'scale': 'xscale', 'signal': time_to_vega(self.to_time)},
+                'encode': {'enter': {'x': {'scale': 'xscale', 'signal': time_to_vega(self.time_lower)},
+                                     'x2': {'scale': 'xscale', 'signal': time_to_vega(self.time_upper)},
                                      'y': {'scale': 'yscale', 'value': -1e8},
                                      'y2': {'scale': 'yscale', 'value': 1e8},
                                      'zindex': {'value': self.zindex},
@@ -156,12 +200,18 @@ class VerticalRange(BaseMark):
 
 
 class HorizontalLine(BaseMark):
+    """
+    A horizontal line at a specific y value.
+    """
 
-    label = Unicode()
-    value = Any()
-    color = Unicode('#000000')
-    opacity = Float(1)
-    width = Float(1)
+    # TODO: validate value and allow it to be a quantity
+    value = Any(help='The y value at which the horizontal line is shown.')
+    width = Float(1, help='The width of the line, in pixels.')
+
+    # NOTE: for now we implement a single color rather than a separate edge and
+    # fill color
+    color = Color('black', help='The color of the line.')
+    opacity = Opacity(1, help='The opacity of the line from 0 (transparent) to 1 (opaque).')
 
     def to_vega(self):
 
@@ -176,24 +226,32 @@ class HorizontalLine(BaseMark):
 
 
 class Text(BaseMark):
+    """
+    A text label.
+    """
 
-    label = Unicode()
-    text = Unicode()
-    x = Any()
-    y = Float()
-    color = Unicode('#000000')
-    opacity = Float(1)
-    weight = Unicode('normal')
-    baseline = Unicode('middle')
-    align = Unicode('left')
-    angle = Float(0)
+    text = Unicode(help='The text label to show.')
+    time = Any(help='The date/time at which the text is shown.')
+    value = Float(help='The y value at which the text is shown.')
+    weight = UnicodeChoice('normal', help='The weight of the text.',
+                           choices=['normal', 'bold'])
+    baseline = UnicodeChoice('alphabetic', help='The vertical text baseline.',
+                             choices=['alphabetic', 'top', 'middle', 'bottom'])
+    align = UnicodeChoice('left', help='The horizontal text alignment.',
+                          choices=['left', 'center', 'right'])
+    angle = Float(0, help='The rotation angle of the text in degrees (default 0).')
+
+    # NOTE: for now we implement a single color rather than a separate edge and
+    # fill color
+    color = Color('black', help='The color of the text.')
+    opacity = Opacity(1, help='The opacity of the text from 0 (transparent) to 1 (opaque).')
 
     def to_vega(self):
 
         vega = {'type': 'text',
                 'description': self.label,
-                'encode': {'enter': {'x': {'scale': 'xscale', 'signal': time_to_vega(self.x)},
-                                     'y': {'scale': 'yscale', 'value': self.y},
+                'encode': {'enter': {'x': {'scale': 'xscale', 'signal': time_to_vega(self.time)},
+                                     'y': {'scale': 'yscale', 'value': self.value},
                                      'zindex': {'value': self.zindex},
                                      'fill': {'value': self.color},
                                      'fillOpacity': {'value': self.opacity},
