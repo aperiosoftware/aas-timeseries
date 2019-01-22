@@ -109,7 +109,7 @@ release = package.__version__
 
 
 html_theme = "sphinx_rtd_theme"
-html_logo = 'images/logo.png'
+html_logo = 'images/aas_logo.svg'
 
 
 # Custom sidebar templates, maps document names to template names.
