@@ -1,5 +1,5 @@
 from traitlets import HasTraits
-from aas_timeseries.traits import (Unicode, Float, Any, Opacity, Color,
+from aas_timeseries.traits import (Unicode, Float, PositiveFloat, Any, Opacity, Color,
                                    UnicodeChoice, DataTrait, AstropyTime)
 
 __all__ = ['Symbol', 'Line', 'Range', 'VerticalLine', 'VerticalRange',
@@ -47,10 +47,10 @@ class Symbol(BaseMark):
 
     shape = UnicodeChoice('circle', help='The symbol shape.', choices=SYMBOL_SHAPES)
 
-    size = Float(5, help='The area in pixels of the bounding box of the symbols.\n\n'
-                         'Note that this value sets the area of the symbol; the '
-                         'side lengths will increase with the square root of this '
-                         'value.')
+    size = PositiveFloat(5, help='The area in pixels of the bounding box of the symbols.\n\n'
+                                 'Note that this value sets the area of the symbol; the '
+                                 'side lengths will increase with the square root of this '
+                                 'value.')
 
     # NOTE: for now we implement a single color rather than a separate edge and
     # fill color
@@ -94,7 +94,7 @@ class Line(BaseMark):
 
     data = DataTrait(help='The time series object containing the data.')
     column = Unicode(help='The field in the time series containing the data.')
-    width = Float(1, help='The width of the line, in pixels.')
+    width = PositiveFloat(1, help='The width of the line, in pixels.')
 
     # NOTE: for now we implement a single color rather than a separate edge and
     # fill color
@@ -145,7 +145,7 @@ class VerticalLine(BaseMark):
     """
 
     time = AstropyTime(help='The date/time at which the vertical line is shown.')
-    width = Float(1, help='The width of the line, in pixels.')
+    width = PositiveFloat(1, help='The width of the line, in pixels.')
 
     # NOTE: for now we implement a single color rather than a separate edge and
     # fill color
@@ -197,7 +197,7 @@ class HorizontalLine(BaseMark):
 
     # TODO: validate value and allow it to be a quantity
     value = Any(help='The y value at which the horizontal line is shown.')
-    width = Float(1, help='The width of the line, in pixels.')
+    width = PositiveFloat(1, help='The width of the line, in pixels.')
 
     # NOTE: for now we implement a single color rather than a separate edge and
     # fill color
@@ -222,7 +222,7 @@ class Text(BaseMark):
 
     text = Unicode(help='The text label to show.')
     time = AstropyTime(help='The date/time at which the text is shown.')
-    value = Float(help='The y value at which the text is shown.')
+    value = PositiveFloat(help='The y value at which the text is shown.')
     weight = UnicodeChoice('normal', help='The weight of the text.',
                            choices=['normal', 'bold'])
     baseline = UnicodeChoice('alphabetic', help='The vertical text baseline.',
