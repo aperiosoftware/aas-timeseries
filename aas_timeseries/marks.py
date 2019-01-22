@@ -68,7 +68,6 @@ class Symbol(BaseMark):
                                       'y': {'scale': 'yscale', 'field': self.column},
                                       'shape': {'value': self.shape}},
                             'update':{'shape': {'value': self.shape},
-                                      'zindex': {'value': self.zindex},
                                       'size': {'value': self.size},
                                       'fill': {'value': self.color},
                                       'fillOpacity': {'value': self.opacity}}}}]
@@ -82,7 +81,6 @@ class Symbol(BaseMark):
                                          'y': {'scale': 'yscale', 'signal': f"datum['{self.column}'] - datum['{self.error}']"},
                                          'y2': {'scale': 'yscale', 'signal': f"datum['{self.column}'] + datum['{self.error}']"}},
                                'update':{'shape': {'value': self.shape},
-                                         'zindex': {'value': self.zindex},
                                          'width': {'value': 1},
                                          'fill': {'value': self.color},
                                          'fillOpacity': {'value': self.opacity}}}})
@@ -110,7 +108,6 @@ class Line(BaseMark):
                 'from': {'data': self.data.uuid},
                 'encode': {'enter': {'x': {'scale': 'xscale', 'field': self.data.time_column},
                                      'y': {'scale': 'yscale', 'field': self.column},
-                                     'zindex': {'value': self.zindex},
                                      'strokeWidth': {'value': self.width},
                                      'stroke': {'value': self.color},
                                      'strokeOpacity': {'value': self.opacity}}}}
@@ -138,7 +135,6 @@ class Range(BaseMark):
                 'encode': {'enter': {'x': {'scale': 'xscale', 'field': self.data.time_column},
                                      'y': {'scale': 'yscale', 'field': self.column_lower},
                                      'y2': {'scale': 'yscale', 'field': self.column_upper},
-                                     'zindex': {'value': self.zindex},
                                      'fill': {'value': self.color},
                                      'fillOpacity': {'value': self.opacity}}}}
         return [vega]
@@ -163,7 +159,6 @@ class VerticalLine(BaseMark):
         vega = {'type': 'rule',
                 'description': self.label,
                 'encode': {'enter': {'x': {'scale': 'xscale', 'signal': time_to_vega(self.time)},
-                                     'zindex': {'value': self.zindex},
                                      'strokeWidth': {'value': self.width},
                                      'stroke': {'value': self.color},
                                      'strokeOpacity': {'value': self.opacity}}}}
@@ -193,7 +188,6 @@ class VerticalRange(BaseMark):
                                      'x2': {'scale': 'xscale', 'signal': time_to_vega(self.time_upper)},
                                      'y': {'scale': 'yscale', 'value': -1e8},
                                      'y2': {'scale': 'yscale', 'value': 1e8},
-                                     'zindex': {'value': self.zindex},
                                      'fill': {'value': self.color},
                                      'fillOpacity': {'value': self.opacity}}}}
         return [vega]
@@ -218,7 +212,6 @@ class HorizontalLine(BaseMark):
         vega = {'type': 'rule',
                 'description': self.label,
                 'encode': {'enter': {'y': {'scale': 'yscale', 'value': self.value},
-                                     'zindex': {'value': self.zindex},
                                      'strokeWidth': {'value': self.width},
                                      'stroke': {'value': self.color},
                                      'strokeOpacity': {'value': self.opacity}}}}
@@ -252,7 +245,6 @@ class Text(BaseMark):
                 'description': self.label,
                 'encode': {'enter': {'x': {'scale': 'xscale', 'signal': time_to_vega(self.time)},
                                      'y': {'scale': 'yscale', 'value': self.value},
-                                     'zindex': {'value': self.zindex},
                                      'fill': {'value': self.color},
                                      'fillOpacity': {'value': self.opacity},
                                      'fontWeigth': {'value': self.weight},
