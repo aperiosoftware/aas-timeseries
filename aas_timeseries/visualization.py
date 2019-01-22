@@ -10,6 +10,9 @@ __all__ = ['InteractiveTimeSeriesFigure']
 
 
 class InteractiveTimeSeriesFigure:
+    """
+    An interactive time series figure.
+    """
 
     def __init__(self, width=600, height=400, resize=False):
         self._data = {}
@@ -18,36 +21,42 @@ class InteractiveTimeSeriesFigure:
         self._height = height
         self._resize = resize
 
-    def add_markers(self, *, time_series=None, column=None, error=None, label=None, **kwargs):
+    def add_markers(self, *, time_series=None, column=None, **kwargs):
         if id(time_series) not in self._data:
             self._data[id(time_series)] = Data(time_series)
-        self._markers.append(Symbol(data=self._data[id(time_series)],
-                                    column=column,
-                                    error=error,
-                                    label=label, **kwargs))
+        markers = Symbol(data=self._data[id(time_series)], **kwargs)
+        # Note that we need to set the column after the data so that the
+        # validation works.
+        markers.column = column
+        self._markers.append(markers)
 
-    def add_line(self, *, time_series=None, column=None, label=None, **kwargs):
+    def add_line(self, *, time_series=None, column=None, **kwargs):
         if id(time_series) not in self._data:
             self._data[id(time_series)] = Data(time_series)
-        self._markers.append(Line(data=self._data[id(time_series)],
-                                  column=column,
-                                  label=label, **kwargs))
+        line = Line(data=self._data[id(time_series)], **kwargs)
+        # Note that we need to set the column after the data so that the
+        # validation works.
+        line.column = column
+        self._markers.append(line)
 
-    def add_range(self, *, time_series=None, column_lower=None, column_upper=None, label=None, **kwargs):
+    def add_range(self, *, time_series=None, column_lower=None, column_upper=None, **kwargs):
         if id(time_series) not in self._data:
             self._data[id(time_series)] = Data(time_series)
-        self._markers.append(Range(data=self._data[id(time_series)],
-                                   column_lower=column_lower, column_upper=column_upper,
-                                   label=label, **kwargs))
+        range = Range(data=self._data[id(time_series)], **kwargs)
+        # Note that we need to set the columns after the data so that the
+        # validation works.
+        range.column_lower = column_lower
+        range.column_upper = column_upper
+        self._markers.append(range)
 
-    def add_vertical_line(self, time, label=None, **kwargs):
-        self._markers.append(VerticalLine(time=time, label=label, **kwargs))
+    def add_vertical_line(self, time, **kwargs):
+        self._markers.append(VerticalLine(time=time, **kwargs))
 
-    def add_vertical_range(self, from_time, to_time, label=None, **kwargs):
-        self._markers.append(VerticalRange(from_time=from_time, to_time=to_time, label=label, **kwargs))
+    def add_vertical_range(self, time_lower, time_upper, **kwargs):
+        self._markers.append(VerticalRange(time_lower=time_lower, time_upper=time_upper, **kwargs))
 
-    def add_horizontal_line(self, value, label=None, **kwargs):
-        self._markers.append(HorizontalLine(value=value, label=label, **kwargs))
+    def add_horizontal_line(self, value, **kwargs):
+        self._markers.append(HorizontalLine(value=value, **kwargs))
 
     def add_text(self, **kwargs):
         self._markers.append(Text(**kwargs))

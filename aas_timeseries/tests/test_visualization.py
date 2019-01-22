@@ -1,3 +1,6 @@
+import pytest
+from traitlets import TraitError
+
 from astropy import units as u
 from astropy_timeseries import TimeSeries
 
@@ -20,5 +23,19 @@ def test_basic(tmpdir):
     figure.add_vertical_range(ts.time[0], ts.time[-1], label='Vertical Range')
     figure.add_horizontal_line(3, label='Horizontal Line')
     figure.add_range(time_series=ts, column_lower='flux', column_upper='error', label='Range')
-    figure.add_text(x=ts.time[2], y=float(ts['flux'][0]), text='My Label', label='Range')
+    figure.add_text(time=ts.time[2], value=float(ts['flux'][0]), text='My Label', label='Range')
     figure.save_interactive(filename)
+
+
+def test_column_validation():
+
+    # Test the validation provied by ColumnTrait
+
+    ts = TimeSeries(time='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
+    ts['flux'] = [1, 2, 3, 4, 5]
+    ts['error'] = [1, 2, 3, 4, 5]
+
+    figure = InteractiveTimeSeriesFigure()
+    with pytest.raises(TraitError) as exc:
+        figure.add_markers(time_series=ts, column='flux2', label='Markers')
+    assert exc.value.args[0] == 'flux2 is not a valid column name'

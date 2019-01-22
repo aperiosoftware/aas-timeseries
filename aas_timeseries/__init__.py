@@ -10,6 +10,8 @@ from ._astropy_init import *
 # This is the same check as the one at the top of setup.py
 import sys
 
+__all__ = ['InteractiveTimeSeriesFigure']
+
 __minimum_python_version__ = "3.5"
 
 class UnsupportedPythonError(Exception):
