@@ -196,7 +196,9 @@ class Color(TraitType):
             self.__doc__ = self.help
 
     def validate(self, obj, value):
-        if isinstance(value, str) or (isinstance(value, tuple) and len(value) == 3):
+        if value is None:
+            return None
+        elif isinstance(value, str) or (isinstance(value, tuple) and len(value) == 3):
             return to_hex(value)
         else:
             if hasattr(obj, 'opacity'):

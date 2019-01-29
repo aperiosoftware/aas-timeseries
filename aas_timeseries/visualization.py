@@ -5,6 +5,7 @@ from jupyter_aas_timeseries import TimeSeriesWidget
 
 from aas_timeseries.data import Data
 from aas_timeseries.marks import Symbol, Line, VerticalLine, VerticalRange, HorizontalLine, HorizontalRange, Range, Text
+from aas_timeseries.colors import auto_assign_colors
 
 __all__ = ['InteractiveTimeSeriesFigure']
 
@@ -64,7 +65,13 @@ class InteractiveTimeSeriesFigure:
     def add_text(self, **kwargs):
         self._markers.append(Text(**kwargs))
 
-    def save_interactive(self, filename):
+    def save_interactive(self, filename, override_style=False):
+
+        colors = auto_assign_colors(self._markers)
+        for marker, color in zip(self._markers, colors):
+            if override_style or marker.color is None:
+                marker.color = color
+
         with open(filename, 'w') as f:
             dump(self._to_json(), f, indent='  ')
 
