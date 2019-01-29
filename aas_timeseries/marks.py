@@ -125,7 +125,7 @@ class Range(BaseMark):
     # NOTE: for now we implement a single color rather than a separate edge and
     # fill color
     color = Color('black', help='The color of the range.')
-    opacity = Opacity(1, help='The opacity of the range from 0 (transparent) to 1 (opaque).')
+    opacity = Opacity(0.2, help='The opacity of the range from 0 (transparent) to 1 (opaque).')
 
     def to_vega(self):
         vega = {'type': 'area',
@@ -135,7 +135,9 @@ class Range(BaseMark):
                                      'y': {'scale': 'yscale', 'field': self.column_lower},
                                      'y2': {'scale': 'yscale', 'field': self.column_upper},
                                      'fill': {'value': self.color},
-                                     'fillOpacity': {'value': self.opacity}}}}
+                                     'fillOpacity': {'value': self.opacity},
+                                     'stroke': {'value': self.color},
+                                     'strokeOpacity': {'value': self.opacity}}}}
         return [vega]
 
 
@@ -174,7 +176,7 @@ class VerticalRange(BaseMark):
     # NOTE: for now we implement a single color rather than a separate edge and
     # fill color
     color = Color('black', help='The color of the range.')
-    opacity = Opacity(1, help='The opacity of the range from 0 (transparent) to 1 (opaque).')
+    opacity = Opacity(0.2, help='The opacity of the range from 0 (transparent) to 1 (opaque).')
 
     def to_vega(self):
 
