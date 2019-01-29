@@ -38,7 +38,7 @@ def interactive_screenshot(json_filename, png_filename):
     web.show()
 
     start = time.time()
-    while time.time() - start < 1:
+    while time.time() - start < 2:
         app.processEvents()
 
     web.save_to_file(png_filename)
@@ -48,4 +48,4 @@ def interactive_screenshot(json_filename, png_filename):
 
     # We need to do this to force garbage collection and avoid a
     # segmentation fault.
-    page = web = None
+    page = web = None  # noqa
