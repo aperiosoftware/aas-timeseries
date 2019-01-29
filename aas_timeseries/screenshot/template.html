@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta charset='utf-8' />
+	<meta http-equiv="X-UA-Compatible" content="chrome=1" />
+	<title>Test</title>
+	<link rel="stylesheet" href="https://aperiosoftware.github.io/timeseries.js/resources/aas.css">
+	<link rel="stylesheet" href="https://aperiosoftware.github.io/timeseries.js/resources/style.css">
+	<link rel="stylesheet" href="https://aperiosoftware.github.io/timeseries.js/resources/timeseries.css">
+	<script language="javascript" type="text/javascript" src="https://aperiosoftware.github.io/timeseries.js/resources/stuquery.js"></script>
+	<script language="javascript" type="text/javascript" src="https://aperiosoftware.github.io/timeseries.js/resources/graph.js"></script>
+	<script language="javascript" type="text/javascript" src="https://aperiosoftware.github.io/timeseries.js/resources/timeseries.js"></script>
+
+	<style type="text/css">
+	body {
+	    overflow:hidden;
+	}
+	</style>
+</head>
+<body>
+
+	<div class="msg"></div>
+
+	<!-- MAIN CONTENT -->
+	<div class="row">
+		<div class="example">
+			<figure>
+				<div id="example1">
+				</div>
+			</figure>
+			<!-- Javascript -->
+			<script>
+			var ex1;
+			S(document).ready(function(){
+
+				ex1 = TimeSeries.create("data.json");
+				ex1.initialize(document.getElementById('example1'));
+
+			});
+			</script>
+		</div>
+	</div>
+
+
+</body>
+</html>
