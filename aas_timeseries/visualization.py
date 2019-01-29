@@ -4,7 +4,7 @@ from json import dump
 from jupyter_aas_timeseries import TimeSeriesWidget
 
 from aas_timeseries.data import Data
-from aas_timeseries.marks import Symbol, Line, VerticalLine, VerticalRange, HorizontalLine, Range, Text
+from aas_timeseries.marks import Symbol, Line, VerticalLine, VerticalRange, HorizontalLine, HorizontalRange, Range, Text
 
 __all__ = ['InteractiveTimeSeriesFigure']
 
@@ -57,6 +57,9 @@ class InteractiveTimeSeriesFigure:
 
     def add_horizontal_line(self, value, **kwargs):
         self._markers.append(HorizontalLine(value=value, **kwargs))
+
+    def add_horizontal_range(self, value_lower, value_upper, **kwargs):
+        self._markers.append(HorizontalRange(value_lower=value_lower, value_upper=value_upper, **kwargs))
 
     def add_text(self, **kwargs):
         self._markers.append(Text(**kwargs))

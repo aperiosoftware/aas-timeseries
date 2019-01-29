@@ -3,7 +3,7 @@ from aas_timeseries.traits import (Unicode, Float, PositiveFloat, Any, Opacity, 
                                    UnicodeChoice, DataTrait, ColumnTrait, AstropyTime)
 
 __all__ = ['Symbol', 'Line', 'Range', 'VerticalLine', 'VerticalRange',
-           'HorizontalLine', 'Text']
+           'HorizontalLine', 'HorizontalRange', 'Text']
 
 
 def time_to_vega(time):
@@ -24,6 +24,8 @@ class BaseMark(HasTraits):
     Base class for any mark object
     """
     label = Unicode(help='The label to use to designate the marks in the legend.')
+
+    # Potential properties that could be implemented: toolTip
 
     def to_vega(self):
         """
@@ -52,10 +54,12 @@ class Symbol(BaseMark):
                                  'side lengths will increase with the square root of this '
                                  'value.')
 
-    # NOTE: for now we implement a single color rather than a separate edge and
-    # fill color
-    color = Color('black', help='The color of the symbols.')
-    opacity = Opacity(1, help='The opacity of the symbol from 0 (transparent) to 1 (opaque).')
+    color = Color('black', help='The fill color of the symbols.')
+    opacity = Opacity(1, help='The opacity of the fill color from 0 (transparent) to 1 (opaque).')
+
+    edge_color = Color('black', help='The edge color of the symbol.')
+    edge_opacity = Opacity(0.2, help='The opacity of the edge color from 0 (transparent) to 1 (opaque).')
+    edge_width = PositiveFloat(0, help='The thickness of the edge, in pixels.')
 
     def to_vega(self):
 
@@ -69,7 +73,10 @@ class Symbol(BaseMark):
                             'update':{'shape': {'value': self.shape},
                                       'size': {'value': self.size},
                                       'fill': {'value': self.color},
-                                      'fillOpacity': {'value': self.opacity}}}}]
+                                      'fillOpacity': {'value': self.opacity},
+                                      'stroke': {'value': self.edge_color},
+                                      'strokeOpacity': {'value': self.edge_opacity},
+                                      'strokeWidth': {'value': self.edge_width}}}}]
 
         # The error bars (if requested)
         if self.error:
@@ -82,7 +89,10 @@ class Symbol(BaseMark):
                                'update':{'shape': {'value': self.shape},
                                          'width': {'value': 1},
                                          'fill': {'value': self.color},
-                                         'fillOpacity': {'value': self.opacity}}}})
+                                         'fillOpacity': {'value': self.opacity},
+                                         'stroke': {'value': self.edge_color},
+                                         'strokeOpacity': {'value': self.edge_opacity},
+                                         'strokeWidth': {'value': self.edge_width}}}})
 
         return vega
 
@@ -96,8 +106,6 @@ class Line(BaseMark):
     column = ColumnTrait(None, help='The field in the time series containing the data.')
     width = PositiveFloat(1, help='The width of the line, in pixels.')
 
-    # NOTE: for now we implement a single color rather than a separate edge and
-    # fill color
     color = Color('black', help='The color of the line.')
     opacity = Opacity(1, help='The opacity of the line from 0 (transparent) to 1 (opaque).')
 
@@ -107,9 +115,9 @@ class Line(BaseMark):
                 'from': {'data': self.data.uuid},
                 'encode': {'enter': {'x': {'scale': 'xscale', 'field': self.data.time_column},
                                      'y': {'scale': 'yscale', 'field': self.column},
-                                     'strokeWidth': {'value': self.width},
                                      'stroke': {'value': self.color},
-                                     'strokeOpacity': {'value': self.opacity}}}}
+                                     'strokeOpacity': {'value': self.opacity},
+                                     'strokeWidth': {'value': self.width}}}}
         return [vega]
 
 
@@ -122,10 +130,14 @@ class Range(BaseMark):
     column_lower = ColumnTrait(None, help='The field in the time series containing the lower value of the data range.')
     column_upper = ColumnTrait(None, help='The field in the time series containing the upper value of the data range.')
 
-    # NOTE: for now we implement a single color rather than a separate edge and
-    # fill color
-    color = Color('black', help='The color of the range.')
-    opacity = Opacity(1, help='The opacity of the range from 0 (transparent) to 1 (opaque).')
+    color = Color('black', help='The fill color of the range.')
+    opacity = Opacity(0.2, help='The opacity of the fill color from 0 (transparent) to 1 (opaque).')
+
+    edge_color = Color('black', help='The edge color of the range.')
+    edge_opacity = Opacity(0.2, help='The opacity of the edge color from 0 (transparent) to 1 (opaque).')
+    edge_width = PositiveFloat(0, help='The thickness of the edge, in pixels.')
+
+    # Potential properties that could be implemented: strokeCap, strokeDash
 
     def to_vega(self):
         vega = {'type': 'area',
@@ -135,7 +147,11 @@ class Range(BaseMark):
                                      'y': {'scale': 'yscale', 'field': self.column_lower},
                                      'y2': {'scale': 'yscale', 'field': self.column_upper},
                                      'fill': {'value': self.color},
-                                     'fillOpacity': {'value': self.opacity}}}}
+                                     'fillOpacity': {'value': self.opacity},
+                                     'stroke': {'value': self.edge_color},
+                                     'strokeOpacity': {'value': self.edge_opacity},
+                                     'strokeWidth': {'value': self.edge_width}}}}
+
         return [vega]
 
 
@@ -147,16 +163,18 @@ class VerticalLine(BaseMark):
     time = AstropyTime(help='The date/time at which the vertical line is shown.')
     width = PositiveFloat(1, help='The width of the line, in pixels.')
 
-    # NOTE: for now we implement a single color rather than a separate edge and
-    # fill color
     color = Color('black', help='The color of the line.')
     opacity = Opacity(1, help='The opacity of the line from 0 (transparent) to 1 (opaque).')
+
+    # Potential properties that could be implemented: strokeCap, strokeDash
 
     def to_vega(self):
 
         vega = {'type': 'rule',
                 'description': self.label,
                 'encode': {'enter': {'x': {'scale': 'xscale', 'signal': time_to_vega(self.time)},
+                                     'y': {'value': 0},
+                                     'y2': {'field': {'group': 'height'}},
                                      'strokeWidth': {'value': self.width},
                                      'stroke': {'value': self.color},
                                      'strokeOpacity': {'value': self.opacity}}}}
@@ -171,22 +189,29 @@ class VerticalRange(BaseMark):
     time_lower = AstropyTime(help='The date/time at which the range starts.')
     time_upper = AstropyTime(help='The date/time at which the range ends.')
 
-    # NOTE: for now we implement a single color rather than a separate edge and
-    # fill color
-    color = Color('black', help='The color of the range.')
-    opacity = Opacity(1, help='The opacity of the range from 0 (transparent) to 1 (opaque).')
+    color = Color('black', help='The fill color of the range.')
+    opacity = Opacity(0.2, help='The opacity of the fill color from 0 (transparent) to 1 (opaque).')
+
+    edge_color = Color('black', help='The edge color of the range.')
+    edge_opacity = Opacity(0.2, help='The opacity of the edge color from 0 (transparent) to 1 (opaque).')
+    edge_width = PositiveFloat(0, help='The thickness of the edge, in pixels.')
+
+    # Potential properties that could be implemented: strokeCap, strokeDash
 
     def to_vega(self):
 
         vega = {'type': 'rect',
                 'description': self.label,
-                # FIXME: find a way to represent an infinite vertical line
                 'encode': {'enter': {'x': {'scale': 'xscale', 'signal': time_to_vega(self.time_lower)},
                                      'x2': {'scale': 'xscale', 'signal': time_to_vega(self.time_upper)},
-                                     'y': {'scale': 'yscale', 'value': -1e8},
-                                     'y2': {'scale': 'yscale', 'value': 1e8},
+                                     'y': {'value': 0},
+                                     'y2': {'field': {'group': 'height'}},
                                      'fill': {'value': self.color},
-                                     'fillOpacity': {'value': self.opacity}}}}
+                                     'fillOpacity': {'value': self.opacity},
+                                     'stroke': {'value': self.edge_color},
+                                     'strokeOpacity': {'value': self.edge_opacity},
+                                     'strokeWidth': {'value': self.edge_width}}}}
+
         return [vega]
 
 
@@ -196,22 +221,57 @@ class HorizontalLine(BaseMark):
     """
 
     # TODO: validate value and allow it to be a quantity
-    value = Any(help='The y value at which the horizontal line is shown.')
+    value = Float(help='The y value at which the horizontal line is shown.')
     width = PositiveFloat(1, help='The width of the line, in pixels.')
 
-    # NOTE: for now we implement a single color rather than a separate edge and
-    # fill color
     color = Color('black', help='The color of the line.')
     opacity = Opacity(1, help='The opacity of the line from 0 (transparent) to 1 (opaque).')
+
+    # Potential properties that could be implemented: strokeCap, strokeDash
 
     def to_vega(self):
 
         vega = {'type': 'rule',
                 'description': self.label,
-                'encode': {'enter': {'y': {'scale': 'yscale', 'value': self.value},
+                'encode': {'enter': {'x': {'value': 0},
+                                     'x2': {'field': {'group': 'width'}},
+                                     'y': {'scale': 'yscale', 'value': self.value},
                                      'strokeWidth': {'value': self.width},
                                      'stroke': {'value': self.color},
                                      'strokeOpacity': {'value': self.opacity}}}}
+        return [vega]
+
+
+class HorizontalRange(BaseMark):
+    """
+    A continuous range specified by a lower and upper value.
+    """
+
+    value_lower = Float(help='The value at which the range starts.')
+    value_upper = Float(help='The value at which the range ends.')
+
+    color = Color('black', help='The fill color of the range.')
+    opacity = Opacity(0.2, help='The opacity of the fill color from 0 (transparent) to 1 (opaque).')
+
+    edge_color = Color('black', help='The edge color of the range.')
+    edge_opacity = Opacity(0.2, help='The opacity of the edge color from 0 (transparent) to 1 (opaque).')
+    edge_width = PositiveFloat(0, help='The thickness of the edge, in pixels.')
+
+    # Potential properties that could be implemented: strokeCap, strokeDash
+
+    def to_vega(self):
+
+        vega = {'type': 'rect',
+                'description': self.label,
+                'encode': {'enter': {'x': {'value': 0},
+                                     'x2': {'field': {'group': 'width'}},
+                                     'y': {'scale': 'yscale', 'value': self.value_lower},
+                                     'y2': {'scale': 'yscale', 'value': self.value_upper},
+                                     'fill': {'value': self.color},
+                                     'fillOpacity': {'value': self.opacity},
+                                     'stroke': {'value': self.edge_color},
+                                     'strokeOpacity': {'value': self.edge_opacity},
+                                     'strokeWidth': {'value': self.edge_width}}}}
         return [vega]
 
 

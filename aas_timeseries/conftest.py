@@ -55,3 +55,27 @@ from astropy.tests.helper import enable_deprecations_as_exceptions
 #     TESTED_VERSIONS[packagename] = version
 # except NameError:   # Needed to support Astropy <= 1.0.0
 #     pass
+
+try:
+    import qtpy
+except ImportError:
+    QT_INSTALLED = False
+else:
+    QT_INSTALLED = True
+
+app = None
+
+
+def pytest_configure(config):
+    if QT_INSTALLED:
+        global app
+        from PyQt5 import QtWebEngineWidgets
+        from qtpy.QtWidgets import QApplication
+        app = QApplication([''])
+
+
+def pytest_unconfigure(config):
+    if QT_INSTALLED:
+        global app
+        app.exit()
+        app = None

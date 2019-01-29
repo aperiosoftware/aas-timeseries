@@ -1,4 +1,4 @@
-language: minimal
+language: c
 
 os:
     - linux
@@ -18,11 +18,12 @@ env:
         - MAIN_CMD='python setup.py'
         - SETUP_CMD='test'
         - EVENT_TYPE='pull_request push'
+        - SETUP_XVFB=true
 
 
         # List runtime dependencies for the package that are available as conda
         # packages here.
-        - CONDA_DEPENDENCIES='matplotlib'
+        - CONDA_DEPENDENCIES='matplotlib flask flask-cors pyqt qtpy pyopengl'
         - CONDA_DEPENDENCIES_DOC='sphinx-astropy sphinx_rtd_theme pandoc matplotlib'
 
         # List other runtime dependencies for the package that are available as
