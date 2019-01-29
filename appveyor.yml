@@ -14,7 +14,7 @@ environment:
 
       # List runtime dependencies for the package that are available as conda
       # packages here.
-      CONDA_DEPENDENCIES: "matplotlib flask flask-cors pyqt qtpy"
+      CONDA_DEPENDENCIES: "matplotlib flask flask-cors pyqt qtpy pyopengl"
 
       # List other runtime dependencies for the package that are available as
       # pip packages here.
