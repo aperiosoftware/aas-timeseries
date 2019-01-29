@@ -31,7 +31,9 @@ def interactive_screenshot(json_filename, png_filename):
     url = server.serve_file(tmp_html)
     server.serve_file(tmp_json)
 
-    app = QtWidgets.QApplication([''])
+    app = QtWidgets.QApplication.instance()
+    if app is None:
+        app = QtWidgets.QApplication([''])
 
     web, page = get_qt_web_widget(url)
     web.resize(600, 400)
