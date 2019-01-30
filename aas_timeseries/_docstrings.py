@@ -32,7 +32,7 @@ TYPE = {
     Any: 'float',
     Opacity: 'float or int',
     Color: 'str or tuple',
-    DataTrait: '`~aas_timeseries.TimeSeries`',
+    DataTrait: '`~astropy_timeseries.TimeSeries`',
     ColumnTrait: 'str',
     AstropyTime: '`~astropy.time.Time`'
 }
