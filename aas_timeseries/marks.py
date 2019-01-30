@@ -106,7 +106,7 @@ class Line(BaseMark):
     A set of time series data points connected by a line.
     """
 
-    data = DataTrait(Nhelp='The time series object containing the data.')
+    data = DataTrait(help='The time series object containing the data.')
     column = ColumnTrait(None, help='The field in the time series containing the data.')
     width = PositiveFloat(1, help='The width of the line, in pixels.')
 
@@ -301,8 +301,6 @@ class Text(BaseMark):
                           choices=['left', 'center', 'right'])
     angle = Float(0, help='The rotation angle of the text in degrees (default 0).')
 
-    # NOTE: for now we implement a single color rather than a separate edge and
-    # fill color
     color = Color(None, help='The color of the text.')
     opacity = Opacity(1, help='The opacity of the text from 0 (transparent) to 1 (opaque).')
 
