@@ -68,6 +68,7 @@ class Symbol(BaseMark):
         # The main markers
         vega = [{'type': 'symbol',
                  'description': self.label,
+                 'clip': True,
                  'from': {'data': self.data.uuid},
                  'encode': {'enter': {'x': {'scale': 'xscale', 'field': self.data.time_column},
                                       'y': {'scale': 'yscale', 'field': self.column},
@@ -84,6 +85,7 @@ class Symbol(BaseMark):
         if self.error:
             vega.append({'type': 'rect',
                          'description': self.label,
+                         'clip': True,
                          'from': {'data': self.data.uuid},
                          'encode': {'enter': {'x': {'scale': 'xscale', 'field': self.data.time_column},
                                          'y': {'scale': 'yscale', 'signal': f"datum['{self.column}'] - datum['{self.error}']"},
@@ -114,6 +116,7 @@ class Line(BaseMark):
     def to_vega(self):
         vega = {'type': 'line',
                 'description': self.label,
+                'clip': True,
                 'from': {'data': self.data.uuid},
                 'encode': {'enter': {'x': {'scale': 'xscale', 'field': self.data.time_column},
                                      'y': {'scale': 'yscale', 'field': self.column},
@@ -144,6 +147,7 @@ class Range(BaseMark):
     def to_vega(self):
         vega = {'type': 'area',
                 'description': self.label,
+                'clip': True,
                 'from': {'data': self.data.uuid},
                 'encode': {'enter': {'x': {'scale': 'xscale', 'field': self.data.time_column},
                                      'y': {'scale': 'yscale', 'field': self.column_lower},
@@ -174,6 +178,7 @@ class VerticalLine(BaseMark):
 
         vega = {'type': 'rule',
                 'description': self.label,
+                'clip': True,
                 'encode': {'enter': {'x': {'scale': 'xscale', 'signal': time_to_vega(self.time)},
                                      'y': {'value': 0},
                                      'y2': {'field': {'group': 'height'}},
@@ -204,6 +209,7 @@ class VerticalRange(BaseMark):
 
         vega = {'type': 'rect',
                 'description': self.label,
+                'clip': True,
                 'encode': {'enter': {'x': {'scale': 'xscale', 'signal': time_to_vega(self.time_lower)},
                                      'x2': {'scale': 'xscale', 'signal': time_to_vega(self.time_upper)},
                                      'y': {'value': 0},
@@ -235,6 +241,7 @@ class HorizontalLine(BaseMark):
 
         vega = {'type': 'rule',
                 'description': self.label,
+                'clip': True,
                 'encode': {'enter': {'x': {'value': 0},
                                      'x2': {'field': {'group': 'width'}},
                                      'y': {'scale': 'yscale', 'value': self.value},
@@ -265,6 +272,7 @@ class HorizontalRange(BaseMark):
 
         vega = {'type': 'rect',
                 'description': self.label,
+                'clip': True,
                 'encode': {'enter': {'x': {'value': 0},
                                      'x2': {'field': {'group': 'width'}},
                                      'y': {'scale': 'yscale', 'value': self.value_lower},
@@ -302,8 +310,10 @@ class Text(BaseMark):
 
         vega = {'type': 'text',
                 'description': self.label,
+                'clip': True,
                 'encode': {'enter': {'x': {'scale': 'xscale', 'signal': time_to_vega(self.time)},
                                      'y': {'scale': 'yscale', 'value': self.value},
+                                     'text': {'value': self.text},
                                      'fill': {'value': self.color or DEFAULT_COLOR},
                                      'fillOpacity': {'value': self.opacity},
                                      'fontWeigth': {'value': self.weight},

@@ -30,6 +30,7 @@ class InteractiveTimeSeriesFigure:
         # validation works.
         markers.column = column
         self._markers.append(markers)
+        return markers
 
     def add_line(self, *, time_series=None, column=None, **kwargs):
         if id(time_series) not in self._data:
@@ -39,6 +40,7 @@ class InteractiveTimeSeriesFigure:
         # validation works.
         line.column = column
         self._markers.append(line)
+        return line
 
     def add_range(self, *, time_series=None, column_lower=None, column_upper=None, **kwargs):
         if id(time_series) not in self._data:
@@ -49,21 +51,32 @@ class InteractiveTimeSeriesFigure:
         range.column_lower = column_lower
         range.column_upper = column_upper
         self._markers.append(range)
+        return range
 
     def add_vertical_line(self, time, **kwargs):
-        self._markers.append(VerticalLine(time=time, **kwargs))
+        line = VerticalLine(time=time, **kwargs)
+        self._markers.append(line)
+        return line
 
     def add_vertical_range(self, time_lower, time_upper, **kwargs):
-        self._markers.append(VerticalRange(time_lower=time_lower, time_upper=time_upper, **kwargs))
+        range = VerticalRange(time_lower=time_lower, time_upper=time_upper, **kwargs)
+        self._markers.append(range)
+        return range
 
     def add_horizontal_line(self, value, **kwargs):
-        self._markers.append(HorizontalLine(value=value, **kwargs))
+        line = HorizontalLine(value=value, **kwargs)
+        self._markers.append(line)
+        return line
 
     def add_horizontal_range(self, value_lower, value_upper, **kwargs):
-        self._markers.append(HorizontalRange(value_lower=value_lower, value_upper=value_upper, **kwargs))
+        range = HorizontalRange(value_lower=value_lower, value_upper=value_upper, **kwargs)
+        self._markers.append(range)
+        return range
 
     def add_text(self, **kwargs):
-        self._markers.append(Text(**kwargs))
+        text = Text(**kwargs)
+        self._markers.append(text)
+        return text
 
     def save_interactive(self, filename, override_style=False):
 

@@ -27,4 +27,5 @@ User guide
 
    installing.rst
    getting_started
+   layers
    api.rst
