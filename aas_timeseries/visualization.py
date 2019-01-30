@@ -13,6 +13,15 @@ __all__ = ['InteractiveTimeSeriesFigure']
 class InteractiveTimeSeriesFigure:
     """
     An interactive time series figure.
+
+    Parameters
+    ----------
+    width : int, optional
+        The preferred width of the figure, in pixels.
+    height : int, optional
+        The preferred height of the figure, in pixels.
+    resize : bool, optional
+        Whether to resize the figure to the available space.
     """
 
     def __init__(self, width=600, height=400, resize=False):
@@ -52,6 +61,10 @@ class InteractiveTimeSeriesFigure:
             The thickness of the edge, in pixels.
         label : str, optional
             The label to use to designate the marks in the legend.
+
+        Returns
+        -------
+        layer : `~aas_timeseries.marks.Symbol`
         """
         if id(time_series) not in self._data:
             self._data[id(time_series)] = Data(time_series)
@@ -80,6 +93,10 @@ class InteractiveTimeSeriesFigure:
             The opacity of the line from 0 (transparent) to 1 (opaque).
         label : str, optional
             The label to use to designate the marks in the legend.
+
+        Returns
+        -------
+        layer : `~aas_timeseries.marks.Line`
         """
 
         if id(time_series) not in self._data:
@@ -117,6 +134,10 @@ class InteractiveTimeSeriesFigure:
             The thickness of the edge, in pixels.
         label : str, optional
             The label to use to designate the marks in the legend.
+
+        Returns
+        -------
+        layer : `~aas_timeseries.marks.Range`
         """
         if id(time_series) not in self._data:
             self._data[id(time_series)] = Data(time_series)
@@ -144,6 +165,10 @@ class InteractiveTimeSeriesFigure:
             The opacity of the line from 0 (transparent) to 1 (opaque).
         label : str, optional
             The label to use to designate the marks in the legend.
+
+        Returns
+        -------
+        layer : `~aas_timeseries.marks.VerticalLine`
         """
         line = VerticalLine(time=time, **kwargs)
         self._markers.append(line)
@@ -171,6 +196,10 @@ class InteractiveTimeSeriesFigure:
             The thickness of the edge, in pixels.
         label : str, optional
             The label to use to designate the marks in the legend.
+
+        Returns
+        -------
+        layer : `~aas_timeseries.marks.VerticalRange`
         """
         range = VerticalRange(time_lower=time_lower, time_upper=time_upper, **kwargs)
         self._markers.append(range)
@@ -192,6 +221,10 @@ class InteractiveTimeSeriesFigure:
             The opacity of the line from 0 (transparent) to 1 (opaque).
         label : str, optional
             The label to use to designate the marks in the legend.
+
+        Returns
+        -------
+        layer : `~aas_timeseries.marks.HorizontalLine`
         """
         line = HorizontalLine(value=value, **kwargs)
         self._markers.append(line)
@@ -219,6 +252,10 @@ class InteractiveTimeSeriesFigure:
             The thickness of the edge, in pixels.
         label : str, optional
             The label to use to designate the marks in the legend.
+
+        Returns
+        -------
+        layer : `~aas_timeseries.marks.HorizontalRange`
         """
         range = HorizontalRange(value_lower=value_lower, value_upper=value_upper, **kwargs)
         self._markers.append(range)
@@ -250,12 +287,29 @@ class InteractiveTimeSeriesFigure:
             The opacity of the text from 0 (transparent) to 1 (opaque).
         label : str, optional
             The label to use to designate the marks in the legend.
+
+        Returns
+        -------
+        layer : `~aas_timeseries.marks.Text`
         """
         text = Text(**kwargs)
         self._markers.append(text)
         return text
 
     def save_interactive(self, filename, override_style=False):
+        """
+        Save a Vega-compatible JSON file that contains the specification for
+        the interactive figure.
+
+        Parameters
+        ----------
+        filename : str
+            The filename for the JSON file.
+        override_style : bool, optional
+            By default, any unspecified colors will be automatically chosen.
+            If this parameter is set to `True`, all colors will be reassigned,
+            even if already set.
+        """
 
         colors = auto_assign_colors(self._markers)
         for marker, color in zip(self._markers, colors):
@@ -266,6 +320,10 @@ class InteractiveTimeSeriesFigure:
             dump(self._to_json(), f, indent='  ')
 
     def preview_interactive(self):
+        """
+        Show an interactive version of the figure (only works in Jupyter
+        notebook or lab).
+        """
         # FIXME: should be able to do without a file
         tmpfile = tempfile.mktemp()
         self.save_interactive(tmpfile)
@@ -293,11 +351,15 @@ class InteractiveTimeSeriesFigure:
             json['marks'].extend(mark.to_vega())
 
         # Axes
-        json['axes'] = [{'orient': 'bottom', 'scale': 'xscale', 'title': 'Time'},
-                        {'orient': 'left', 'scale': 'yscale', 'title': 'Intensity'}]
+        json['axes'] = [{'orient': 'bottom', 'scale': 'xscale',
+                         'title': 'Time'},
+                        {'orient': 'left', 'scale': 'yscale',
+                         'title': 'Intensity'}]
 
         # Scales
-        json['scales'] = [{'name': 'xscale', 'type': 'time', 'range': 'width', 'zero': False},
-                          {'name': 'yscale', 'type': 'linear', 'range': 'width', 'zero': False}]
+        json['scales'] = [{'name': 'xscale', 'type': 'time',
+                           'range': 'width', 'zero': False},
+                          {'name': 'yscale', 'type': 'linear',
+                           'range': 'height', 'zero': False}]
 
         return json
