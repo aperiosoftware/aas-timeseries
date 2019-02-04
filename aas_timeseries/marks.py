@@ -1,3 +1,4 @@
+import uuid
 from traitlets import HasTraits
 from aas_timeseries.traits import (Unicode, Float, PositiveFloat, Any, Opacity, Color,
                                    UnicodeChoice, DataTrait, ColumnTrait, AstropyTime)
@@ -28,6 +29,10 @@ class BaseMark(HasTraits):
     label = Unicode(help='The label to use to designate the marks in the legend.')
 
     # Potential properties that could be implemented: toolTip
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.uuid = str(uuid.uuid4())
 
     def to_vega(self):
         """
@@ -67,6 +72,7 @@ class Symbol(BaseMark):
 
         # The main markers
         vega = [{'type': 'symbol',
+                 'name': self.uuid,
                  'description': self.label,
                  'clip': True,
                  'from': {'data': self.data.uuid},
@@ -84,6 +90,7 @@ class Symbol(BaseMark):
         # The error bars (if requested)
         if self.error:
             vega.append({'type': 'rect',
+                         'name': self.uuid,
                          'description': self.label,
                          'clip': True,
                          'from': {'data': self.data.uuid},
@@ -115,6 +122,7 @@ class Line(BaseMark):
 
     def to_vega(self):
         vega = {'type': 'line',
+                'name': self.uuid,
                 'description': self.label,
                 'clip': True,
                 'from': {'data': self.data.uuid},
@@ -146,6 +154,7 @@ class Range(BaseMark):
 
     def to_vega(self):
         vega = {'type': 'area',
+                'name': self.uuid,
                 'description': self.label,
                 'clip': True,
                 'from': {'data': self.data.uuid},
@@ -177,6 +186,7 @@ class VerticalLine(BaseMark):
     def to_vega(self):
 
         vega = {'type': 'rule',
+                'name': self.uuid,
                 'description': self.label,
                 'clip': True,
                 'encode': {'enter': {'x': {'scale': 'xscale', 'signal': time_to_vega(self.time)},
@@ -208,6 +218,7 @@ class VerticalRange(BaseMark):
     def to_vega(self):
 
         vega = {'type': 'rect',
+                'name': self.uuid,
                 'description': self.label,
                 'clip': True,
                 'encode': {'enter': {'x': {'scale': 'xscale', 'signal': time_to_vega(self.time_lower)},
@@ -240,6 +251,7 @@ class HorizontalLine(BaseMark):
     def to_vega(self):
 
         vega = {'type': 'rule',
+                'name': self.uuid,
                 'description': self.label,
                 'clip': True,
                 'encode': {'enter': {'x': {'value': 0},
@@ -271,6 +283,7 @@ class HorizontalRange(BaseMark):
     def to_vega(self):
 
         vega = {'type': 'rect',
+                'name': self.uuid,
                 'description': self.label,
                 'clip': True,
                 'encode': {'enter': {'x': {'value': 0},
@@ -307,6 +320,7 @@ class Text(BaseMark):
     def to_vega(self):
 
         vega = {'type': 'text',
+                'name': self.uuid,
                 'description': self.label,
                 'clip': True,
                 'encode': {'enter': {'x': {'scale': 'xscale', 'signal': time_to_vega(self.time)},
