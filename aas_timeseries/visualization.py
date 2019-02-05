@@ -39,12 +39,12 @@ class InteractiveTimeSeriesFigure(BaseView):
         elif include is not None:
             for mark in include:
                 if mark not in self._markers:
-                    raise ValueError(f'Layer {mark} does not exist')
+                    raise ValueError(f'Layer {mark} does not exist in base figure')
             inherited_marks = {mark: self._markers[mark] for mark in include}
         elif exclude is not None:
             for mark in exclude:
                 if mark not in self._markers:
-                    raise ValueError(f'Layer {mark} does not exist')
+                    raise ValueError(f'Layer {mark} does not exist in base figure')
             inherited_marks = {mark: self._markers[mark] for mark in self._markers if mark not in exclude}
         else:
             inherited_marks = self._markers.copy()

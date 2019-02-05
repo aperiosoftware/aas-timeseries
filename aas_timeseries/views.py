@@ -1,4 +1,5 @@
 import uuid
+from collections import OrderedDict
 
 from astropy.time import Time
 
@@ -13,8 +14,8 @@ class BaseView:
 
     def __init__(self):
         self.uuid = str(uuid.uuid4())
-        self._data = {}
-        self._markers = {}
+        self._data = OrderedDict()
+        self._markers = OrderedDict()
         self._xlim = None
         self._ylim = None
 
@@ -309,12 +310,16 @@ class BaseView:
         self._markers[text] = {'visible': True}
         return text
 
+    @property
+    def layers(self):
+        return list(self._markers)
+
 
 class View(BaseView):
 
     def __init__(self, inherited_marks=None):
         super().__init__()
-        self._inherited_marks = inherited_marks or []
+        self._inherited_marks = inherited_marks or OrderedDict()
 
     def show(self, layers):
         self._set_visible(layers, True)
@@ -330,3 +335,7 @@ class View(BaseView):
                 self._markers[layer]['visible'] = visible
             else:
                 raise ValueError(f'Layer {layer} no in view')
+
+    @property
+    def layers(self):
+        return list(self._inherited_marks) + list(self._markers)
