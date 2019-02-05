@@ -1,4 +1,7 @@
 import uuid
+
+from astropy.time import Time
+
 from aas_timeseries.data import Data
 from aas_timeseries.marks import BaseMark, Symbol, Line, VerticalLine, VerticalRange, HorizontalLine, HorizontalRange, Range, Text
 
@@ -17,14 +20,24 @@ class BaseView:
 
     @property
     def xlim(self):
+        """
+        The x/time limits of the view.
+        """
         return self._xlim
 
     @xlim.setter
     def xlim(self, range):
+        if not isinstance(range, (tuple, list)) or len(range) != 2:
+            raise ValueError("xlim should be a tuple of two elements")
+        if not isinstance(range[0], Time) or not isinstance(range[1], Time):
+            raise TypeError("xlim should be a typle of two Time instances")
         self._xlim = range
 
     @property
     def ylim(self):
+        """
+        The y limits of the view.
+        """
         return self._ylim
 
     @ylim.setter

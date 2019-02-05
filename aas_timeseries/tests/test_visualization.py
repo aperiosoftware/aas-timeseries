@@ -40,3 +40,26 @@ def test_column_validation():
     with pytest.raises(TraitError) as exc:
         figure.add_markers(time_series=ts, column='flux2', label='Markers')
     assert exc.value.args[0] == 'flux2 is not a valid column name'
+
+
+def test_limits(tmpdir):
+
+    ts = TimeSeries(time='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
+    ts['flux'] = [1, 2, 3, 4, 5]
+    ts['error'] = [1, 2, 3, 4, 5]
+
+    filename = tmpdir.join('figure.json').strpath
+
+    figure = InteractiveTimeSeriesFigure()
+    figure.add_markers(time_series=ts, column='flux', label='Markers')
+    figure.xlim = ts.time[0], ts.time[-1]
+    figure.ylim = 0, 10
+    figure.save_interactive(filename)
+
+    with pytest.raises(TypeError) as exc:
+        figure.xlim = 0, 1
+    assert exc.value.args[0] == 'xlim should be a typle of two Time instances'
+
+    with pytest.raises(ValueError) as exc:
+        figure.xlim = ts.time[0], ts.time[-1], ts.time[-4]
+    assert exc.value.args[0] == 'xlim should be a tuple of two elements'
