@@ -32,7 +32,7 @@ class InteractiveTimeSeriesFigure(BaseView):
         self._resize = resize
         self._views = []
 
-    def add_view(self, title=None, description=None, include=None, exclude=None, empty=False):
+    def add_view(self, title, description=None, include=None, exclude=None, empty=False):
 
         if empty:
             inherited_marks = {}
@@ -152,6 +152,7 @@ class InteractiveTimeSeriesFigure(BaseView):
                 if view['view'].xlim is not None:
                     view_json['scales'][0]['domain'] = ({'signal': time_to_vega(view['view'].xlim[0])},
                                                         {'signal': time_to_vega(view['view'].xlim[1])})
+
                 if view['view'].ylim is not None:
                     view_json['scales'][1]['domain'] = list(view['view'].ylim)
 
