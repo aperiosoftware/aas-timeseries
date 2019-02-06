@@ -340,8 +340,10 @@ class View(BaseView):
         for layer in layers:
             if layer in self._markers:
                 self._markers[layer]['visible'] = visible
+            elif layer in self._inherited_marks:
+                self._inherited_marks[layer]['visible'] = visible
             else:
-                raise ValueError(f'Layer {layer} no in view')
+                raise ValueError(f'Layer {layer} not in view')
 
     @property
     def layers(self):
