@@ -32,9 +32,14 @@ class BaseView:
     def xlim(self, range):
         if not isinstance(range, (tuple, list)) or len(range) != 2:
             raise ValueError("xlim should be a tuple of two elements")
-        if not isinstance(range[0], Time) or not isinstance(range[1], Time):
+        start, end = range
+        if isinstance(start, str):
+            start = Time(start)
+        if isinstance(end, str):
+            end = Time(end)
+        if not isinstance(start, Time) or not isinstance(end, Time):
             raise TypeError("xlim should be a typle of two Time instances")
-        self._xlim = range
+        self._xlim = start, end
 
     @property
     def ylim(self):
