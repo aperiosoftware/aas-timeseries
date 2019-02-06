@@ -31,7 +31,7 @@
 from traitlets import (TraitType, TraitError,
                        Any as OriginalAny,
                        Bool as OriginalBool,
-                       Float as OriginalFloat,
+                       CFloat as OriginalCFloat,
                        Int as OriginalInt,
                        Unicode as OriginalUnicode)
 
@@ -66,7 +66,7 @@ class Bool(OriginalBool):
             self.__doc__ = self.help
 
 
-class Float(OriginalFloat):
+class CFloat(OriginalCFloat):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -74,7 +74,7 @@ class Float(OriginalFloat):
             self.__doc__ = self.help
 
 
-class PositiveFloat(Float):
+class PositiveCFloat(CFloat):
 
     def validate(self, obj, value):
         if value >= 0:
@@ -202,12 +202,12 @@ class Color(TraitType):
             return to_hex(value)
         else:
             if hasattr(obj, 'opacity'):
-                raise TraitError('color must be a string or a tuple of 3 or 4 floats')
+                raise TraitError('color must be a string or a tuple of 3 or 4 CFloats')
             else:
-                raise TraitError('color must be a string or a tuple of 3 floats')
+                raise TraitError('color must be a string or a tuple of 3 CFloats')
 
 
-class Opacity(OriginalFloat):
+class Opacity(OriginalCFloat):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
