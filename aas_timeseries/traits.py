@@ -185,7 +185,10 @@ class AstropyTime(TraitType):
         if isinstance(value, Time):
             return value
         else:
-            raise TraitError('value should be a Time instance')
+            try:
+                return Time(value)
+            except ValueError:
+                raise TraitError('value should be a Time instance')
 
 
 class Color(TraitType):
