@@ -1,5 +1,6 @@
+import uuid
 from traitlets import HasTraits
-from aas_timeseries.traits import (Unicode, Float, PositiveFloat, Any, Opacity, Color,
+from aas_timeseries.traits import (Unicode, CFloat, PositiveCFloat, Opacity, Color,
                                    UnicodeChoice, DataTrait, ColumnTrait, AstropyTime)
 
 __all__ = ['Symbol', 'Line', 'Range', 'VerticalLine', 'VerticalRange',
@@ -29,6 +30,10 @@ class BaseMark(HasTraits):
 
     # Potential properties that could be implemented: toolTip
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.uuid = str(uuid.uuid4())
+
     def to_vega(self):
         """
         Convert the mark to its Vega representation.
@@ -51,7 +56,7 @@ class Symbol(BaseMark):
 
     shape = UnicodeChoice('circle', help='The symbol shape.', choices=SYMBOL_SHAPES)
 
-    size = PositiveFloat(20, help='The area in pixels of the bounding box of the symbols.\n\n'
+    size = PositiveCFloat(20, help='The area in pixels of the bounding box of the symbols.\n\n'
                                   'Note that this value sets the area of the symbol; the '
                                   'side lengths will increase with the square root of this '
                                   'value.')
@@ -61,12 +66,13 @@ class Symbol(BaseMark):
 
     edge_color = Color(None, help='The edge color of the symbol.')
     edge_opacity = Opacity(0.2, help='The opacity of the edge color from 0 (transparent) to 1 (opaque).')
-    edge_width = PositiveFloat(0, help='The thickness of the edge, in pixels.')
+    edge_width = PositiveCFloat(0, help='The thickness of the edge, in pixels.')
 
     def to_vega(self):
 
         # The main markers
         vega = [{'type': 'symbol',
+                 'name': self.uuid,
                  'description': self.label,
                  'clip': True,
                  'from': {'data': self.data.uuid},
@@ -84,6 +90,7 @@ class Symbol(BaseMark):
         # The error bars (if requested)
         if self.error:
             vega.append({'type': 'rect',
+                         'name': self.uuid,
                          'description': self.label,
                          'clip': True,
                          'from': {'data': self.data.uuid},
@@ -108,13 +115,14 @@ class Line(BaseMark):
 
     data = DataTrait(help='The time series object containing the data.')
     column = ColumnTrait(None, help='The field in the time series containing the data.')
-    width = PositiveFloat(1, help='The width of the line, in pixels.')
+    width = PositiveCFloat(1, help='The width of the line, in pixels.')
 
     color = Color(None, help='The color of the line.')
     opacity = Opacity(1, help='The opacity of the line from 0 (transparent) to 1 (opaque).')
 
     def to_vega(self):
         vega = {'type': 'line',
+                'name': self.uuid,
                 'description': self.label,
                 'clip': True,
                 'from': {'data': self.data.uuid},
@@ -140,12 +148,13 @@ class Range(BaseMark):
 
     edge_color = Color(None, help='The edge color of the range.')
     edge_opacity = Opacity(0.2, help='The opacity of the edge color from 0 (transparent) to 1 (opaque).')
-    edge_width = PositiveFloat(0, help='The thickness of the edge, in pixels.')
+    edge_width = PositiveCFloat(0, help='The thickness of the edge, in pixels.')
 
     # Potential properties that could be implemented: strokeCap, strokeDash
 
     def to_vega(self):
         vega = {'type': 'area',
+                'name': self.uuid,
                 'description': self.label,
                 'clip': True,
                 'from': {'data': self.data.uuid},
@@ -167,7 +176,7 @@ class VerticalLine(BaseMark):
     """
 
     time = AstropyTime(help='The date/time at which the vertical line is shown.')
-    width = PositiveFloat(1, help='The width of the line, in pixels.')
+    width = PositiveCFloat(1, help='The width of the line, in pixels.')
 
     color = Color(None, help='The color of the line.')
     opacity = Opacity(1, help='The opacity of the line from 0 (transparent) to 1 (opaque).')
@@ -177,6 +186,7 @@ class VerticalLine(BaseMark):
     def to_vega(self):
 
         vega = {'type': 'rule',
+                'name': self.uuid,
                 'description': self.label,
                 'clip': True,
                 'encode': {'enter': {'x': {'scale': 'xscale', 'signal': time_to_vega(self.time)},
@@ -201,13 +211,14 @@ class VerticalRange(BaseMark):
 
     edge_color = Color(None, help='The edge color of the range.')
     edge_opacity = Opacity(0.2, help='The opacity of the edge color from 0 (transparent) to 1 (opaque).')
-    edge_width = PositiveFloat(0, help='The thickness of the edge, in pixels.')
+    edge_width = PositiveCFloat(0, help='The thickness of the edge, in pixels.')
 
     # Potential properties that could be implemented: strokeCap, strokeDash
 
     def to_vega(self):
 
         vega = {'type': 'rect',
+                'name': self.uuid,
                 'description': self.label,
                 'clip': True,
                 'encode': {'enter': {'x': {'scale': 'xscale', 'signal': time_to_vega(self.time_lower)},
@@ -229,8 +240,8 @@ class HorizontalLine(BaseMark):
     """
 
     # TODO: validate value and allow it to be a quantity
-    value = Float(help='The y value at which the horizontal line is shown.')
-    width = PositiveFloat(1, help='The width of the line, in pixels.')
+    value = CFloat(help='The y value at which the horizontal line is shown.')
+    width = PositiveCFloat(1, help='The width of the line, in pixels.')
 
     color = Color(None, help='The color of the line.')
     opacity = Opacity(1, help='The opacity of the line from 0 (transparent) to 1 (opaque).')
@@ -240,6 +251,7 @@ class HorizontalLine(BaseMark):
     def to_vega(self):
 
         vega = {'type': 'rule',
+                'name': self.uuid,
                 'description': self.label,
                 'clip': True,
                 'encode': {'enter': {'x': {'value': 0},
@@ -256,21 +268,22 @@ class HorizontalRange(BaseMark):
     A continuous range specified by a lower and upper value.
     """
 
-    value_lower = Float(help='The value at which the range starts.')
-    value_upper = Float(help='The value at which the range ends.')
+    value_lower = CFloat(help='The value at which the range starts.')
+    value_upper = CFloat(help='The value at which the range ends.')
 
     color = Color(None, help='The fill color of the range.')
     opacity = Opacity(0.2, help='The opacity of the fill color from 0 (transparent) to 1 (opaque).')
 
     edge_color = Color(None, help='The edge color of the range.')
     edge_opacity = Opacity(0.2, help='The opacity of the edge color from 0 (transparent) to 1 (opaque).')
-    edge_width = PositiveFloat(0, help='The thickness of the edge, in pixels.')
+    edge_width = PositiveCFloat(0, help='The thickness of the edge, in pixels.')
 
     # Potential properties that could be implemented: strokeCap, strokeDash
 
     def to_vega(self):
 
         vega = {'type': 'rect',
+                'name': self.uuid,
                 'description': self.label,
                 'clip': True,
                 'encode': {'enter': {'x': {'value': 0},
@@ -292,14 +305,14 @@ class Text(BaseMark):
 
     text = Unicode(help='The text label to show.')
     time = AstropyTime(help='The date/time at which the text is shown.')
-    value = PositiveFloat(help='The y value at which the text is shown.')
+    value = PositiveCFloat(help='The y value at which the text is shown.')
     weight = UnicodeChoice('normal', help='The weight of the text.',
                            choices=['normal', 'bold'])
     baseline = UnicodeChoice('alphabetic', help='The vertical text baseline.',
                              choices=['alphabetic', 'top', 'middle', 'bottom'])
     align = UnicodeChoice('left', help='The horizontal text alignment.',
                           choices=['left', 'center', 'right'])
-    angle = Float(0, help='The rotation angle of the text in degrees (default 0).')
+    angle = CFloat(0, help='The rotation angle of the text in degrees (default 0).')
 
     color = Color(None, help='The color of the text.')
     opacity = Opacity(1, help='The opacity of the text from 0 (transparent) to 1 (opaque).')
@@ -307,6 +320,7 @@ class Text(BaseMark):
     def to_vega(self):
 
         vega = {'type': 'text',
+                'name': self.uuid,
                 'description': self.label,
                 'clip': True,
                 'encode': {'enter': {'x': {'scale': 'xscale', 'signal': time_to_vega(self.time)},

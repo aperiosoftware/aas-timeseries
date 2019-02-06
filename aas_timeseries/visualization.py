@@ -1,16 +1,17 @@
+import uuid
 import tempfile
 from json import dump
 
 from jupyter_aas_timeseries import TimeSeriesWidget
 
-from aas_timeseries.data import Data
-from aas_timeseries.marks import Symbol, Line, VerticalLine, VerticalRange, HorizontalLine, HorizontalRange, Range, Text
 from aas_timeseries.colors import auto_assign_colors
+from aas_timeseries.views import BaseView, View
+from aas_timeseries.marks import time_to_vega
 
 __all__ = ['InteractiveTimeSeriesFigure']
 
 
-class InteractiveTimeSeriesFigure:
+class InteractiveTimeSeriesFigure(BaseView):
     """
     An interactive time series figure.
 
@@ -25,276 +26,34 @@ class InteractiveTimeSeriesFigure:
     """
 
     def __init__(self, width=600, height=400, resize=False):
-        self._data = {}
-        self._markers = []
+        super().__init__()
         self._width = width
         self._height = height
         self._resize = resize
+        self._views = []
 
-    def add_markers(self, *, time_series=None, column=None, **kwargs):
-        """
-        Add markers, optionally with errorbars, to the figure.
+    def add_view(self, title, description=None, include=None, exclude=None, empty=False):
 
-        Parameters
-        ----------
-        data : `~astropy_timeseries.TimeSeries`
-            The time series object containing the data.
-        column : str
-            The field in the time series containing the data.
-        error : str, optional
-            The field in the time series containing the data uncertainties.
-        shape : {'circle', 'square', 'cross', 'diamond', 'triangle-up', 'triangle-down', 'triangle-right', 'triangle-left'}, optional
-            The symbol shape.
-        size : float or int, optional
-            The area in pixels of the bounding box of the symbols.  Note that this
-            value sets the area of the symbol; the side lengths will increase with
-            the square root of this value.
-        color : str or tuple, optional
-            The fill color of the symbols.
-        opacity : float or int, optional
-            The opacity of the fill color from 0 (transparent) to 1 (opaque).
-        edge_color : str or tuple, optional
-            The edge color of the symbol.
-        edge_opacity : float or int, optional
-            The opacity of the edge color from 0 (transparent) to 1 (opaque).
-        edge_width : float or int, optional
-            The thickness of the edge, in pixels.
-        label : str, optional
-            The label to use to designate the marks in the legend.
+        if empty:
+            inherited_marks = {}
+        elif include is not None:
+            for mark in include:
+                if mark not in self._markers:
+                    raise ValueError(f'Layer {mark} does not exist in base figure')
+            inherited_marks = {mark: self._markers[mark] for mark in include}
+        elif exclude is not None:
+            for mark in exclude:
+                if mark not in self._markers:
+                    raise ValueError(f'Layer {mark} does not exist in base figure')
+            inherited_marks = {mark: self._markers[mark] for mark in self._markers if mark not in exclude}
+        else:
+            inherited_marks = self._markers.copy()
 
-        Returns
-        -------
-        layer : `~aas_timeseries.marks.Symbol`
-        """
-        if id(time_series) not in self._data:
-            self._data[id(time_series)] = Data(time_series)
-        markers = Symbol(data=self._data[id(time_series)], **kwargs)
-        # Note that we need to set the column after the data so that the
-        # validation works.
-        markers.column = column
-        self._markers.append(markers)
-        return markers
+        view = View(inherited_marks=inherited_marks)
 
-    def add_line(self, *, time_series=None, column=None, **kwargs):
-        """
-        Add a line to the figure.
+        self._views.append({'title': title, 'description': description, 'view': view})
 
-        Parameters
-        ----------
-        data : `~astropy_timeseries.TimeSeries`
-            The time series object containing the data.
-        column : str
-            The field in the time series containing the data.
-        width : float or int, optional
-            The width of the line, in pixels.
-        color : str or tuple, optional
-            The color of the line.
-        opacity : float or int, optional
-            The opacity of the line from 0 (transparent) to 1 (opaque).
-        label : str, optional
-            The label to use to designate the marks in the legend.
-
-        Returns
-        -------
-        layer : `~aas_timeseries.marks.Line`
-        """
-
-        if id(time_series) not in self._data:
-            self._data[id(time_series)] = Data(time_series)
-        line = Line(data=self._data[id(time_series)], **kwargs)
-        # Note that we need to set the column after the data so that the
-        # validation works.
-        line.column = column
-        self._markers.append(line)
-        return line
-
-    def add_range(self, *, time_series=None, column_lower=None, column_upper=None, **kwargs):
-        """
-        Add a time dependent range to the figure.
-
-        Parameters
-        ----------
-        data : `~astropy_timeseries.TimeSeries`
-            The time series object containing the data.
-        column_lower : str
-            The field in the time series containing the lower value of the data
-            range.
-        column_upper : str
-            The field in the time series containing the upper value of the data
-            range.
-        color : str or tuple, optional
-            The fill color of the range.
-        opacity : float or int, optional
-            The opacity of the fill color from 0 (transparent) to 1 (opaque).
-        edge_color : str or tuple, optional
-            The edge color of the range.
-        edge_opacity : float or int, optional
-            The opacity of the edge color from 0 (transparent) to 1 (opaque).
-        edge_width : float or int, optional
-            The thickness of the edge, in pixels.
-        label : str, optional
-            The label to use to designate the marks in the legend.
-
-        Returns
-        -------
-        layer : `~aas_timeseries.marks.Range`
-        """
-        if id(time_series) not in self._data:
-            self._data[id(time_series)] = Data(time_series)
-        range = Range(data=self._data[id(time_series)], **kwargs)
-        # Note that we need to set the columns after the data so that the
-        # validation works.
-        range.column_lower = column_lower
-        range.column_upper = column_upper
-        self._markers.append(range)
-        return range
-
-    def add_vertical_line(self, time, **kwargs):
-        """
-        Add a vertical line to the figure.
-
-        Parameters
-        ----------
-        time : `~astropy.time.Time`
-            The date/time at which the vertical line is shown.
-        width : float or int, optional
-            The width of the line, in pixels.
-        color : str or tuple, optional
-            The color of the line.
-        opacity : float or int, optional
-            The opacity of the line from 0 (transparent) to 1 (opaque).
-        label : str, optional
-            The label to use to designate the marks in the legend.
-
-        Returns
-        -------
-        layer : `~aas_timeseries.marks.VerticalLine`
-        """
-        line = VerticalLine(time=time, **kwargs)
-        self._markers.append(line)
-        return line
-
-    def add_vertical_range(self, time_lower, time_upper, **kwargs):
-        """
-        Add a vertical range to the figure.
-
-        Parameters
-        ----------
-        time_lower : `~astropy.time.Time`
-            The date/time at which the range starts.
-        time_upper : `~astropy.time.Time`
-            The date/time at which the range ends.
-        color : str or tuple, optional
-            The fill color of the range.
-        opacity : float or int, optional
-            The opacity of the fill color from 0 (transparent) to 1 (opaque).
-        edge_color : str or tuple, optional
-            The edge color of the range.
-        edge_opacity : float or int, optional
-            The opacity of the edge color from 0 (transparent) to 1 (opaque).
-        edge_width : float or int, optional
-            The thickness of the edge, in pixels.
-        label : str, optional
-            The label to use to designate the marks in the legend.
-
-        Returns
-        -------
-        layer : `~aas_timeseries.marks.VerticalRange`
-        """
-        range = VerticalRange(time_lower=time_lower, time_upper=time_upper, **kwargs)
-        self._markers.append(range)
-        return range
-
-    def add_horizontal_line(self, value, **kwargs):
-        """
-        Add a horizontal line to the figure.
-
-        Parameters
-        ----------
-        value : float or int
-            The y value at which the horizontal line is shown.
-        width : float or int, optional
-            The width of the line, in pixels.
-        color : str or tuple, optional
-            The color of the line.
-        opacity : float or int, optional
-            The opacity of the line from 0 (transparent) to 1 (opaque).
-        label : str, optional
-            The label to use to designate the marks in the legend.
-
-        Returns
-        -------
-        layer : `~aas_timeseries.marks.HorizontalLine`
-        """
-        line = HorizontalLine(value=value, **kwargs)
-        self._markers.append(line)
-        return line
-
-    def add_horizontal_range(self, value_lower, value_upper, **kwargs):
-        """
-        Add a horizontal range to the figure.
-
-        Parameters
-        ----------
-        value_lower : float or int
-            The value at which the range starts.
-        value_upper : float or int
-            The value at which the range ends.
-        color : str or tuple, optional
-            The fill color of the range.
-        opacity : float or int, optional
-            The opacity of the fill color from 0 (transparent) to 1 (opaque).
-        edge_color : str or tuple, optional
-            The edge color of the range.
-        edge_opacity : float or int, optional
-            The opacity of the edge color from 0 (transparent) to 1 (opaque).
-        edge_width : float or int, optional
-            The thickness of the edge, in pixels.
-        label : str, optional
-            The label to use to designate the marks in the legend.
-
-        Returns
-        -------
-        layer : `~aas_timeseries.marks.HorizontalRange`
-        """
-        range = HorizontalRange(value_lower=value_lower, value_upper=value_upper, **kwargs)
-        self._markers.append(range)
-        return range
-
-    def add_text(self, **kwargs):
-        """
-        Add a text label to the figure.
-
-        Parameters
-        ----------
-        time : `~astropy.time.Time`
-            The date/time at which the text is shown.
-        value : float or int
-            The y value at which the text is shown.
-        weight : {'normal', 'bold'}, optional
-            The weight of the text.
-        baseline : {'alphabetic', 'top', 'middle', 'bottom'}, optional
-            The vertical text baseline.
-        align : {'left', 'center', 'right'}, optional
-            The horizontal text alignment.
-        angle : float or int, optional
-            The rotation angle of the text in degrees (default 0).
-        text : str, optional
-            The text label to show.
-        color : str or tuple, optional
-            The color of the text.
-        opacity : float or int, optional
-            The opacity of the text from 0 (transparent) to 1 (opaque).
-        label : str, optional
-            The label to use to designate the marks in the legend.
-
-        Returns
-        -------
-        layer : `~aas_timeseries.marks.Text`
-        """
-        text = Text(**kwargs)
-        self._markers.append(text)
-        return text
+        return view
 
     def save_interactive(self, filename, override_style=False):
         """
@@ -347,7 +106,7 @@ class InteractiveTimeSeriesFigure:
         # Data
         json['data'] = [data.to_vega() for data in self._data.values()]
         json['marks'] = []
-        for mark in self._markers:
+        for mark, settings in self._markers.items():
             json['marks'].extend(mark.to_vega())
 
         # Axes
@@ -361,5 +120,51 @@ class InteractiveTimeSeriesFigure:
                            'range': 'width', 'zero': False},
                           {'name': 'yscale', 'type': 'linear',
                            'range': 'height', 'zero': False}]
+
+        # Limits, if specified
+        if self.xlim is not None:
+            json['scales'][0]['domain'] = ({'signal': time_to_vega(self.xlim[0])},
+                                           {'signal': time_to_vega(self.xlim[1])})
+        if self.ylim is not None:
+            json['scales'][1]['domain'] = list(self.ylim)
+
+        # Views
+
+        if len(self._views) > 0:
+
+            json['_views'] = []
+            json['_extramarks'] = []
+
+            for view in self._views:
+
+                view_json = {'name': self.uuid,
+                             'title': view['title'],
+                             'description': view['description']}
+
+                json['_views'].append(view_json)
+
+                view_json['scales'] = [{'name': 'xscale', 'type': 'time',
+                                        'range': 'width', 'zero': False},
+                                       {'name': 'yscale', 'type': 'linear',
+                                        'range': 'height', 'zero': False}]
+
+                # Limits, if specified
+                if view['view'].xlim is not None:
+                    view_json['scales'][0]['domain'] = ({'signal': time_to_vega(view['view'].xlim[0])},
+                                                        {'signal': time_to_vega(view['view'].xlim[1])})
+
+                if view['view'].ylim is not None:
+                    view_json['scales'][1]['domain'] = list(view['view'].ylim)
+
+                # Markers
+
+                view_json['markers'] = []
+
+                for mark, settings in view['view']._inherited_marks.items():
+                    view_json['markers'].append({'name': mark.uuid, 'visible': settings['visible']})
+
+                for mark, settings in view['view']._markers.items():
+                    json['_extramarks'].extend(mark.to_vega())
+                    view_json['markers'].append({'name': mark.uuid, 'visible': settings['visible']})
 
         return json

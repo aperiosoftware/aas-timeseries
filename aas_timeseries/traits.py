@@ -31,7 +31,7 @@
 from traitlets import (TraitType, TraitError,
                        Any as OriginalAny,
                        Bool as OriginalBool,
-                       Float as OriginalFloat,
+                       CFloat as OriginalCFloat,
                        Int as OriginalInt,
                        Unicode as OriginalUnicode)
 
@@ -66,7 +66,7 @@ class Bool(OriginalBool):
             self.__doc__ = self.help
 
 
-class Float(OriginalFloat):
+class CFloat(OriginalCFloat):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -74,7 +74,7 @@ class Float(OriginalFloat):
             self.__doc__ = self.help
 
 
-class PositiveFloat(Float):
+class PositiveCFloat(CFloat):
 
     def validate(self, obj, value):
         if value >= 0:
@@ -185,7 +185,10 @@ class AstropyTime(TraitType):
         if isinstance(value, Time):
             return value
         else:
-            raise TraitError('value should be a Time instance')
+            try:
+                return Time(value)
+            except ValueError:
+                raise TraitError('value should be a Time instance')
 
 
 class Color(TraitType):
@@ -207,7 +210,7 @@ class Color(TraitType):
                 raise TraitError('color must be a string or a tuple of 3 floats')
 
 
-class Opacity(OriginalFloat):
+class Opacity(OriginalCFloat):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

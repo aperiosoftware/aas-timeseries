@@ -28,5 +28,6 @@ User guide
    installing.rst
    getting_started
    layers
+   views
    submitting.rst
    api.rst
