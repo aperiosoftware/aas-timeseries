@@ -6,6 +6,8 @@ from astropy.time import Time
 from aas_timeseries.data import Data
 from aas_timeseries.marks import BaseMark, Symbol, Line, VerticalLine, VerticalRange, HorizontalLine, HorizontalRange, Range, Text
 
+__all__ = ['BaseView', 'View']
+
 
 class BaseView:
     """
