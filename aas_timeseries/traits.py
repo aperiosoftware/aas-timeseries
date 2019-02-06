@@ -205,9 +205,9 @@ class Color(TraitType):
             return to_hex(value)
         else:
             if hasattr(obj, 'opacity'):
-                raise TraitError('color must be a string or a tuple of 3 or 4 CFloats')
+                raise TraitError('color must be a string or a tuple of 3 or 4 floats')
             else:
-                raise TraitError('color must be a string or a tuple of 3 CFloats')
+                raise TraitError('color must be a string or a tuple of 3 floats')
 
 
 class Opacity(OriginalCFloat):
