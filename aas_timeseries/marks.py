@@ -1,6 +1,6 @@
 import uuid
 from traitlets import HasTraits
-from aas_timeseries.traits import (Unicode, CFloat, PositiveCFloat, Any, Opacity, Color,
+from aas_timeseries.traits import (Unicode, CFloat, PositiveCFloat, Opacity, Color,
                                    UnicodeChoice, DataTrait, ColumnTrait, AstropyTime)
 
 __all__ = ['Symbol', 'Line', 'Range', 'VerticalLine', 'VerticalRange',
