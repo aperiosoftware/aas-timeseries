@@ -7,14 +7,14 @@
 import os
 from textwrap import wrap, indent
 
-from aas_timeseries.marks import (Symbol, Line, VerticalLine, VerticalRange,
-                                  HorizontalLine, HorizontalRange, Range, Text)
+from aas_timeseries.layers import (Markers, Line, VerticalLine, VerticalRange,
+                                   HorizontalLine, HorizontalRange, Range, Text)
 from aas_timeseries.traits import (Unicode, Float, PositiveFloat, Any, Opacity,
                                    Color, UnicodeChoice, DataTrait, ColumnTrait,
                                    AstropyTime)
 
-marks = [Symbol, Line, VerticalLine, VerticalRange,
-         HorizontalLine, HorizontalRange, Range, Text]
+layers = [Markers, Line, VerticalLine, VerticalRange,
+          HorizontalLine, HorizontalRange, Range, Text]
 
 ORDER = ['time', 'value', 'time_lower', 'time_upper', 'value_lower',
          'value_upper', 'weight', 'baseline', 'align', 'angle', 'data',
@@ -63,7 +63,7 @@ def traits_to_docstring(cls):
 
 
 if __name__ == "__main__":
-    for cls in marks:
+    for cls in layers:
         print('-' * 80)
         print(cls)
         print("")

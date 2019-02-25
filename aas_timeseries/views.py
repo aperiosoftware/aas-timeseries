@@ -4,7 +4,7 @@ from collections import OrderedDict
 from astropy.time import Time
 
 from aas_timeseries.data import Data
-from aas_timeseries.marks import BaseMark, Symbol, Line, VerticalLine, VerticalRange, HorizontalLine, HorizontalRange, Range, Text
+from aas_timeseries.layers import BaseLayer, Markers, Line, VerticalLine, VerticalRange, HorizontalLine, HorizontalRange, Range, Text
 
 __all__ = ['BaseView', 'View']
 
@@ -17,7 +17,7 @@ class BaseView:
     def __init__(self):
         self.uuid = str(uuid.uuid4())
         self._data = OrderedDict()
-        self._markers = OrderedDict()
+        self._layers = OrderedDict()
         self._xlim = None
         self._ylim = None
         self._ylog = False
@@ -93,19 +93,19 @@ class BaseView:
         edge_width : float or int, optional
             The thickness of the edge, in pixels.
         label : str, optional
-            The label to use to designate the marks in the legend.
+            The label to use to designate the layer in the legend.
 
         Returns
         -------
-        layer : `~aas_timeseries.marks.Symbol`
+        layer : `~aas_timeseries.layers.Markers`
         """
         if id(time_series) not in self._data:
             self._data[id(time_series)] = Data(time_series)
-        markers = Symbol(data=self._data[id(time_series)], **kwargs)
+        markers = Markers(parent=self, data=self._data[id(time_series)], **kwargs)
         # Note that we need to set the column after the data so that the
         # validation works.
         markers.column = column
-        self._markers[markers] = {'visible': True}
+        self._layers[markers] = {'visible': True}
         return markers
 
     def add_line(self, *, time_series=None, column=None, **kwargs):
@@ -125,20 +125,20 @@ class BaseView:
         opacity : float or int, optional
             The opacity of the line from 0 (transparent) to 1 (opaque).
         label : str, optional
-            The label to use to designate the marks in the legend.
+            The label to use to designate the layer in the legend.
 
         Returns
         -------
-        layer : `~aas_timeseries.marks.Line`
+        layer : `~aas_timeseries.layers.Line`
         """
 
         if id(time_series) not in self._data:
             self._data[id(time_series)] = Data(time_series)
-        line = Line(data=self._data[id(time_series)], **kwargs)
+        line = Line(parent=self, data=self._data[id(time_series)], **kwargs)
         # Note that we need to set the column after the data so that the
         # validation works.
         line.column = column
-        self._markers[line] = {'visible': True}
+        self._layers[line] = {'visible': True}
         return line
 
     def add_range(self, *, time_series=None, column_lower=None, column_upper=None, **kwargs):
@@ -166,20 +166,20 @@ class BaseView:
         edge_width : float or int, optional
             The thickness of the edge, in pixels.
         label : str, optional
-            The label to use to designate the marks in the legend.
+            The label to use to designate the layer in the legend.
 
         Returns
         -------
-        layer : `~aas_timeseries.marks.Range`
+        layer : `~aas_timeseries.layers.Range`
         """
         if id(time_series) not in self._data:
             self._data[id(time_series)] = Data(time_series)
-        range = Range(data=self._data[id(time_series)], **kwargs)
+        range = Range(parent=self, data=self._data[id(time_series)], **kwargs)
         # Note that we need to set the columns after the data so that the
         # validation works.
         range.column_lower = column_lower
         range.column_upper = column_upper
-        self._markers[range] = {'visible': True}
+        self._layers[range] = {'visible': True}
         return range
 
     def add_vertical_line(self, time, **kwargs):
@@ -197,14 +197,14 @@ class BaseView:
         opacity : float or int, optional
             The opacity of the line from 0 (transparent) to 1 (opaque).
         label : str, optional
-            The label to use to designate the marks in the legend.
+            The label to use to designate the layer in the legend.
 
         Returns
         -------
-        layer : `~aas_timeseries.marks.VerticalLine`
+        layer : `~aas_timeseries.layers.VerticalLine`
         """
-        line = VerticalLine(time=time, **kwargs)
-        self._markers[line] = {'visible': True}
+        line = VerticalLine(parent=self, time=time, **kwargs)
+        self._layers[line] = {'visible': True}
         return line
 
     def add_vertical_range(self, time_lower, time_upper, **kwargs):
@@ -228,14 +228,14 @@ class BaseView:
         edge_width : float or int, optional
             The thickness of the edge, in pixels.
         label : str, optional
-            The label to use to designate the marks in the legend.
+            The label to use to designate the layer in the legend.
 
         Returns
         -------
-        layer : `~aas_timeseries.marks.VerticalRange`
+        layer : `~aas_timeseries.layers.VerticalRange`
         """
-        range = VerticalRange(time_lower=time_lower, time_upper=time_upper, **kwargs)
-        self._markers[range] = {'visible': True}
+        range = VerticalRange(parent=self, time_lower=time_lower, time_upper=time_upper, **kwargs)
+        self._layers[range] = {'visible': True}
         return range
 
     def add_horizontal_line(self, value, **kwargs):
@@ -253,14 +253,14 @@ class BaseView:
         opacity : float or int, optional
             The opacity of the line from 0 (transparent) to 1 (opaque).
         label : str, optional
-            The label to use to designate the marks in the legend.
+            The label to use to designate the layer in the legend.
 
         Returns
         -------
-        layer : `~aas_timeseries.marks.HorizontalLine`
+        layer : `~aas_timeseries.layers.HorizontalLine`
         """
-        line = HorizontalLine(value=value, **kwargs)
-        self._markers[line] = {'visible': True}
+        line = HorizontalLine(parent=self, value=value, **kwargs)
+        self._layers[line] = {'visible': True}
         return line
 
     def add_horizontal_range(self, value_lower, value_upper, **kwargs):
@@ -284,14 +284,14 @@ class BaseView:
         edge_width : float or int, optional
             The thickness of the edge, in pixels.
         label : str, optional
-            The label to use to designate the marks in the legend.
+            The label to use to designate the layer in the legend.
 
         Returns
         -------
-        layer : `~aas_timeseries.marks.HorizontalRange`
+        layer : `~aas_timeseries.layers.HorizontalRange`
         """
-        range = HorizontalRange(value_lower=value_lower, value_upper=value_upper, **kwargs)
-        self._markers[range] = {'visible': True}
+        range = HorizontalRange(parent=self, value_lower=value_lower, value_upper=value_upper, **kwargs)
+        self._layers[range] = {'visible': True}
         return range
 
     def add_text(self, **kwargs):
@@ -319,26 +319,26 @@ class BaseView:
         opacity : float or int, optional
             The opacity of the text from 0 (transparent) to 1 (opaque).
         label : str, optional
-            The label to use to designate the marks in the legend.
+            The label to use to designate the layer in the legend.
 
         Returns
         -------
-        layer : `~aas_timeseries.marks.Text`
+        layer : `~aas_timeseries.layers.Text`
         """
-        text = Text(**kwargs)
-        self._markers[text] = {'visible': True}
+        text = Text(parent=self, **kwargs)
+        self._layers[text] = {'visible': True}
         return text
 
     @property
     def layers(self):
-        return list(self._markers)
+        return list(self._layers)
 
 
 class View(BaseView):
 
-    def __init__(self, inherited_marks=None):
+    def __init__(self, inherited_layers=None):
         super().__init__()
-        self._inherited_marks = inherited_marks or OrderedDict()
+        self._inherited_layers = inherited_layers or OrderedDict()
 
     def show(self, layers):
         self._set_visible(layers, True)
@@ -347,16 +347,27 @@ class View(BaseView):
         self._set_visible(layers, False)
 
     def _set_visible(self, layers, visible):
-        if isinstance(layers, BaseMark):
+        if isinstance(layers, BaseLayer):
             layers = [layers]
         for layer in layers:
-            if layer in self._markers:
-                self._markers[layer]['visible'] = visible
-            elif layer in self._inherited_marks:
-                self._inherited_marks[layer]['visible'] = visible
+            if layer in self._layers:
+                self._layers[layer]['visible'] = visible
+            elif layer in self._inherited_layers:
+                self._inherited_layers[layer]['visible'] = visible
             else:
                 raise ValueError(f'Layer {layer} not in view')
 
+    def remove(self, layer):
+        """
+        Remove a layer from the view.
+        """
+        if layer in self._inherited_layers:
+            self._inherited_layers.pop(layer)
+        elif layer in self._layers:
+            self._layers.pop(layer)
+        else:
+            raise ValueError(f"Layer '{layer.label}' is not in view")
+
     @property
     def layers(self):
-        return list(self._inherited_marks) + list(self._markers)
+        return list(self._inherited_layers) + list(self._layers)
