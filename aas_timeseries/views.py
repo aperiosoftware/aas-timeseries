@@ -101,7 +101,7 @@ class BaseView:
         """
         if id(time_series) not in self._data:
             self._data[id(time_series)] = Data(time_series)
-        markers = Symbol(data=self._data[id(time_series)], **kwargs)
+        markers = Symbol(parent=self, data=self._data[id(time_series)], **kwargs)
         # Note that we need to set the column after the data so that the
         # validation works.
         markers.column = column
@@ -134,7 +134,7 @@ class BaseView:
 
         if id(time_series) not in self._data:
             self._data[id(time_series)] = Data(time_series)
-        line = Line(data=self._data[id(time_series)], **kwargs)
+        line = Line(parent=self, data=self._data[id(time_series)], **kwargs)
         # Note that we need to set the column after the data so that the
         # validation works.
         line.column = column
@@ -174,7 +174,7 @@ class BaseView:
         """
         if id(time_series) not in self._data:
             self._data[id(time_series)] = Data(time_series)
-        range = Range(data=self._data[id(time_series)], **kwargs)
+        range = Range(parent=self, data=self._data[id(time_series)], **kwargs)
         # Note that we need to set the columns after the data so that the
         # validation works.
         range.column_lower = column_lower
@@ -203,7 +203,7 @@ class BaseView:
         -------
         layer : `~aas_timeseries.marks.VerticalLine`
         """
-        line = VerticalLine(time=time, **kwargs)
+        line = VerticalLine(parent=self, time=time, **kwargs)
         self._markers[line] = {'visible': True}
         return line
 
@@ -234,7 +234,7 @@ class BaseView:
         -------
         layer : `~aas_timeseries.marks.VerticalRange`
         """
-        range = VerticalRange(time_lower=time_lower, time_upper=time_upper, **kwargs)
+        range = VerticalRange(parent=self, time_lower=time_lower, time_upper=time_upper, **kwargs)
         self._markers[range] = {'visible': True}
         return range
 
@@ -259,7 +259,7 @@ class BaseView:
         -------
         layer : `~aas_timeseries.marks.HorizontalLine`
         """
-        line = HorizontalLine(value=value, **kwargs)
+        line = HorizontalLine(parent=self, value=value, **kwargs)
         self._markers[line] = {'visible': True}
         return line
 
@@ -290,7 +290,7 @@ class BaseView:
         -------
         layer : `~aas_timeseries.marks.HorizontalRange`
         """
-        range = HorizontalRange(value_lower=value_lower, value_upper=value_upper, **kwargs)
+        range = HorizontalRange(parent=self, value_lower=value_lower, value_upper=value_upper, **kwargs)
         self._markers[range] = {'visible': True}
         return range
 
@@ -325,9 +325,18 @@ class BaseView:
         -------
         layer : `~aas_timeseries.marks.Text`
         """
-        text = Text(**kwargs)
+        text = Text(parent=self, **kwargs)
         self._markers[text] = {'visible': True}
         return text
+
+    def remove(self, mark):
+        """
+        Remove a mark/layer from the figure/view.
+        """
+        if mark in self._markers:
+            self._markers.pop(mark)
+        else:
+            raise ValueError("Mark is not currently in figure/view")
 
     @property
     def layers(self):

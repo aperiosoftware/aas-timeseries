@@ -1,4 +1,5 @@
 import uuid
+import weakref
 from traitlets import HasTraits
 from aas_timeseries.traits import (Unicode, CFloat, PositiveCFloat, Opacity, Color,
                                    UnicodeChoice, DataTrait, ColumnTrait, AstropyTime)
@@ -30,9 +31,21 @@ class BaseMark(HasTraits):
 
     # Potential properties that could be implemented: toolTip
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, parent=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.uuid = str(uuid.uuid4())
+        # NOTE: we use weakref to avoid circular references
+        self.parent = weakref.ref(parent)
+
+    def remove(self):
+        """
+        Remove the layer from the visualization.
+        """
+        parent = self.parent()
+        if parent is None:
+            raise Exception("Mark is no longer in a figure/view")
+        else:
+            self.parent.remove(self)
 
     def to_vega(self):
         """
