@@ -173,7 +173,7 @@ github_issues_url = 'https://github.com/{0}/issues/'.format(setup_cfg['github_pr
 # -- Turn on nitpicky mode for sphinx (to warn about references not found) ----
 #
 nitpicky = True
-nitpick_ignore = [('py:class', 'aas_timeseries.layers.BaseLayer')]
+nitpick_ignore = [('py:class', 'traitlets.traitlets.HasTraits')]
 #
 # Some warnings are impossible to suppress, and you can list specific references
 # that should be ignored in a nitpick-exceptions file which should be inside
