@@ -1,5 +1,7 @@
+import os
 import tempfile
-from json import dump
+from json import dump, dumps
+from zipfile import ZipFile
 
 import numpy as np
 
@@ -59,7 +61,7 @@ class InteractiveTimeSeriesFigure(BaseView):
 
         return view
 
-    def save_interactive(self, filename, override_style=False, embed_data=True):
+    def save_interactive(self, filename, override_style=False, embed_data=True, zip_bundle=False):
         """
         Save a Vega-compatible JSON file that contains the specification for
         the interactive figure.
@@ -67,7 +69,7 @@ class InteractiveTimeSeriesFigure(BaseView):
         Parameters
         ----------
         filename : str
-            The filename for the JSON file.
+            The filename for the JSON or Zip file.
         override_style : bool, optional
             By default, any unspecified colors will be automatically chosen.
             If this parameter is set to `True`, all colors will be reassigned,
@@ -75,6 +77,9 @@ class InteractiveTimeSeriesFigure(BaseView):
         embed_data : bool, optional
             Whether to embed the data in the JSON file (`True`) or include it
             in separate CSV files (`False`).
+        zip_bundle : bool, optional
+            Whether to save a bundle tar file that includes everything needed
+            to run the interactive visualization.
         """
 
         colors = auto_assign_colors(self._layers)
@@ -82,8 +87,23 @@ class InteractiveTimeSeriesFigure(BaseView):
             if override_style or layer.color is None:
                 layer.color = color
 
-        with open(filename, 'w') as f:
-            dump(self._to_json(embed_data=embed_data), f, indent='  ')
+        if zip_bundle:
+            start_dir = os.path.abspath('.')
+            tmp_dir = tempfile.mkdtemp()
+            os.chdir(tmp_dir)
+            try:
+                json = self._to_json(embed_data=embed_data)
+            finally:
+                os.chdir(start_dir)
+            html_file = os.path.join(os.path.dirname(__file__), 'screenshot', 'template.html')
+            with ZipFile(filename, 'w') as fzip:
+                fzip.writestr('figure.json', dumps(json))
+                for filename in os.listdir(tmp_dir):
+                    fzip.write(os.path.join(tmp_dir, filename), os.path.basename(filename))
+                fzip.write(html_file, 'index.html')
+        else:
+            with open(filename, 'w') as f:
+                dump(self._to_json(embed_data=embed_data), f, indent='  ')
 
     def preview_interactive(self):
         """

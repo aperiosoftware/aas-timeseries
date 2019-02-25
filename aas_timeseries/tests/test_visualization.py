@@ -28,6 +28,20 @@ def test_basic(tmpdir):
     figure.save_interactive(filename)
 
 
+def test_save_options(tmpdir):
+
+    ts = TimeSeries(time='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
+    ts['flux'] = [1, 2, 3, 4, 5]
+    ts['error'] = [1, 2, 3, 4, 5]
+
+    filename = tmpdir.join('figure.json').strpath
+
+    figure = InteractiveTimeSeriesFigure()
+    figure.add_markers(time_series=ts, column='flux', label='Markers')
+    figure.save_interactive(filename, embed_data=True)
+    figure.save_interactive(filename, zip_bundle=True)
+
+
 def test_column_validation():
 
     # Test the validation provied by ColumnTrait
