@@ -1,12 +1,13 @@
-import uuid
 import tempfile
 from json import dump
+
+import numpy as np
 
 from jupyter_aas_timeseries import TimeSeriesWidget
 
 from aas_timeseries.colors import auto_assign_colors
 from aas_timeseries.views import BaseView, View
-from aas_timeseries.marks import time_to_vega
+from aas_timeseries.marks import time_to_vega, Symbol, Range, Line
 
 __all__ = ['InteractiveTimeSeriesFigure']
 
@@ -21,15 +22,18 @@ class InteractiveTimeSeriesFigure(BaseView):
         The preferred width of the figure, in pixels.
     height : int, optional
         The preferred height of the figure, in pixels.
+    padding : int, optional
+        The padding inside the axes, in pixels
     resize : bool, optional
         Whether to resize the figure to the available space.
     """
 
-    def __init__(self, width=600, height=400, resize=False):
+    def __init__(self, width=600, height=400, padding=36, resize=False):
         super().__init__()
         self._width = width
         self._height = height
         self._resize = resize
+        self._padding = padding
         self._views = []
 
     def add_view(self, title, description=None, include=None, exclude=None, empty=False):
@@ -116,17 +120,56 @@ class InteractiveTimeSeriesFigure(BaseView):
                          'title': 'Intensity'}]
 
         # Scales
-        json['scales'] = [{'name': 'xscale', 'type': 'time',
-                           'range': 'width', 'zero': False},
-                          {'name': 'yscale', 'type': 'linear',
-                           'range': 'height', 'zero': False}]
+        json['scales'] = [{'name': 'xscale',
+                           'type': 'time',
+                           'range': 'width',
+                           'zero': False,
+                           'padding': self._padding},
+                          {'name': 'yscale',
+                           'type': 'linear',
+                           'range': 'height',
+                           'zero': False,
+                           'padding': self._padding}]
 
-        # Limits, if specified
-        if self.xlim is not None:
-            json['scales'][0]['domain'] = ({'signal': time_to_vega(self.xlim[0])},
-                                           {'signal': time_to_vega(self.xlim[1])})
-        if self.ylim is not None:
-            json['scales'][1]['domain'] = list(self.ylim)
+        # Limits
+
+        if self.xlim is None or self.ylim is None:
+
+            all_times = []
+            all_values = []
+
+            # If there are symbol layers, we just use those to determine limits
+            if any(isinstance(mark, Symbol) for mark in self._markers):
+                layer_types = (Symbol,)
+            else:
+                layer_types = (Range, Line)
+
+            for mark in self._markers:
+                if isinstance(mark, layer_types):
+                    all_times.append(np.min(mark.data.time_series.time))
+                    all_times.append(np.max(mark.data.time_series.time))
+                    all_values.append(np.nanmin(mark.data.time_series[mark.column]))
+                    all_values.append(np.nanmax(mark.data.time_series[mark.column]))
+
+            if len(all_times) > 0:
+                xlim_auto = np.min(all_times), np.max(all_times)
+            else:
+                xlim_auto = None
+
+            if len(all_values) > 0:
+                ylim_auto = float(np.min(all_values)), float(np.max(all_values))
+            else:
+                ylim_auto = None
+
+        xlim = xlim_auto if self.xlim is None else self.xlim
+        ylim = ylim_auto if self.ylim is None else self.ylim
+
+        if xlim is not None:
+            json['scales'][0]['domain'] = ({'signal': time_to_vega(xlim[0])},
+                                           {'signal': time_to_vega(xlim[1])})
+
+        if ylim is not None:
+            json['scales'][1]['domain'] = list(ylim)
 
         # Views
 
