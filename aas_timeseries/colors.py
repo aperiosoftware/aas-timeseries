@@ -15,18 +15,18 @@ def auto_assign_colors(layers):
     colors = []
 
     layers_by_type = defaultdict(list)
-    for marker in layers:
-        layers_by_type[type(marker)].append(marker)
+    for layer in layers:
+        layers_by_type[type(layer)].append(layer)
 
     offset = 0
 
-    for marker in layers:
-        if isinstance(marker, ALWAYS_BLACK):
+    for layer in layers:
+        if isinstance(layer, ALWAYS_BLACK):
             colors.append('#000000')
-        elif isinstance(marker, BLACK_IF_ONLY_ONE) and len(layers_by_type[type(marker)]) == 1:
+        elif isinstance(layer, BLACK_IF_ONLY_ONE) and len(layers_by_type[type(layer)]) == 1:
             colors.append('#000000')
         else:
-            icolor = layers_by_type[type(marker)].index(marker)
+            icolor = layers_by_type[type(layer)].index(layer)
             current = (offset + icolor) % 4
             colors.append(Paired_5.hex_colors[current])
             offset = current + 1

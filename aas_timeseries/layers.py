@@ -41,11 +41,11 @@ class BaseLayer(HasTraits):
         """
         Remove the layer from the visualization.
         """
-        parent = self.parent()
-        if parent is None:
-            raise Exception("Layer is no longer in a figure/view")
+        if self.parent is None or self.parent() is None:
+            raise Exception(f"Layer '{self.label}' is no longer in a figure/view")
         else:
-            self.parent.remove(self)
+            self.parent().remove(self)
+            self.parent = None
 
     def to_vega(self):
         """

@@ -115,3 +115,33 @@ def test_views(tmpdir):
     assert 'does not exist in base figure' in exc.value.args[0]
 
     figure.save_interactive(filename)
+
+
+def test_remove():
+
+    ts = TimeSeries(time='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
+    ts['flux'] = [1, 2, 3, 4, 5]
+    ts['error'] = [1, 2, 3, 4, 5]
+
+    figure = InteractiveTimeSeriesFigure()
+    assert len(figure.layers) == 0
+    markers = figure.add_markers(time_series=ts, column='flux', label='Markers')
+    assert len(figure.layers) == 1
+    line = figure.add_line(time_series=ts, column='flux', label='Line')
+    assert len(figure.layers) == 2
+    range = figure.add_vertical_range(ts.time[0], ts.time[-1], label='Vertical Range')
+    assert len(figure.layers) == 3
+    line.remove()
+    assert len(figure.layers) == 2
+    range.remove()
+    assert len(figure.layers) == 1
+    markers.remove()
+    assert len(figure.layers) == 0
+
+    with pytest.raises(Exception) as exc:
+        markers.remove()
+    assert exc.value.args[0] == "Layer 'Markers' is no longer in a figure/view"
+
+    with pytest.raises(Exception) as exc:
+        figure.remove(markers)
+    assert exc.value.args[0] == "Layer 'Markers' is not in figure/view"

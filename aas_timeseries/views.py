@@ -329,14 +329,14 @@ class BaseView:
         self._layers[text] = {'visible': True}
         return text
 
-    def remove(self, mark):
+    def remove(self, layer):
         """
-        Remove a mark/layer from the figure/view.
+        Remove a layer from the figure/view.
         """
-        if mark in self._layers:
-            self._layers.pop(mark)
+        if layer in self._layers:
+            self._layers.pop(layer)
         else:
-            raise ValueError("Mark is not currently in figure/view")
+            raise ValueError(f"Layer '{layer.label}' is not in figure/view")
 
     @property
     def layers(self):
