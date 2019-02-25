@@ -4,8 +4,9 @@ from traitlets import HasTraits
 from aas_timeseries.traits import (Unicode, CFloat, PositiveCFloat, Opacity, Color,
                                    UnicodeChoice, DataTrait, ColumnTrait, AstropyTime)
 
-__all__ = ['Markers', 'Line', 'Range', 'VerticalLine', 'VerticalRange',
-           'HorizontalLine', 'HorizontalRange', 'Text']
+__all__ = ['BaseLayer', 'Markers', 'Line', 'Range', 'VerticalLine',
+           'VerticalRange', 'HorizontalLine', 'HorizontalRange', 'Text',
+           'time_to_vega']
 
 DEFAULT_COLOR = '#000000'
 
