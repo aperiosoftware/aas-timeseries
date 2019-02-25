@@ -126,7 +126,7 @@ class InteractiveTimeSeriesFigure(BaseView):
                            'zero': False,
                            'padding': self._padding},
                           {'name': 'yscale',
-                           'type': 'linear',
+                           'type': 'log' if self.ylog else 'linear',
                            'range': 'height',
                            'zero': False,
                            'padding': self._padding}]
@@ -186,10 +186,16 @@ class InteractiveTimeSeriesFigure(BaseView):
 
                 json['_views'].append(view_json)
 
-                view_json['scales'] = [{'name': 'xscale', 'type': 'time',
-                                        'range': 'width', 'zero': False},
-                                       {'name': 'yscale', 'type': 'linear',
-                                        'range': 'height', 'zero': False}]
+                view_json['scales'] = [{'name': 'xscale',
+                                        'type': 'time',
+                                        'range': 'width',
+                                        'zero': False,
+                                        'padding': self._padding},
+                                       {'name': 'yscale',
+                                        'type': 'log' if view['view'].ylog else 'linear',
+                                        'range': 'height',
+                                        'zero': False,
+                                        'padding': self._padding}]
 
                 # Limits, if specified
                 if view['view'].xlim is not None:
