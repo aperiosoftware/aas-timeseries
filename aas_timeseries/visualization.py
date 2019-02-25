@@ -59,7 +59,7 @@ class InteractiveTimeSeriesFigure(BaseView):
 
         return view
 
-    def save_interactive(self, filename, override_style=False):
+    def save_interactive(self, filename, override_style=False, embed_data=True):
         """
         Save a Vega-compatible JSON file that contains the specification for
         the interactive figure.
@@ -72,6 +72,9 @@ class InteractiveTimeSeriesFigure(BaseView):
             By default, any unspecified colors will be automatically chosen.
             If this parameter is set to `True`, all colors will be reassigned,
             even if already set.
+        embed_data : bool, optional
+            Whether to embed the data in the JSON file (`True`) or include it
+            in separate CSV files (`False`).
         """
 
         colors = auto_assign_colors(self._layers)
@@ -80,7 +83,7 @@ class InteractiveTimeSeriesFigure(BaseView):
                 layer.color = color
 
         with open(filename, 'w') as f:
-            dump(self._to_json(), f, indent='  ')
+            dump(self._to_json(embed_data=embed_data), f, indent='  ')
 
     def preview_interactive(self):
         """
@@ -89,11 +92,11 @@ class InteractiveTimeSeriesFigure(BaseView):
         """
         # FIXME: should be able to do without a file
         tmpfile = tempfile.mktemp()
-        self.save_interactive(tmpfile)
+        self.save_interactive(tmpfile, embed_data=True)
         widget = TimeSeriesWidget(tmpfile)
         return widget
 
-    def _to_json(self):
+    def _to_json(self, embed_data=True):
 
         # Start off with empty JSON
         json = {}
@@ -108,7 +111,7 @@ class InteractiveTimeSeriesFigure(BaseView):
         json['autosize'] = {'type': 'fit', 'resize': self._resize}
 
         # Data
-        json['data'] = [data.to_vega() for data in self._data.values()]
+        json['data'] = [data.to_vega(embed_data=embed_data) for data in self._data.values()]
         json['marks'] = []
         for layer, settings in self._layers.items():
             json['marks'].extend(layer.to_vega())
