@@ -7,7 +7,7 @@ from jupyter_aas_timeseries import TimeSeriesWidget
 
 from aas_timeseries.colors import auto_assign_colors
 from aas_timeseries.views import BaseView, View
-from aas_timeseries.marks import time_to_vega, Symbol, Range, Line
+from aas_timeseries.layers import time_to_vega, Markers, Range, Line
 
 __all__ = ['InteractiveTimeSeriesFigure']
 
@@ -39,21 +39,21 @@ class InteractiveTimeSeriesFigure(BaseView):
     def add_view(self, title, description=None, include=None, exclude=None, empty=False):
 
         if empty:
-            inherited_marks = {}
+            inherited_layers = {}
         elif include is not None:
             for mark in include:
-                if mark not in self._markers:
+                if mark not in self._layers:
                     raise ValueError(f'Layer {mark} does not exist in base figure')
-            inherited_marks = {mark: self._markers[mark] for mark in include}
+            inherited_layers = {mark: self._layers[mark] for mark in include}
         elif exclude is not None:
             for mark in exclude:
-                if mark not in self._markers:
+                if mark not in self._layers:
                     raise ValueError(f'Layer {mark} does not exist in base figure')
-            inherited_marks = {mark: self._markers[mark] for mark in self._markers if mark not in exclude}
+            inherited_layers = {mark: self._layers[mark] for mark in self._layers if mark not in exclude}
         else:
-            inherited_marks = self._markers.copy()
+            inherited_layers = self._layers.copy()
 
-        view = View(inherited_marks=inherited_marks)
+        view = View(inherited_layers=inherited_layers)
 
         self._views.append({'title': title, 'description': description, 'view': view})
 
@@ -74,8 +74,8 @@ class InteractiveTimeSeriesFigure(BaseView):
             even if already set.
         """
 
-        colors = auto_assign_colors(self._markers)
-        for marker, color in zip(self._markers, colors):
+        colors = auto_assign_colors(self._layers)
+        for marker, color in zip(self._layers, colors):
             if override_style or marker.color is None:
                 marker.color = color
 
@@ -110,7 +110,7 @@ class InteractiveTimeSeriesFigure(BaseView):
         # Data
         json['data'] = [data.to_vega() for data in self._data.values()]
         json['marks'] = []
-        for mark, settings in self._markers.items():
+        for mark, settings in self._layers.items():
             json['marks'].extend(mark.to_vega())
 
         # Axes
@@ -139,12 +139,12 @@ class InteractiveTimeSeriesFigure(BaseView):
             all_values = []
 
             # If there are symbol layers, we just use those to determine limits
-            if any(isinstance(mark, Symbol) for mark in self._markers):
-                layer_types = (Symbol,)
+            if any(isinstance(mark, Markers) for mark in self._layers):
+                layer_types = (Markers,)
             else:
                 layer_types = (Range, Line)
 
-            for mark in self._markers:
+            for mark in self._layers:
                 if isinstance(mark, layer_types):
                     all_times.append(np.min(mark.data.time_series.time))
                     all_times.append(np.max(mark.data.time_series.time))
@@ -205,15 +205,15 @@ class InteractiveTimeSeriesFigure(BaseView):
                 if view['view'].ylim is not None:
                     view_json['scales'][1]['domain'] = list(view['view'].ylim)
 
-                # Markers
+                # layers
 
-                view_json['markers'] = []
+                view_json['marks'] = []
 
-                for mark, settings in view['view']._inherited_marks.items():
-                    view_json['markers'].append({'name': mark.uuid, 'visible': settings['visible']})
+                for mark, settings in view['view']._inherited_layers.items():
+                    view_json['marks'].append({'name': mark.uuid, 'visible': settings['visible']})
 
-                for mark, settings in view['view']._markers.items():
+                for mark, settings in view['view']._layers.items():
                     json['_extramarks'].extend(mark.to_vega())
-                    view_json['markers'].append({'name': mark.uuid, 'visible': settings['visible']})
+                    view_json['marks'].append({'name': mark.uuid, 'visible': settings['visible']})
 
         return json

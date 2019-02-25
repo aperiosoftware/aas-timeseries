@@ -5,7 +5,7 @@ API Documentation
    :no-inheritance-diagram:
    :inherited-members:
 
-.. automodapi:: aas_timeseries.marks
+.. automodapi:: aas_timeseries.layers
    :no-inheritance-diagram:
 
 .. automodapi:: aas_timeseries.views

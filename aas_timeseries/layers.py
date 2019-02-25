@@ -4,7 +4,7 @@ from traitlets import HasTraits
 from aas_timeseries.traits import (Unicode, CFloat, PositiveCFloat, Opacity, Color,
                                    UnicodeChoice, DataTrait, ColumnTrait, AstropyTime)
 
-__all__ = ['Symbol', 'Line', 'Range', 'VerticalLine', 'VerticalRange',
+__all__ = ['Markers', 'Line', 'Range', 'VerticalLine', 'VerticalRange',
            'HorizontalLine', 'HorizontalRange', 'Text']
 
 DEFAULT_COLOR = '#000000'
@@ -23,11 +23,11 @@ def time_to_vega(time):
     return f'datetime({year}, {month}, {day}, {hour}, {minute}, {second})'
 
 
-class BaseMark(HasTraits):
+class BaseLayer(HasTraits):
     """
-    Base class for any mark object
+    Base class for any layer object
     """
-    label = Unicode(help='The label to use to designate the marks in the legend.')
+    label = Unicode(help='The label to use to designate the layers in the legend.')
 
     # Potential properties that could be implemented: toolTip
 
@@ -43,21 +43,21 @@ class BaseMark(HasTraits):
         """
         parent = self.parent()
         if parent is None:
-            raise Exception("Mark is no longer in a figure/view")
+            raise Exception("Layer is no longer in a figure/view")
         else:
             self.parent.remove(self)
 
     def to_vega(self):
         """
-        Convert the mark to its Vega representation.
+        Convert the layer to its Vega representation.
         """
 
 
-SYMBOL_SHAPES = ['circle', 'square', 'cross', 'diamond', 'triangle-up',
+MARKER_SHAPES = ['circle', 'square', 'cross', 'diamond', 'triangle-up',
                  'triangle-down', 'triangle-right', 'triangle-left']
 
 
-class Symbol(BaseMark):
+class Markers(BaseLayer):
     """
     A set of time series data points represented by markers.
     """
@@ -67,12 +67,12 @@ class Symbol(BaseMark):
     error = ColumnTrait(None, help='The field in the time series '
                                    'containing the data uncertainties.')
 
-    shape = UnicodeChoice('circle', help='The symbol shape.', choices=SYMBOL_SHAPES)
+    shape = UnicodeChoice('circle', help='The symbol shape.', choices=MARKER_SHAPES)
 
     size = PositiveCFloat(20, help='The area in pixels of the bounding box of the symbols.\n\n'
-                                  'Note that this value sets the area of the symbol; the '
-                                  'side lengths will increase with the square root of this '
-                                  'value.')
+                                   'Note that this value sets the area of the symbol; the '
+                                   'side lengths will increase with the square root of this '
+                                   'value.')
 
     color = Color(None, help='The fill color of the symbols.')
     opacity = Opacity(1, help='The opacity of the fill color from 0 (transparent) to 1 (opaque).')
@@ -121,7 +121,7 @@ class Symbol(BaseMark):
         return vega
 
 
-class Line(BaseMark):
+class Line(BaseLayer):
     """
     A set of time series data points connected by a line.
     """
@@ -147,7 +147,7 @@ class Line(BaseMark):
         return [vega]
 
 
-class Range(BaseMark):
+class Range(BaseLayer):
     """
     An interval defined by lower and upper values as a function of time.
     """
@@ -183,7 +183,7 @@ class Range(BaseMark):
         return [vega]
 
 
-class VerticalLine(BaseMark):
+class VerticalLine(BaseLayer):
     """
     A vertical line at a specific time.
     """
@@ -211,7 +211,7 @@ class VerticalLine(BaseMark):
         return [vega]
 
 
-class VerticalRange(BaseMark):
+class VerticalRange(BaseLayer):
     """
     A continuous range specified by a lower and upper time.
     """
@@ -247,7 +247,7 @@ class VerticalRange(BaseMark):
         return [vega]
 
 
-class HorizontalLine(BaseMark):
+class HorizontalLine(BaseLayer):
     """
     A horizontal line at a specific y value.
     """
@@ -276,7 +276,7 @@ class HorizontalLine(BaseMark):
         return [vega]
 
 
-class HorizontalRange(BaseMark):
+class HorizontalRange(BaseLayer):
     """
     A continuous range specified by a lower and upper value.
     """
@@ -311,7 +311,7 @@ class HorizontalRange(BaseMark):
         return [vega]
 
 
-class Text(BaseMark):
+class Text(BaseLayer):
     """
     A text label.
     """
