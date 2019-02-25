@@ -217,3 +217,15 @@ class InteractiveTimeSeriesFigure(BaseView):
                     view_json['marks'].append({'name': layer.uuid, 'visible': settings['visible']})
 
         return json
+
+    def remove(self, layer):
+        """
+        Remove a layer from the figure.
+        """
+        if layer in self._layers:
+            self._layers.pop(layer)
+            for view in self._views:
+                if layer in view['view'].layers:
+                    view['view'].remove(layer)
+        else:
+            raise ValueError(f"Layer '{layer.label}' is not in figure")

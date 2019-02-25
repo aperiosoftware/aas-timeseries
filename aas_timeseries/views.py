@@ -329,15 +329,6 @@ class BaseView:
         self._layers[text] = {'visible': True}
         return text
 
-    def remove(self, layer):
-        """
-        Remove a layer from the figure/view.
-        """
-        if layer in self._layers:
-            self._layers.pop(layer)
-        else:
-            raise ValueError(f"Layer '{layer.label}' is not in figure/view")
-
     @property
     def layers(self):
         return list(self._layers)
@@ -365,6 +356,17 @@ class View(BaseView):
                 self._inherited_layers[layer]['visible'] = visible
             else:
                 raise ValueError(f'Layer {layer} not in view')
+
+    def remove(self, layer):
+        """
+        Remove a layer from the view.
+        """
+        if layer in self._inherited_layers:
+            self._inherited_layers.pop(layer)
+        elif layer in self._layers:
+            self._layers.pop(layer)
+        else:
+            raise ValueError(f"Layer '{layer.label}' is not in view")
 
     @property
     def layers(self):

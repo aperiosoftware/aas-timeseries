@@ -129,14 +129,33 @@ def test_remove():
     assert len(figure.layers) == 1
     line = figure.add_line(time_series=ts, column='flux', label='Line')
     assert len(figure.layers) == 2
-    range = figure.add_vertical_range(ts.time[0], ts.time[-1], label='Vertical Range')
-    assert len(figure.layers) == 3
-    line.remove()
+
+    view = figure.add_view('Test view')
+    assert len(view.layers) == 2
+
+    range = view.add_vertical_range(ts.time[0], ts.time[-1], label='Vertical Range')
+
     assert len(figure.layers) == 2
+    assert len(view.layers) == 3
+
+    # Removing using the .remove() method on a layer removes it from the
+    # figure and all views where it is.
+    line.remove()
+    assert len(figure.layers) == 1
+    assert len(view.layers) == 2
+
+    # Removing from the .remove() method on a view removes it just from the view
+    view.remove(markers)
+    assert len(figure.layers) == 1
+    assert len(view.layers) == 1
+
+    # Check removing a view-specific layer
     range.remove()
     assert len(figure.layers) == 1
+    assert len(view.layers) == 0
+
+    # Remove last layer from figure
     markers.remove()
-    assert len(figure.layers) == 0
 
     with pytest.raises(Exception) as exc:
         markers.remove()
@@ -144,4 +163,8 @@ def test_remove():
 
     with pytest.raises(Exception) as exc:
         figure.remove(markers)
-    assert exc.value.args[0] == "Layer 'Markers' is not in figure/view"
+    assert exc.value.args[0] == "Layer 'Markers' is not in figure"
+
+    with pytest.raises(Exception) as exc:
+        view.remove(markers)
+    assert exc.value.args[0] == "Layer 'Markers' is not in view"
