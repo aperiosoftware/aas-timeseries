@@ -12,18 +12,13 @@ class Data:
         self.uuid = str(uuid.uuid4())
         self.time_column = 'time'
 
-    def to_vega(self):
+    def to_vega(self, embed_data=True):
 
         table = Table()
         table[self.time_column] = self.time_series.time.isot
         for colname in self.time_series.colnames:
             if colname != 'time':
                 table[colname] = self.time_series[colname]
-
-        s = StringIO()
-        table.write(s, format='ascii.basic', delimiter=',')
-        s.seek(0)
-        csv_string = s.read()
 
         parse = {}
         for colname in table.colnames:
@@ -38,8 +33,18 @@ class Data:
                 parse[colname] = 'string'
 
         vega = {'name': self.uuid,
-                'values': csv_string,
                 'format': {'type': 'csv',
                            'parse': parse}}
+
+        if embed_data:
+            s = StringIO()
+            table.write(s, format='ascii.basic', delimiter=',')
+            s.seek(0)
+            csv_string = s.read()
+            vega['values'] = csv_string
+        else:
+            filename = self.uuid + '.csv'
+            table.write(filename, format='ascii.basic', delimiter=',')
+            vega['url'] = filename
 
         return vega

@@ -29,5 +29,6 @@ User guide
    getting_started
    layers
    views
+   saving.rst
    submitting.rst
    api.rst

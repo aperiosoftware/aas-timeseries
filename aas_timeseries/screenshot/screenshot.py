@@ -22,7 +22,7 @@ def interactive_screenshot(json_filename, png_filename):
 
     tmpdir = tempfile.mkdtemp()
     tmp_html = os.path.join(tmpdir, 'page.html')
-    tmp_json = os.path.join(tmpdir, 'data.json')
+    tmp_json = os.path.join(tmpdir, 'figure.json')
 
     shutil.copy(os.path.join(ROOT, 'template.html'), tmp_html)
     shutil.copy(json_filename, tmp_json)
