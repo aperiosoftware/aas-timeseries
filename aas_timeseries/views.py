@@ -20,6 +20,18 @@ class BaseView:
         self._markers = OrderedDict()
         self._xlim = None
         self._ylim = None
+        self._ylog = False
+
+    @property
+    def ylog(self):
+        """
+        Whether the y axis is linear (`False`) or log (`True`).
+        """
+        return self._ylog
+
+    @ylog.setter
+    def ylog(self, value):
+        self._ylog = value
 
     @property
     def xlim(self):
