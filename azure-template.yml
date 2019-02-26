@@ -34,3 +34,5 @@ jobs:
         pip install -e .
         python .validate-notebooks.py
     displayName: Validating notebooks
+
+  - script: codecov
