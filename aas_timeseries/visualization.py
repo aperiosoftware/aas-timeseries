@@ -52,11 +52,10 @@ class InteractiveTimeSeriesFigure(BaseView):
 
     @yunit.setter
     def yunit(self, value):
-        print(value, type(value))
         if isinstance(value, u.UnitBase) or value == 'auto':
             self._yunit = value
         else:
-            raise ValueError("yunit should be an astropy Unit or None")
+            self._yunit = u.Unit(value)
 
     def _guess_yunit(self):
         """
@@ -255,6 +254,8 @@ class InteractiveTimeSeriesFigure(BaseView):
                 table.write(data_filename, format='ascii.basic', delimiter=',')
                 vega['url'] = data_filename
 
+            json['data'].append(vega)
+
         # Layers
 
         json['marks'] = []
@@ -320,9 +321,12 @@ class InteractiveTimeSeriesFigure(BaseView):
             ylim = self.ylim
             if isinstance(ylim[0], u.Quantity):
                 ylim = ylim[0].to_value(yunit), ylim[1].to_value(yunit)
+            elif yunit is not u.one:
+                raise u.UnitsError('Limits for y axis are dimensionless but '
+                                 f'expected units of {yunit}')
 
-        xlim = xlim_auto if self.xlim is None else self.xlim
-        ylim = ylim_auto if self.ylim is None else self.ylim
+        xlim = xlim_auto if xlim is None else xlim
+        ylim = ylim_auto if ylim is None else ylim
 
         if xlim is not None:
             json['scales'][0]['domain'] = ({'signal': time_to_vega(xlim[0])},
@@ -366,6 +370,11 @@ class InteractiveTimeSeriesFigure(BaseView):
                     ylim = view['view'].ylim
                     if isinstance(ylim[0], u.Quantity):
                         ylim = ylim[0].to_value(yunit), ylim[1].to_value(yunit)
+                    elif yunit is not u.one:
+                        title = view['title']
+                        raise u.UnitsError(f"Limits for y axis in view '{title}' "
+                                           f'are dimensionless but expected '
+                                           f'units of {yunit}')
                     view_json['scales'][1]['domain'] = list(ylim)
 
                 # layers

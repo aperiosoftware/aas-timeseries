@@ -3,7 +3,8 @@ import weakref
 from traitlets import HasTraits
 from astropy import units as u
 from aas_timeseries.traits import (Unicode, CFloat, PositiveCFloat, Opacity, Color,
-                                   UnicodeChoice, DataTrait, ColumnTrait, AstropyTime)
+                                   UnicodeChoice, DataTrait, ColumnTrait, AstropyTime,
+                                   AstropyQuantity)
 
 __all__ = ['BaseLayer', 'Markers', 'Line', 'Range', 'VerticalLine',
            'VerticalRange', 'HorizontalLine', 'HorizontalRange', 'Text',
@@ -61,16 +62,6 @@ class BaseLayer(HasTraits):
         for the layer.
         """
         return []
-
-    def _check_compatible_yunit(self, yunit):
-        for (data, column) in self._required_data:
-            if data.time_series[column].unit is None and yunit is not u.one:
-                column_unit = u.one
-            else:
-                column_unit = data.time_series[column].unit
-            if not column_unit.is_equivalent(yunit):
-                raise u.UnitsError(f"The units of column '{column}' are not "
-                                   f"convertible to the figure units '{yunit}'")
 
 
 MARKER_SHAPES = ['circle', 'square', 'cross', 'diamond', 'triangle-up',
@@ -142,7 +133,7 @@ class Markers(BaseLayer):
 
     @property
     def _required_data(self):
-        return [(self.data, self.column)]
+        return [(self.data, self.column), (self.data, self.error)]
 
 
 class Line(BaseLayer):
@@ -285,7 +276,7 @@ class HorizontalLine(BaseLayer):
     """
 
     # TODO: validate value and allow it to be a quantity
-    value = CFloat(help='The y value at which the horizontal line is shown.')
+    value = AstropyQuantity(help='The y value at which the horizontal line is shown.')
     width = PositiveCFloat(1, help='The width of the line, in pixels.')
 
     color = Color(None, help='The color of the line.')
@@ -298,7 +289,7 @@ class HorizontalLine(BaseLayer):
         if yunit is None:
             yunit = u.one
 
-        value = self.value.to(yunit)
+        value = self.value.to_value(yunit)
 
         vega = {'type': 'rule',
                 'name': self.uuid,
@@ -318,8 +309,8 @@ class HorizontalRange(BaseLayer):
     A continuous range specified by a lower and upper value.
     """
 
-    value_lower = CFloat(help='The value at which the range starts.')
-    value_upper = CFloat(help='The value at which the range ends.')
+    value_lower = AstropyQuantity(help='The value at which the range starts.')
+    value_upper = AstropyQuantity(help='The value at which the range ends.')
 
     color = Color(None, help='The fill color of the range.')
     opacity = Opacity(0.2, help='The opacity of the fill color from 0 (transparent) to 1 (opaque).')
@@ -335,8 +326,8 @@ class HorizontalRange(BaseLayer):
         if yunit is None:
             yunit = u.one
 
-        value_lower = self.value_lower.to(yunit)
-        value_upper = self.value_upper.to(yunit)
+        value_lower = self.value_lower.to_value(yunit)
+        value_upper = self.value_upper.to_value(yunit)
 
         vega = {'type': 'rect',
                 'name': self.uuid,
@@ -361,7 +352,7 @@ class Text(BaseLayer):
 
     text = Unicode(help='The text label to show.')
     time = AstropyTime(help='The date/time at which the text is shown.')
-    value = PositiveCFloat(help='The y value at which the text is shown.')
+    value = AstropyQuantity(help='The y value at which the text is shown.')
     weight = UnicodeChoice('normal', help='The weight of the text.',
                            choices=['normal', 'bold'])
     baseline = UnicodeChoice('alphabetic', help='The vertical text baseline.',
@@ -378,7 +369,7 @@ class Text(BaseLayer):
         if yunit is None:
             yunit = u.one
 
-        value = self.value.to(yunit)
+        value = self.value.to_value(yunit)
 
         vega = {'type': 'text',
                 'name': self.uuid,

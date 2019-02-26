@@ -28,6 +28,8 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import numpy as np
+
 from traitlets import (TraitType, TraitError,
                        Any as OriginalAny,
                        Bool as OriginalBool,
@@ -132,6 +134,8 @@ class AstropyQuantity(TraitType):
     def validate(self, obj, value):
         if isinstance(value, u.Quantity):
             return value
+        elif np.isscalar(value) and np.isreal(value):
+            return value * u.one
         self.error(obj, value)
 
 
