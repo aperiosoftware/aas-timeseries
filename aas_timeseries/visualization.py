@@ -251,7 +251,8 @@ class InteractiveTimeSeriesFigure(BaseView):
                 vega['values'] = csv_string
             else:
                 data_filename = 'data_' + data.uuid + '.csv'
-                table.write(data_filename, format='ascii.basic', delimiter=',')
+                data_path = os.path.join(os.path.dirname(filename), data_filename)
+                table.write(data_path, format='ascii.basic', delimiter=',')
                 vega['url'] = data_filename
 
             json['data'].append(vega)
