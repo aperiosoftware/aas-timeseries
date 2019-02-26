@@ -1,0 +1,36 @@
+jobs:
+- job: ${{ format(parameters.name) }}
+  pool:
+    ${{ if eq(parameters.os, 'macosx') }}:
+      vmImage: macOS 10.13
+    ${{ if eq(parameters.os, 'linux') }}:
+      vmImage: Ubuntu 16.04
+    ${{ if eq(parameters.os, 'windows') }}:
+      vmImage: vs2017-win2016
+  strategy:
+    matrix:
+      Python36:
+        python.version: '3.6'
+      Python37:
+        python.version: '3.7'
+
+  steps:
+
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '$(python.version)'
+      architecture: 'x64'
+
+  - script: pip install tox pip setuptools --upgrade
+    displayName: Installing tox
+
+  - script: tox -e test
+    displayName: Running tests
+
+  - script: tox -e docs
+    displayName: Building docs
+
+  - script: |
+        pip install -e .
+        python .validate-notebooks.py
+    displayName: Validating notebooks
