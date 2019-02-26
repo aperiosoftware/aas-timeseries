@@ -1,25 +1,13 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 
-# Packages may add whatever they like to this file, but
-# should keep this content at the top.
-# ----------------------------------------------------------------------------
-from ._astropy_init import *
-# ----------------------------------------------------------------------------
-
-# Enforce Python version check during package import.
-# This is the same check as the one at the top of setup.py
-import sys
+from pkg_resources import get_distribution, DistributionNotFound
 
 __all__ = ['InteractiveTimeSeriesFigure']
 
-__minimum_python_version__ = "3.5"
-
-class UnsupportedPythonError(Exception):
+try:
+    __version__ = get_distribution(__name__).version
+except DistributionNotFound:
+    # package is not installed
     pass
 
-if sys.version_info < tuple((int(val) for val in __minimum_python_version__.split('.'))):
-    raise UnsupportedPythonError("aas_timeseries does not support Python < {}".format(__minimum_python_version__))
-
-if not _ASTROPY_SETUP_:
-    # For egg_info test builds to pass, put package imports here.
-    from .visualization import InteractiveTimeSeriesFigure
+from .visualization import InteractiveTimeSeriesFigure
