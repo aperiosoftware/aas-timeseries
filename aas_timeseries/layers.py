@@ -53,6 +53,13 @@ class BaseLayer(HasTraits):
         Convert the layer to its Vega representation.
         """
 
+    def _required_data(self):
+        """
+        Return a list of (data, column) tuples giving the data/columns required
+        for the layer.
+        """
+        return []
+
 
 MARKER_SHAPES = ['circle', 'square', 'cross', 'diamond', 'triangle-up',
                  'triangle-down', 'triangle-right', 'triangle-left']
@@ -121,6 +128,9 @@ class Markers(BaseLayer):
 
         return vega
 
+    def _required_data(self):
+        return [(self.data, self.column)]
+
 
 class Line(BaseLayer):
     """
@@ -146,6 +156,9 @@ class Line(BaseLayer):
                                      'strokeOpacity': {'value': self.opacity},
                                      'strokeWidth': {'value': self.width}}}}
         return [vega]
+
+    def _required_data(self):
+        return [(self.data, self.column)]
 
 
 class Range(BaseLayer):
@@ -182,6 +195,9 @@ class Range(BaseLayer):
                                      'strokeWidth': {'value': self.edge_width}}}}
 
         return [vega]
+
+    def _required_data(self):
+        return [(self.data, self.column_lower), (self.data, self.column_upper)]
 
 
 class VerticalLine(BaseLayer):

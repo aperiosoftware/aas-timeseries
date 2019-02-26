@@ -7,7 +7,7 @@ Submitting an interactive figure to AAS Journals
 To include an interactive figure in your paper, first make sure you export
 the interactive figure(s) you have produced to a zip file::
 
-    fig.save_interactive('my_figure.zip', zip_bundle=True)
+    fig.export_interactive_bundle('my_figure.zip')
 
 The workflow to include your figure in the paper will be added here in the near
 future.

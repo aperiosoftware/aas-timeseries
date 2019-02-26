@@ -25,7 +25,7 @@ def test_basic(tmpdir):
     figure.add_horizontal_range(5, 6, label='Horizontal Range')
     figure.add_range(time_series=ts, column_lower='flux', column_upper='error', label='Range')
     figure.add_text(time=ts.time[2], value=float(ts['flux'][0]), text='My Label', label='Range')
-    figure.save_interactive(filename)
+    figure.save_vega_json(filename)
 
 
 def test_save_options(tmpdir):
@@ -34,12 +34,11 @@ def test_save_options(tmpdir):
     ts['flux'] = [1, 2, 3, 4, 5]
     ts['error'] = [1, 2, 3, 4, 5]
 
-    filename = tmpdir.join('figure.json').strpath
-
     figure = InteractiveTimeSeriesFigure()
     figure.add_markers(time_series=ts, column='flux', label='Markers')
-    figure.save_interactive(filename, embed_data=True)
-    figure.save_interactive(filename, zip_bundle=True)
+    figure.save_vega_json(tmpdir.join('figure1.json').strpath, embed_data=True)
+    figure.save_vega_json(tmpdir.join('figure2.json').strpath, minimize_data=False)
+    figure.export_interactive_bundle(tmpdir.join('figure.zip').strpath)
 
 
 def test_column_validation():
@@ -68,7 +67,7 @@ def test_limits(tmpdir):
     figure.add_markers(time_series=ts, column='flux', label='Markers')
     figure.xlim = ts.time[0], ts.time[-1]
     figure.ylim = 0, 10
-    figure.save_interactive(filename)
+    figure.save_vega_json(filename)
 
     with pytest.raises(TypeError) as exc:
         figure.xlim = 0, 1
@@ -128,7 +127,7 @@ def test_views(tmpdir):
         figure.add_view('Test1', include=[vertical])
     assert 'does not exist in base figure' in exc.value.args[0]
 
-    figure.save_interactive(filename)
+    figure.save_vega_json(filename)
 
 
 def test_remove():
