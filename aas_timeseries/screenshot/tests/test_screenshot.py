@@ -19,7 +19,7 @@ def test_interactive_screenshot(tmpdir):
     figure = InteractiveTimeSeriesFigure()
     figure.add_markers(time_series=ts, column='flux', label='Markers')
 
-    figure.save_vega_json(filename_json)
+    figure.save_vega_json(filename_json, embed_data=True)
 
     interactive_screenshot(filename_json, filename_png)
 

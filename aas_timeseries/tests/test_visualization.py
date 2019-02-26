@@ -181,3 +181,105 @@ def test_remove():
     with pytest.raises(Exception) as exc:
         view.remove(markers)
     assert exc.value.args[0] == "Layer 'Markers' is not in view"
+
+
+class TestUnit:
+
+    # Make sure that things work as expected when units are present, and that
+    # the correct errors are raised when mixing data with and without units.
+
+    def setup_method(self, method):
+
+        self.ts = TimeSeries(time='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
+        self.ts['flux'] = [1, 2, 3, 4, 5]
+        self.ts['error'] = [1, 2, 3, 4, 5]
+        self.ts['flux_with_unit'] = [1, 2, 3, 4, 5] * u.Jy
+        self.ts['error_with_unit'] = [1, 2, 3, 4, 5] * u.mJy
+
+        self.figure = InteractiveTimeSeriesFigure()
+
+    def test_basic(self, tmpdir):
+        # Make sure things work for a simple example with just one layer
+        self.figure.add_markers(time_series=self.ts, column='flux_with_unit', label='Markers')
+        self.figure.save_vega_json(tmpdir.join('figure.json').strpath)
+
+    def test_full(self, tmpdir):
+        # A test with all the layer types and convertible units
+        self.figure.add_markers(time_series=self.ts, column='flux_with_unit', label='Markers')
+        self.figure.add_line(time_series=self.ts, column='flux_with_unit', label='Line')
+        self.figure.add_markers(time_series=self.ts, column='flux_with_unit', error='error_with_unit', label='Markers with Errors')
+        self.figure.add_vertical_line(self.ts.time[3], label='Vertical Line')
+        self.figure.add_vertical_range(self.ts.time[0], self.ts.time[-1], label='Vertical Range')
+        self.figure.add_horizontal_line(3 * u.MJy, label='Horizontal Line')
+        self.figure.add_horizontal_range(5000 * u.mJy, 6 * u.Jy, label='Horizontal Range')
+        self.figure.add_range(time_series=self.ts, column_lower='flux_with_unit', column_upper='error_with_unit', label='Range')
+        self.figure.add_text(time=self.ts.time[2], value=self.ts['flux_with_unit'][0], text='My Label', label='Range')
+        self.figure.save_vega_json(tmpdir.join('figure.json').strpath)
+
+    def test_compatible_limits(self, tmpdir):
+        # Set the limits using compatible units
+        self.figure.add_markers(time_series=self.ts, column='flux_with_unit', label='Markers')
+        self.figure.ylim = (1e-6 * u.MJy, 6000 * u.mJy)
+        view = self.figure.add_view('my view')
+        view.ylim = (2e-6 * u.MJy, 4000 * u.mJy)
+        self.figure.save_vega_json(tmpdir.join('figure.json').strpath)
+
+    def test_incompatible_limits(self, tmpdir):
+        # Set the limits using incompatible units
+        self.figure.add_markers(time_series=self.ts, column='flux_with_unit', label='Markers')
+        self.figure.ylim = 1, 6
+        with pytest.raises(u.UnitsError) as exc:
+            self.figure.save_vega_json(tmpdir.join('figure.json').strpath)
+        assert exc.value.args[0] == 'Limits for y axis are dimensionless but expected units of Jy'
+
+    def test_incompatible_limits_view(self, tmpdir):
+        # Set the limits using incompatible units (with a view)
+        self.figure.add_markers(time_series=self.ts, column='flux_with_unit', label='Markers')
+        view = self.figure.add_view('my view')
+        view.ylim = 1, 6
+        with pytest.raises(u.UnitsError) as exc:
+            self.figure.save_vega_json(tmpdir.join('figure.json').strpath)
+        assert exc.value.args[0] == "Limits for y axis in view 'my view' are dimensionless but expected units of Jy"
+
+    def test_two_marker_layer_incompatible(self, tmpdir):
+        self.figure.add_markers(time_series=self.ts, column='flux_with_unit', label='Markers')
+        self.figure.add_markers(time_series=self.ts, column='flux', label='Markers')
+        with pytest.raises(u.UnitsError) as exc:
+            self.figure.save_vega_json(tmpdir.join('figure.json').strpath)
+        assert exc.value.args[0] == "Cannot convert the units '' of column 'flux' to the required units of 'Jy'"
+
+    def test_incompatible_overlays(self, tmpdir):
+        self.figure.add_markers(time_series=self.ts, column='flux_with_unit', label='Markers')
+        self.figure.add_markers(time_series=self.ts, column='flux', label='Markers')
+        with pytest.raises(u.UnitsError) as exc:
+            self.figure.save_vega_json(tmpdir.join('figure.json').strpath)
+        assert exc.value.args[0] == "Cannot convert the units '' of column 'flux' to the required units of 'Jy'"
+
+    def test_custom_yunit(self, tmpdir):
+        self.figure.add_markers(time_series=self.ts, column='flux_with_unit', label='Markers')
+        self.figure.yunit = u.MJy
+        self.figure.save_vega_json(tmpdir.join('figure.json').strpath)
+        self.figure.yunit = 'mJy'  # with a string
+        self.figure.save_vega_json(tmpdir.join('figure.json').strpath)
+
+    def test_custom_incompatible_yunit(self, tmpdir):
+        self.figure.add_markers(time_series=self.ts, column='flux_with_unit', label='Markers')
+        self.figure.yunit = u.m
+        with pytest.raises(u.UnitsError) as exc:
+            self.figure.save_vega_json(tmpdir.join('figure.json').strpath)
+        assert exc.value.args[0] == "Cannot convert the units 'Jy' of column 'flux_with_unit' to the required units of 'm'"
+
+    def test_empty_base_figure(self, tmpdir):
+        # Check that things work fine if the only layer is in a view
+        view = self.figure.add_view('my view')
+        view.add_markers(time_series=self.ts, column='flux_with_unit', label='Markers')
+        self.figure.save_vega_json(tmpdir.join('figure.json').strpath)
+
+    def test_no_data_layers(self, tmpdir):
+        # In the case where there are no layers that depend on data, the default
+        # assumed unit is u.one so adding a line with a unit will raise an error.
+        # In future we might want to consider making this work.
+        self.figure.add_horizontal_line(3 * u.mJy, label='Line')
+        with pytest.raises(u.UnitsError) as exc:
+            self.figure.save_vega_json(tmpdir.join('figure.json').strpath)
+        assert exc.value.args[0] == "'mJy' (spectral flux density) and '' (dimensionless) are not convertible"

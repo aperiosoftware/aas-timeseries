@@ -2,7 +2,7 @@ import uuid
 from collections import OrderedDict
 
 from astropy.time import Time
-
+from astropy import units as u
 from aas_timeseries.data import Data
 from aas_timeseries.layers import BaseLayer, Markers, Line, VerticalLine, VerticalRange, HorizontalLine, HorizontalRange, Range, Text
 
@@ -62,6 +62,14 @@ class BaseView:
 
     @ylim.setter
     def ylim(self, range):
+        if isinstance(range[0], u.Quantity) is isinstance(range[1], u.Quantity):
+            if isinstance(range[0], u.Quantity):
+                if not range[0].unit.is_equivalent(range[1].unit):
+                    raise u.UnitsError(f'The units of ymin ({range[0].unit}) are '
+                                       f'not compatible with the units of ymax ({range[1].unit})')
+        else:
+            raise ValueError('Either both or neither limit has to be specified '
+                             'as a Quantity')
         self._ylim = range
 
     def add_markers(self, *, time_series=None, column=None, **kwargs):
@@ -336,8 +344,9 @@ class BaseView:
 
 class View(BaseView):
 
-    def __init__(self, inherited_layers=None):
+    def __init__(self, figure=None, inherited_layers=None):
         super().__init__()
+        self._figure = figure
         self._inherited_layers = inherited_layers or OrderedDict()
 
     def show(self, layers):
