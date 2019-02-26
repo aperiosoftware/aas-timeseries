@@ -11,7 +11,7 @@ platform:
     -x64
 
 install:
-  - "%PYTHON%\\python.exe -m pip install tox tox-venv pip setuptools --upgrade"
+  - "%PYTHON%\\python.exe -m pip install tox pip setuptools --upgrade"
 
 build: false
 
