@@ -62,38 +62,15 @@ class BaseView:
 
     @ylim.setter
     def ylim(self, range):
-        self._ylim = range
-
-    @property
-    def yunit(self):
-        """
-        The unit to use for the y axis, or `None` if using data without units
-        """
-        return self._yunit
-
-    @yunit.setter
-    def yunit(self, value):
-        print(value, type(value))
-        if isinstance(value, u.UnitBase) or value is None:
-            self._yunit = value
+        if isinstance(range[0], u.Quantity) is isinstance(range[1], u.Quantity):
+            if isinstance(range[0], u.Quantity):
+                if not range[0].unit.is_equivalent(range[1].unit):
+                    raise u.UnitsError(f'The units of ymin ({range[0].unit}) are '
+                                       f'not compatible with the units of ymax ({range[1].unit})')
         else:
-            raise ValueError("yunit should be an astropy Unit or None")
-
-    def _handle_units(self, layer):
-
-        # Some layers don't actually require any data, in which case we just
-        # exit early since there is nothing to check/set.
-        if len(layer._required_data) == 0:
-            return
-
-        # If the unit hasn't been set yet, use the first unit we can find in
-        # the layer.
-        if self.yunit is None:
-            data, column = layer._required_data[0]
-            self.yunit = data.time_series[column].unit or u.one
-
-        # Now check in all cases since some layers rely on multiple datasets
-        layer._check_compatible_yunit(self.yunit)
+            raise ValueError('Either both or neither limit has to be specified '
+                             'as a Quantity')
+        self._ylim = range
 
     def add_markers(self, *, time_series=None, column=None, **kwargs):
         """
@@ -136,7 +113,6 @@ class BaseView:
         # Note that we need to set the column after the data so that the
         # validation works.
         markers.column = column
-        self._handle_units(markers)
         self._layers[markers] = {'visible': True}
         return markers
 
@@ -170,7 +146,6 @@ class BaseView:
         # Note that we need to set the column after the data so that the
         # validation works.
         line.column = column
-        self._handle_units(line)
         self._layers[line] = {'visible': True}
         return line
 
@@ -212,7 +187,6 @@ class BaseView:
         # validation works.
         range.column_lower = column_lower
         range.column_upper = column_upper
-        self._handle_units(range)
         self._layers[range] = {'visible': True}
         return range
 
@@ -238,7 +212,6 @@ class BaseView:
         layer : `~aas_timeseries.layers.VerticalLine`
         """
         line = VerticalLine(parent=self, time=time, **kwargs)
-        self._handle_units(line)
         self._layers[line] = {'visible': True}
         return line
 
@@ -270,7 +243,6 @@ class BaseView:
         layer : `~aas_timeseries.layers.VerticalRange`
         """
         range = VerticalRange(parent=self, time_lower=time_lower, time_upper=time_upper, **kwargs)
-        self._handle_units(range)
         self._layers[range] = {'visible': True}
         return range
 
@@ -296,7 +268,6 @@ class BaseView:
         layer : `~aas_timeseries.layers.HorizontalLine`
         """
         line = HorizontalLine(parent=self, value=value, **kwargs)
-        self._handle_units(line)
         self._layers[line] = {'visible': True}
         return line
 
@@ -328,7 +299,6 @@ class BaseView:
         layer : `~aas_timeseries.layers.HorizontalRange`
         """
         range = HorizontalRange(parent=self, value_lower=value_lower, value_upper=value_upper, **kwargs)
-        self._handle_units(range)
         self._layers[range] = {'visible': True}
         return range
 
@@ -364,7 +334,6 @@ class BaseView:
         layer : `~aas_timeseries.layers.Text`
         """
         text = Text(parent=self, **kwargs)
-        self._handle_units(text)
         self._layers[text] = {'visible': True}
         return text
 
@@ -379,14 +348,6 @@ class View(BaseView):
         super().__init__()
         self._figure = figure
         self._inherited_layers = inherited_layers or OrderedDict()
-
-    @property
-    def yunit(self):
-        """
-        The unit to use for the y axis, or `None` if using data without units.
-        This cannot be changed in views, only in the base figure.
-        """
-        return self.figure._yunit
 
     def show(self, layers):
         self._set_visible(layers, True)

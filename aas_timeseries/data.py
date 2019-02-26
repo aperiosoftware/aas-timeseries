@@ -21,3 +21,6 @@ class Data:
             raise UnitsError(f"Cannot convert the units '{quantity.unit}' of "
                              f"column '{colname}' to the required units of "
                              f"'{unit}'.")
+
+    def unit(self, colname):
+        return Quantity(self.time_series[colname], copy=False).unit

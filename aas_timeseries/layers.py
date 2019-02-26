@@ -101,7 +101,7 @@ class Markers(BaseLayer):
     edge_opacity = Opacity(0.2, help='The opacity of the edge color from 0 (transparent) to 1 (opaque).')
     edge_width = PositiveCFloat(0, help='The thickness of the edge, in pixels.')
 
-    def to_vega(self):
+    def to_vega(self, yunit=None):
 
         # The main markers
         vega = [{'type': 'symbol',
@@ -157,7 +157,7 @@ class Line(BaseLayer):
     color = Color(None, help='The color of the line.')
     opacity = Opacity(1, help='The opacity of the line from 0 (transparent) to 1 (opaque).')
 
-    def to_vega(self):
+    def to_vega(self, yunit=None):
         vega = {'type': 'line',
                 'name': self.uuid,
                 'description': self.label,
@@ -193,7 +193,7 @@ class Range(BaseLayer):
 
     # Potential properties that could be implemented: strokeCap, strokeDash
 
-    def to_vega(self):
+    def to_vega(self, yunit=None):
         vega = {'type': 'area',
                 'name': self.uuid,
                 'description': self.label,
@@ -228,7 +228,7 @@ class VerticalLine(BaseLayer):
 
     # Potential properties that could be implemented: strokeCap, strokeDash
 
-    def to_vega(self):
+    def to_vega(self, yunit=None):
 
         vega = {'type': 'rule',
                 'name': self.uuid,
@@ -260,7 +260,7 @@ class VerticalRange(BaseLayer):
 
     # Potential properties that could be implemented: strokeCap, strokeDash
 
-    def to_vega(self):
+    def to_vega(self, yunit=None):
 
         vega = {'type': 'rect',
                 'name': self.uuid,
@@ -293,7 +293,12 @@ class HorizontalLine(BaseLayer):
 
     # Potential properties that could be implemented: strokeCap, strokeDash
 
-    def to_vega(self):
+    def to_vega(self, yunit=None):
+
+        if yunit is None:
+            yunit = u.one
+
+        value = self.value.to(yunit)
 
         vega = {'type': 'rule',
                 'name': self.uuid,
@@ -301,7 +306,7 @@ class HorizontalLine(BaseLayer):
                 'clip': True,
                 'encode': {'enter': {'x': {'value': 0},
                                      'x2': {'field': {'group': 'width'}},
-                                     'y': {'scale': 'yscale', 'value': self.value},
+                                     'y': {'scale': 'yscale', 'value': value},
                                      'strokeWidth': {'value': self.width},
                                      'stroke': {'value': self.color or DEFAULT_COLOR},
                                      'strokeOpacity': {'value': self.opacity}}}}
@@ -325,7 +330,13 @@ class HorizontalRange(BaseLayer):
 
     # Potential properties that could be implemented: strokeCap, strokeDash
 
-    def to_vega(self):
+    def to_vega(self, yunit=None):
+
+        if yunit is None:
+            yunit = u.one
+
+        value_lower = self.value_lower.to(yunit)
+        value_upper = self.value_upper.to(yunit)
 
         vega = {'type': 'rect',
                 'name': self.uuid,
@@ -333,8 +344,8 @@ class HorizontalRange(BaseLayer):
                 'clip': True,
                 'encode': {'enter': {'x': {'value': 0},
                                      'x2': {'field': {'group': 'width'}},
-                                     'y': {'scale': 'yscale', 'value': self.value_lower},
-                                     'y2': {'scale': 'yscale', 'value': self.value_upper},
+                                     'y': {'scale': 'yscale', 'value': value_lower},
+                                     'y2': {'scale': 'yscale', 'value': value_upper},
                                      'fill': {'value': self.color or DEFAULT_COLOR},
                                      'fillOpacity': {'value': self.opacity},
                                      'stroke': {'value': self.edge_color or DEFAULT_COLOR},
@@ -362,14 +373,19 @@ class Text(BaseLayer):
     color = Color(None, help='The color of the text.')
     opacity = Opacity(1, help='The opacity of the text from 0 (transparent) to 1 (opaque).')
 
-    def to_vega(self):
+    def to_vega(self, yunit=None):
+
+        if yunit is None:
+            yunit = u.one
+
+        value = self.value.to(yunit)
 
         vega = {'type': 'text',
                 'name': self.uuid,
                 'description': self.label,
                 'clip': True,
                 'encode': {'enter': {'x': {'scale': 'xscale', 'signal': time_to_vega(self.time)},
-                                     'y': {'scale': 'yscale', 'value': self.value},
+                                     'y': {'scale': 'yscale', 'value': value},
                                      'text': {'value': self.text},
                                      'fill': {'value': self.color or DEFAULT_COLOR},
                                      'fillOpacity': {'value': self.opacity},

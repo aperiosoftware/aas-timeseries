@@ -39,8 +39,52 @@ class InteractiveTimeSeriesFigure(BaseView):
         self._height = height
         self._resize = resize
         self._padding = padding
-        self._yunit = None
+        self._yunit = 'auto'
         self._views = []
+
+    @property
+    def yunit(self):
+        """
+        The unit to use for the y axis, or 'auto' to guess. If using data
+        without quantities, this can be set to ``u.one``.
+        """
+        return self._yunit
+
+    @yunit.setter
+    def yunit(self, value):
+        print(value, type(value))
+        if isinstance(value, u.UnitBase) or value == 'auto':
+            self._yunit = value
+        else:
+            raise ValueError("yunit should be an astropy Unit or None")
+
+    def _guess_yunit(self):
+        """
+        Try and guess unit to use on the y axis based on the limits set and the
+        data used.
+        """
+
+        # First check if the limits were set explicitly and if so use those
+        # units if they were Quantities since it seems likely this was
+        # deliberate.
+        if self.ylim is not None and isinstance(self.ylim[0], u.Quantity):
+            return self.ylim[0].unit
+
+        # Next, check through all the data required by the layers, first in the
+        # figure, then in the views, and return the first unit or lack of unit
+        # found.
+        for layer in self._layers:
+            for (data, colname) in layer._required_data:
+                return data.unit(colname)
+        for view in self._views:
+            for layer in view['view']._layers:
+                for (data, colname) in layer._required_data:
+                    return data.unit(colname)
+
+        # Since we didn't find anything, let's assume that the y axis should
+        # be dimensionless. In theory we could also go through non-data layers
+        # and check the units used there.
+        return u.one
 
     def add_view(self, title, description=None, include=None, exclude=None, empty=False):
 
@@ -122,6 +166,15 @@ class InteractiveTimeSeriesFigure(BaseView):
             even if already set.
         """
 
+        # Start off by figuring out what units we are using on the y axis.
+        # Note that we check the consistency of the units only here for
+        # simplicity otherwise any guessing while users add/remove layers is
+        # tricky.
+        if self.yunit == 'auto':
+            yunit = self._guess_yunit()
+        else:
+            yunit = self.yunit
+
         # Auto-assign colors if needed
         colors = auto_assign_colors(self._layers)
         for layer, color in zip(self._layers, colors):
@@ -165,7 +218,7 @@ class InteractiveTimeSeriesFigure(BaseView):
             for colname in data.time_series.colnames:
                 if colname != 'time' and (not minimize_data or (data, colname) in required_data):
                     if (data, colname) in required_data:
-                        table[colname] = data.column_to_values(colname, self.yunit)
+                        table[colname] = data.column_to_values(colname, yunit)
                     else:
                         table[colname] = data.time_series[colname]
 
@@ -206,7 +259,7 @@ class InteractiveTimeSeriesFigure(BaseView):
 
         json['marks'] = []
         for layer, settings in self._layers.items():
-            json['marks'].extend(layer.to_vega())
+            json['marks'].extend(layer.to_vega(yunit=yunit))
 
         # Axes
         json['axes'] = [{'orient': 'bottom', 'scale': 'xscale',
@@ -243,8 +296,8 @@ class InteractiveTimeSeriesFigure(BaseView):
                 if isinstance(layer, layer_types):
                     all_times.append(np.min(layer.data.time_series.time))
                     all_times.append(np.max(layer.data.time_series.time))
-                    all_values.append(np.nanmin(layer.data.column_to_values(layer.column, self.yunit)))
-                    all_values.append(np.nanmax(layer.data.column_to_values(layer.column, self.yunit)))
+                    all_values.append(np.nanmin(layer.data.column_to_values(layer.column, yunit)))
+                    all_values.append(np.nanmax(layer.data.column_to_values(layer.column, yunit)))
 
             if len(all_times) > 0:
                 xlim_auto = np.min(all_times), np.max(all_times)
@@ -255,6 +308,18 @@ class InteractiveTimeSeriesFigure(BaseView):
                 ylim_auto = float(np.min(all_values)), float(np.max(all_values))
             else:
                 ylim_auto = None
+
+        if self.xlim is None:
+            xlim = xlim_auto
+        else:
+            xlim = self.xlim
+
+        if self.ylim is None:
+            ylim = ylim_auto
+        else:
+            ylim = self.ylim
+            if isinstance(ylim[0], u.Quantity):
+                ylim = ylim[0].to_value(yunit), ylim[1].to_value(yunit)
 
         xlim = xlim_auto if self.xlim is None else self.xlim
         ylim = ylim_auto if self.ylim is None else self.ylim
@@ -298,7 +363,10 @@ class InteractiveTimeSeriesFigure(BaseView):
                                                         {'signal': time_to_vega(view['view'].xlim[1])})
 
                 if view['view'].ylim is not None:
-                    view_json['scales'][1]['domain'] = list(view['view'].ylim)
+                    ylim = view['view'].ylim
+                    if isinstance(ylim[0], u.Quantity):
+                        ylim = ylim[0].to_value(yunit), ylim[1].to_value(yunit)
+                    view_json['scales'][1]['domain'] = list(ylim)
 
                 # layers
 
@@ -308,7 +376,7 @@ class InteractiveTimeSeriesFigure(BaseView):
                     view_json['marks'].append({'name': layer.uuid, 'visible': settings['visible']})
 
                 for layer, settings in view['view']._layers.items():
-                    json['_extramarks'].extend(layer.to_vega())
+                    json['_extramarks'].extend(layer.to_vega(yunit=yunit))
                     view_json['marks'].append({'name': layer.uuid, 'visible': settings['visible']})
 
         with open(filename, 'w') as f:
