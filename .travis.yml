@@ -123,6 +123,7 @@ install:
 
 script:
     - $MAIN_CMD $SETUP_CMD
+    - pip install -e .
     - python .validate-notebooks.py
 
 after_success:
