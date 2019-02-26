@@ -123,7 +123,7 @@ install:
 
 script:
     - $MAIN_CMD $SETUP_CMD
-    - python .validate_notebooks.py
+    - python .validate-notebooks.py
 
 after_success:
     - if [[ $SETUP_CMD == *coverage* ]]; then codecov; fi
