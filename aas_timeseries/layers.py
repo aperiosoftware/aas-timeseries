@@ -1,6 +1,7 @@
 import uuid
 import weakref
 from traitlets import HasTraits
+from astropy import units as u
 from aas_timeseries.traits import (Unicode, CFloat, PositiveCFloat, Opacity, Color,
                                    UnicodeChoice, DataTrait, ColumnTrait, AstropyTime)
 
@@ -53,12 +54,23 @@ class BaseLayer(HasTraits):
         Convert the layer to its Vega representation.
         """
 
+    @property
     def _required_data(self):
         """
         Return a list of (data, column) tuples giving the data/columns required
         for the layer.
         """
         return []
+
+    def _check_compatible_yunit(self, yunit):
+        for (data, column) in self._required_data:
+            if data.time_series[column].unit is None and yunit is not u.one:
+                column_unit = u.one
+            else:
+                column_unit = data.time_series[column].unit
+            if not column_unit.is_equivalent(yunit):
+                raise u.UnitsError(f"The units of column '{column}' are not "
+                                   f"convertible to the figure units '{yunit}'")
 
 
 MARKER_SHAPES = ['circle', 'square', 'cross', 'diamond', 'triangle-up',
@@ -128,6 +140,7 @@ class Markers(BaseLayer):
 
         return vega
 
+    @property
     def _required_data(self):
         return [(self.data, self.column)]
 
@@ -157,6 +170,7 @@ class Line(BaseLayer):
                                      'strokeWidth': {'value': self.width}}}}
         return [vega]
 
+    @property
     def _required_data(self):
         return [(self.data, self.column)]
 
@@ -196,6 +210,7 @@ class Range(BaseLayer):
 
         return [vega]
 
+    @property
     def _required_data(self):
         return [(self.data, self.column_lower), (self.data, self.column_upper)]
 

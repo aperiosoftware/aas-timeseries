@@ -1,13 +1,13 @@
 import os
 import tempfile
 from io import StringIO
-from json import dump, dumps
+from json import dump
 from zipfile import ZipFile
 
 import numpy as np
 
 from astropy.table import Table
-
+from astropy import units as u
 from jupyter_aas_timeseries import TimeSeriesWidget
 
 from aas_timeseries.colors import auto_assign_colors
@@ -39,6 +39,7 @@ class InteractiveTimeSeriesFigure(BaseView):
         self._height = height
         self._resize = resize
         self._padding = padding
+        self._yunit = None
         self._views = []
 
     def add_view(self, title, description=None, include=None, exclude=None, empty=False):
@@ -145,14 +146,13 @@ class InteractiveTimeSeriesFigure(BaseView):
         # required. We do this by iterating over the layers in the main
         # figure and the views and keeping track of the set of (data, column)
         # that are needed.
-        if minimize_data:
-            required_data = []
-            for layer in self._layers:
-                required_data.extend(layer._required_data())
-            for view in self._views:
-                for layer in view['view']._layers:
-                    required_data.extend(layer._required_data())
-            required_data = set(required_data)
+        required_data = []
+        for layer in self._layers:
+            required_data.extend(layer._required_data)
+        for view in self._views:
+            for layer in view['view']._layers:
+                required_data.extend(layer._required_data)
+        required_data = set(required_data)
 
         json['data'] = []
 
@@ -164,7 +164,10 @@ class InteractiveTimeSeriesFigure(BaseView):
             table[data.time_column] = data.time_series.time.isot
             for colname in data.time_series.colnames:
                 if colname != 'time' and (not minimize_data or (data, colname) in required_data):
-                    table[colname] = data.time_series[colname]
+                    if (data, colname) in required_data:
+                        table[colname] = data.column_to_values(colname, self.yunit)
+                    else:
+                        table[colname] = data.time_series[colname]
 
             # Next up, we create the information for the 'parse' Vega key
             # which indicates the format for each column.
@@ -240,8 +243,8 @@ class InteractiveTimeSeriesFigure(BaseView):
                 if isinstance(layer, layer_types):
                     all_times.append(np.min(layer.data.time_series.time))
                     all_times.append(np.max(layer.data.time_series.time))
-                    all_values.append(np.nanmin(layer.data.time_series[layer.column]))
-                    all_values.append(np.nanmax(layer.data.time_series[layer.column]))
+                    all_values.append(np.nanmin(layer.data.column_to_values(layer.column, self.yunit)))
+                    all_values.append(np.nanmax(layer.data.column_to_values(layer.column, self.yunit)))
 
             if len(all_times) > 0:
                 xlim_auto = np.min(all_times), np.max(all_times)
