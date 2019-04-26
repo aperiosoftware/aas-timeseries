@@ -31,9 +31,12 @@ class InteractiveTimeSeriesFigure(BaseView):
         The padding inside the axes, in pixels
     resize : bool, optional
         Whether to resize the figure to the available space.
+    title : str, optinal
+        If views are added to the figure, this title is used for the default
+        view, otherwise 'Default' is used.
     """
 
-    def __init__(self, width=600, height=400, padding=36, resize=False):
+    def __init__(self, width=600, height=400, padding=36, resize=False, title=None):
         super().__init__()
         self._width = width
         self._height = height
@@ -41,6 +44,7 @@ class InteractiveTimeSeriesFigure(BaseView):
         self._padding = padding
         self._yunit = 'auto'
         self._views = []
+        self._title = title
 
     @property
     def yunit(self):
@@ -187,10 +191,13 @@ class InteractiveTimeSeriesFigure(BaseView):
         json['$schema'] = 'https://vega.github.io/schema/vega/v4.json'
 
         # Layout
+        json['title'] = self._title or 'Default'
         json['width'] = self._width
         json['height'] = self._height
         json['padding'] = 0
         json['autosize'] = {'type': 'fit', 'resize': self._resize}
+
+        json['_extend'] = {}
 
         # Data
 
@@ -341,7 +348,7 @@ class InteractiveTimeSeriesFigure(BaseView):
         if len(self._views) > 0:
 
             json['_views'] = []
-            json['_extramarks'] = []
+            json['_extend']['marks'] = []
 
             for view in self._views:
 
@@ -380,14 +387,14 @@ class InteractiveTimeSeriesFigure(BaseView):
 
                 # layers
 
-                view_json['marks'] = []
+                view_json['markers'] = []
 
                 for layer, settings in view['view']._inherited_layers.items():
-                    view_json['marks'].append({'name': layer.uuid, 'visible': settings['visible']})
+                    view_json['markers'].append({'name': layer.uuid, 'visible': settings['visible']})
 
                 for layer, settings in view['view']._layers.items():
-                    json['_extramarks'].extend(layer.to_vega(yunit=yunit))
-                    view_json['marks'].append({'name': layer.uuid, 'visible': settings['visible']})
+                    json['_extend']['marks'].extend(layer.to_vega(yunit=yunit))
+                    view_json['markers'].append({'name': layer.uuid, 'visible': settings['visible']})
 
         with open(filename, 'w') as f:
             dump(json, f, indent='  ')
