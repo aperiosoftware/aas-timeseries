@@ -30,6 +30,7 @@ class BaseLayer(HasTraits):
     """
     Base class for any layer object
     """
+
     label = Unicode(help='The label to use to designate the layers in the legend.')
 
     # Potential properties that could be implemented: toolTip
@@ -103,13 +104,13 @@ class Markers(BaseLayer):
                  'encode': {'enter': {'x': {'scale': 'xscale', 'field': self.data.time_column},
                                       'y': {'scale': 'yscale', 'field': self.column},
                                       'shape': {'value': self.shape}},
-                            'update':{'shape': {'value': self.shape},
-                                      'size': {'value': self.size},
-                                      'fill': {'value': self.color or DEFAULT_COLOR},
-                                      'fillOpacity': {'value': self.opacity},
-                                      'stroke': {'value': self.edge_color or DEFAULT_COLOR},
-                                      'strokeOpacity': {'value': self.edge_opacity},
-                                      'strokeWidth': {'value': self.edge_width}}}}]
+                            'update': {'shape': {'value': self.shape},
+                                       'size': {'value': self.size},
+                                       'fill': {'value': self.color or DEFAULT_COLOR},
+                                       'fillOpacity': {'value': self.opacity},
+                                       'stroke': {'value': self.edge_color or DEFAULT_COLOR},
+                                       'strokeOpacity': {'value': self.edge_opacity},
+                                       'strokeWidth': {'value': self.edge_width}}}}]
 
         # The error bars (if requested)
         if self.error:
@@ -119,15 +120,15 @@ class Markers(BaseLayer):
                          'clip': True,
                          'from': {'data': self.data.uuid},
                          'encode': {'enter': {'x': {'scale': 'xscale', 'field': self.data.time_column},
-                                         'y': {'scale': 'yscale', 'signal': f"datum['{self.column}'] - datum['{self.error}']"},
-                                         'y2': {'scale': 'yscale', 'signal': f"datum['{self.column}'] + datum['{self.error}']"}},
-                               'update':{'shape': {'value': self.shape},
-                                         'width': {'value': 1},
-                                         'fill': {'value': self.color or DEFAULT_COLOR},
-                                         'fillOpacity': {'value': self.opacity},
-                                         'stroke': {'value': self.edge_color or DEFAULT_COLOR},
-                                         'strokeOpacity': {'value': self.edge_opacity},
-                                         'strokeWidth': {'value': self.edge_width}}}})
+                                              'y': {'scale': 'yscale', 'signal': f"datum['{self.column}'] - datum['{self.error}']"},
+                                              'y2': {'scale': 'yscale', 'signal': f"datum['{self.column}'] + datum['{self.error}']"}},
+                                    'update': {'shape': {'value': self.shape},
+                                               'width': {'value': 1},
+                                               'fill': {'value': self.color or DEFAULT_COLOR},
+                                               'fillOpacity': {'value': self.opacity},
+                                               'stroke': {'value': self.edge_color or DEFAULT_COLOR},
+                                               'strokeOpacity': {'value': self.edge_opacity},
+                                               'strokeWidth': {'value': self.edge_width}}}})
 
         return vega
 
