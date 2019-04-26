@@ -422,7 +422,7 @@ class BaseView:
                 ylim = ylim[0].to_value(yunit), ylim[1].to_value(yunit)
             elif yunit is not u.one:
                 raise u.UnitsError('Limits for y axis are dimensionless but '
-                                 f'expected units of {yunit}')
+                                  f'expected units of {yunit}')
 
         xlim = xlim_auto if xlim is None else xlim
         ylim = ylim_auto if ylim is None else ylim

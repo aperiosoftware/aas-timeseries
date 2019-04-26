@@ -1,3 +1,6 @@
+import os
+import tempfile
+
 import pytest
 from traitlets import TraitError
 
@@ -6,14 +9,31 @@ from astropy_timeseries import TimeSeries
 
 from aas_timeseries.visualization import InteractiveTimeSeriesFigure
 
+DATA = os.path.abspath(os.path.join(os.path.dirname(__file__), 'data'))
 
-def test_basic(tmpdir):
+
+def compare_to_reference_json(tmpdir, test_name):
+
+    tmpdir = tmpdir.strpath
+
+    expected_files = sorted(os.listdir(os.path.join(DATA, test_name)))
+    actual_files = sorted(os.listdir(tmpdir))
+
+    assert expected_files == actual_files
+
+    for filename in expected_files:
+        with open(os.path.join(DATA, test_name, filename)) as f:
+            expected = f.read().strip()
+        with open(os.path.join(tmpdir, filename)) as f:
+            actual = f.read().strip()
+        assert expected == actual
+
+
+def test_basic(tmpdir, deterministic_uuid):
 
     ts = TimeSeries(time='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
     ts['flux'] = [1, 2, 3, 4, 5]
     ts['error'] = [1, 2, 3, 4, 5]
-
-    filename = tmpdir.join('figure.json').strpath
 
     figure = InteractiveTimeSeriesFigure()
     figure.add_markers(time_series=ts, column='flux', label='Markers')
@@ -25,10 +45,13 @@ def test_basic(tmpdir):
     figure.add_horizontal_range(5, 6, label='Horizontal Range')
     figure.add_range(time_series=ts, column_lower='flux', column_upper='error', label='Range')
     figure.add_text(time=ts.time[2], value=float(ts['flux'][0]), text='My Label', label='Range')
-    figure.save_vega_json(filename)
+
+    figure.save_vega_json(tmpdir.join('figure.json').strpath)
+
+    compare_to_reference_json(tmpdir, 'basic')
 
 
-def test_save_options(tmpdir):
+def test_save_options_embed(tmpdir, deterministic_uuid):
 
     ts = TimeSeries(time='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
     ts['flux'] = [1, 2, 3, 4, 5]
@@ -36,8 +59,32 @@ def test_save_options(tmpdir):
 
     figure = InteractiveTimeSeriesFigure()
     figure.add_markers(time_series=ts, column='flux', label='Markers')
-    figure.save_vega_json(tmpdir.join('figure1.json').strpath, embed_data=True)
-    figure.save_vega_json(tmpdir.join('figure2.json').strpath, minimize_data=False)
+    figure.save_vega_json(tmpdir.join('figure.json').strpath, embed_data=True)
+    compare_to_reference_json(tmpdir, 'save_options_embed')
+
+
+def test_save_options_no_minimize(tmpdir, deterministic_uuid):
+
+    ts = TimeSeries(time='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
+    ts['flux'] = [1, 2, 3, 4, 5]
+    ts['error'] = [1, 2, 3, 4, 5]
+
+    figure = InteractiveTimeSeriesFigure()
+    figure.add_markers(time_series=ts, column='flux', label='Markers')
+
+    figure.save_vega_json(tmpdir.join('figure.json').strpath, minimize_data=False)
+    compare_to_reference_json(tmpdir, 'save_options_no_minimize')
+
+
+def test_save_options_export_bundle(tmpdir):
+
+    ts = TimeSeries(time='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
+    ts['flux'] = [1, 2, 3, 4, 5]
+    ts['error'] = [1, 2, 3, 4, 5]
+
+    figure = InteractiveTimeSeriesFigure()
+    figure.add_markers(time_series=ts, column='flux', label='Markers')
+
     figure.export_interactive_bundle(tmpdir.join('figure.zip').strpath)
 
 
@@ -203,7 +250,7 @@ class TestUnit:
         self.figure.add_markers(time_series=self.ts, column='flux_with_unit', label='Markers')
         self.figure.save_vega_json(tmpdir.join('figure.json').strpath)
 
-    def test_full(self, tmpdir):
+    def test_all_markers(self, tmpdir):
         # A test with all the layer types and convertible units
         self.figure.add_markers(time_series=self.ts, column='flux_with_unit', label='Markers')
         self.figure.add_line(time_series=self.ts, column='flux_with_unit', label='Line')
@@ -239,7 +286,7 @@ class TestUnit:
         view.ylim = 1, 6
         with pytest.raises(u.UnitsError) as exc:
             self.figure.save_vega_json(tmpdir.join('figure.json').strpath)
-        assert exc.value.args[0] == "Limits for y axis in view 'my view' are dimensionless but expected units of Jy"
+        assert exc.value.args[0] == "Limits for y axis are dimensionless but expected units of Jy"
 
     def test_two_marker_layer_incompatible(self, tmpdir):
         self.figure.add_markers(time_series=self.ts, column='flux_with_unit', label='Markers')

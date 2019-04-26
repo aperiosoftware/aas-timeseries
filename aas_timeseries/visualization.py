@@ -233,7 +233,10 @@ class InteractiveTimeSeriesFigure(BaseView):
                         table[colname] = column.isot
                         time_columns.append(colname)
                     elif (data, colname) in required_xdata:
-                        table[colname] = data.column_to_values(colname, (u.one, u.s))
+                        try:
+                            table[colname] = data.column_to_values(colname, u.s)
+                        except u.UnitsError:
+                            table[colname] = data.column_to_values(colname, u.one)
                     elif (data, colname) in required_ydata:
                         table[colname] = data.column_to_values(colname, yunit)
                     else:

@@ -56,12 +56,18 @@ from astropy.tests.helper import enable_deprecations_as_exceptions
 # except NameError:   # Needed to support Astropy <= 1.0.0
 #     pass
 
+import uuid
+import pytest
+from faker import Faker
+
 try:
     import qtpy
 except ImportError:
     QT_INSTALLED = False
 else:
     QT_INSTALLED = True
+
+UUID4_ORIGINAL = uuid.uuid4
 
 app = None
 
@@ -72,6 +78,15 @@ def pytest_configure(config):
         from PyQt5 import QtWebEngineWidgets
         from qtpy.QtWidgets import QApplication
         app = QApplication([''])
+
+
+@pytest.fixture(scope='function')
+def deterministic_uuid():
+    faker = Faker()
+    faker.seed(12345)
+    uuid.uuid4 = faker.uuid4
+    yield
+    uuid.uuid4 = UUID4_ORIGINAL
 
 
 def pytest_unconfigure(config):
