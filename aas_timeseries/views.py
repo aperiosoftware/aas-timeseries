@@ -348,6 +348,7 @@ class View(BaseView):
         super().__init__()
         self._figure = figure
         self._inherited_layers = inherited_layers or OrderedDict()
+        self._data = figure._data
 
     def show(self, layers):
         self._set_visible(layers, True)

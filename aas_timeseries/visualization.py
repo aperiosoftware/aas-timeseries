@@ -102,7 +102,7 @@ class InteractiveTimeSeriesFigure(BaseView):
         else:
             inherited_layers = self._layers.copy()
 
-        view = View(inherited_layers=inherited_layers)
+        view = View(figure=self, inherited_layers=inherited_layers)
 
         self._views.append({'title': title, 'description': description, 'view': view})
 
