@@ -8,7 +8,7 @@ from aas_timeseries.traits import (Unicode, CFloat, PositiveCFloat, Opacity, Col
 
 __all__ = ['BaseLayer', 'Markers', 'Line', 'Range', 'VerticalLine',
            'VerticalRange', 'HorizontalLine', 'HorizontalRange', 'Text',
-           'time_to_vega']
+           'time_to_vega', 'TimeDependentLayer']
 
 DEFAULT_COLOR = '#000000'
 
