@@ -1,6 +1,6 @@
 import uuid
 
-from astropy.units import Quantity, UnitsError
+from astropy.units import Quantity, UnitsError, UnitBase
 
 
 class Data:
@@ -10,17 +10,21 @@ class Data:
         self.uuid = str(uuid.uuid4())
         self.time_column = 'time'
 
-    def column_to_values(self, colname, unit):
+    def column_to_values(self, colname, units):
 
         # First make sure the column is a quantity
         quantity = Quantity(self.time_series[colname], copy=False)
 
-        if quantity.unit.is_equivalent(unit):
-            return quantity.to_value(unit)
+        if isinstance(units, UnitBase):
+            units = [units]
+
+        for unit in units:
+            if quantity.unit.is_equivalent(unit):
+                return quantity.to_value(unit)
         else:
             raise UnitsError(f"Cannot convert the units '{quantity.unit}' of "
                              f"column '{colname}' to the required units of "
-                             f"'{unit}'")
+                             f"'{units}'")
 
     def unit(self, colname):
         return Quantity(self.time_series[colname], copy=False).unit
