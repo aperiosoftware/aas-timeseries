@@ -1,5 +1,5 @@
 from qtpy.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, WEBENGINE
-from qtpy import QtGui, QtCore
+from qtpy import QtGui, QtWidgets, QtCore
 
 __all__ = ['get_qt_web_widget']
 
@@ -23,6 +23,22 @@ class TimeSeriesWebEnginePage(QWebEnginePage):
                                      line_number=None, source_id=None):
             print(f'{message} (level={level}, line_number={line_number}, '
                   f'source_id={source_id})')
+
+        def _process_js_response(self, result):
+            self._js_response_received = True
+            self._js_response = result
+
+        def runJavaScript(self, code, asynchronous=True):
+            app = QtWidgets.QApplication.instance()
+            if asynchronous:
+                super(TimeSeriesWebEnginePage, self).runJavaScript(code)
+            else:
+                self._js_response_received = False
+                self._js_response = None
+                super(TimeSeriesWebEnginePage, self).runJavaScript(code, self._process_js_response)
+                while not self._js_response_received:
+                    app.processEvents()
+                return self._js_response
 
     else:
 

@@ -5,7 +5,7 @@ import pytest
 from traitlets import TraitError
 
 from astropy import units as u
-from astropy_timeseries import TimeSeries
+from astropy.timeseries import TimeSeries
 
 from aas_timeseries.visualization import InteractiveTimeSeriesFigure
 
@@ -31,7 +31,7 @@ def compare_to_reference_json(tmpdir, test_name):
 
 def test_basic(tmpdir, deterministic_uuid):
 
-    ts = TimeSeries(time='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
+    ts = TimeSeries(time_start='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
     ts['flux'] = [1, 2, 3, 4, 5]
     ts['error'] = [1, 2, 3, 4, 5]
 
@@ -53,7 +53,7 @@ def test_basic(tmpdir, deterministic_uuid):
 
 def test_save_options_embed(tmpdir, deterministic_uuid):
 
-    ts = TimeSeries(time='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
+    ts = TimeSeries(time_start='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
     ts['flux'] = [1, 2, 3, 4, 5]
     ts['error'] = [1, 2, 3, 4, 5]
 
@@ -65,7 +65,7 @@ def test_save_options_embed(tmpdir, deterministic_uuid):
 
 def test_save_options_no_minimize(tmpdir, deterministic_uuid):
 
-    ts = TimeSeries(time='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
+    ts = TimeSeries(time_start='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
     ts['flux'] = [1, 2, 3, 4, 5]
     ts['error'] = [1, 2, 3, 4, 5]
 
@@ -78,7 +78,7 @@ def test_save_options_no_minimize(tmpdir, deterministic_uuid):
 
 def test_save_options_export_bundle(tmpdir):
 
-    ts = TimeSeries(time='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
+    ts = TimeSeries(time_start='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
     ts['flux'] = [1, 2, 3, 4, 5]
     ts['error'] = [1, 2, 3, 4, 5]
 
@@ -92,7 +92,7 @@ def test_column_validation():
 
     # Test the validation provied by ColumnTrait
 
-    ts = TimeSeries(time='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
+    ts = TimeSeries(time_start='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
     ts['flux'] = [1, 2, 3, 4, 5]
     ts['error'] = [1, 2, 3, 4, 5]
 
@@ -104,7 +104,7 @@ def test_column_validation():
 
 def test_limits(tmpdir):
 
-    ts = TimeSeries(time='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
+    ts = TimeSeries(time_start='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
     ts['flux'] = [1, 2, 3, 4, 5]
     ts['error'] = [1, 2, 3, 4, 5]
 
@@ -127,7 +127,7 @@ def test_limits(tmpdir):
 
 def test_views(tmpdir):
 
-    ts = TimeSeries(time='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
+    ts = TimeSeries(time_start='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
     ts['flux'] = [1, 2, 3, 4, 5]
     ts['error'] = [1, 2, 3, 4, 5]
 
@@ -179,7 +179,7 @@ def test_views(tmpdir):
 
 def test_remove():
 
-    ts = TimeSeries(time='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
+    ts = TimeSeries(time_start='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
     ts['flux'] = [1, 2, 3, 4, 5]
     ts['error'] = [1, 2, 3, 4, 5]
 
@@ -237,7 +237,7 @@ class TestUnit:
 
     def setup_method(self, method):
 
-        self.ts = TimeSeries(time='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
+        self.ts = TimeSeries(time_start='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
         self.ts['flux'] = [1, 2, 3, 4, 5]
         self.ts['error'] = [1, 2, 3, 4, 5]
         self.ts['flux_with_unit'] = [1, 2, 3, 4, 5] * u.Jy

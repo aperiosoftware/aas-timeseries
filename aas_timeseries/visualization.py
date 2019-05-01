@@ -302,7 +302,7 @@ class InteractiveTimeSeriesFigure(BaseView):
             x_title = 'Phase'
             x_type = 'number'
             x_input = 'phase'
-            x_output = 'phase'
+            x_output = 'unity'
 
         json['_extend'] = {'scales': [{'name': 'xscale', 'input': x_input, 'output': x_output}]}
 
@@ -362,7 +362,7 @@ class InteractiveTimeSeriesFigure(BaseView):
                     x_title = 'Phase'
                     x_type = 'number'
                     x_input = 'phase'
-                    x_output = 'phase'
+                    x_output = 'unity'
 
                 view_json['_extend'] = {'scales': [{'name': 'xscale', 'input': x_input, 'output': x_output}]}
 

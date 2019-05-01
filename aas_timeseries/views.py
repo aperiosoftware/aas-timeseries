@@ -96,7 +96,7 @@ class BaseView:
 
         Parameters
         ----------
-        data : `~astropy_timeseries.TimeSeries`
+        data : `~astropy.timeseries.TimeSeries`
             The time series object containing the data.
         column : str
             The field in the time series containing the data.
@@ -144,7 +144,7 @@ class BaseView:
 
         Parameters
         ----------
-        data : `~astropy_timeseries.TimeSeries`
+        data : `~astropy.timeseries.TimeSeries`
             The time series object containing the data.
         column : str
             The field in the time series containing the data.
@@ -180,7 +180,7 @@ class BaseView:
 
         Parameters
         ----------
-        data : `~astropy_timeseries.TimeSeries`
+        data : `~astropy.timeseries.TimeSeries`
             The time series object containing the data.
         column_lower : str
             The field in the time series containing the lower value of the data
