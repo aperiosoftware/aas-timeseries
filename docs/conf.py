@@ -168,3 +168,7 @@ html_js_files = [
     'https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js',
     DEFAULT_EMBED_REQUIREJS_URL,
 ]
+
+# Use developer docs for astropy
+intersphinx_mapping['astropy'] = ('https://docs.astropy.org/en/latest/', None)
+
