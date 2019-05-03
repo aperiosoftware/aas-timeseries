@@ -28,16 +28,23 @@
   <div class="row">
     <div class="example">
       <figure>
-        <div id="example1">
+        <div id="main_figure">
         </div>
       </figure>
 
       <script>
-      var ex1;
+      var figure;
+      var figure_ready = false;
+
       S(document).ready(function(){
-        ex1 = TimeSeries.create("figure.json");
-        ex1.initialize(document.getElementById('example1'));
+        figure = TimeSeries.create("figure.json");
+        figure.initialize(document.getElementById('main_figure'), on_ready);
       });
+
+      function on_ready() {
+        figure_ready = true;
+      }
+
       </script>
 
     </div>
