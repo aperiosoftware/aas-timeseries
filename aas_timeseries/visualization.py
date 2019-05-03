@@ -268,7 +268,9 @@ class InteractiveTimeSeriesFigure(BaseView):
                 s = StringIO()
                 table.write(s, format='ascii.basic', delimiter=',')
                 s.seek(0)
-                csv_string = s.read()
+                # NOTE: when embedding the data inside the JSON file, we should
+                # just use simple Unix line endings inside the serialized table.
+                csv_string = s.read().replace('\r\n', '\n')
                 vega['values'] = csv_string
             else:
                 data_filename = 'data_' + data.uuid + '.csv'
