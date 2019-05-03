@@ -4,6 +4,7 @@
 # of the widget with Qt.
 
 import os
+import json
 import shutil
 import time
 import tempfile
@@ -36,6 +37,13 @@ def interactive_screenshot(json_filename, prefix):
     server = get_data_server()
     url = server.serve_file(tmp_html)
     server.serve_file(tmp_json)
+
+    # Check if we need to serve any csv files
+    with open(json_filename) as f:
+        figure = json.load(f)
+    for data in figure['data']:
+        if 'url' in data:
+            server.serve_file(os.path.join(os.path.dirname(json_filename), data['url']))
 
     app = QtWidgets.QApplication.instance()
     if app is None:
