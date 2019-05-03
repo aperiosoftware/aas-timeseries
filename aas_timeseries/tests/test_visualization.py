@@ -33,8 +33,6 @@ def compare_to_reference_json(tmpdir, test_name):
 
         if filename.endswith('.png'):
 
-            print(actual_file)
-
             try:
                 msg = compare_images(expected_file, actual_file, tol=0)
             except Exception:
@@ -75,7 +73,10 @@ def test_basic(tmpdir, deterministic_uuid):
     figure.add_range(time_series=ts, column_lower='flux', column_upper='error', label='Range')
     figure.add_text(time=ts.time[2], value=float(ts['flux'][0]), text='My Label', label='Range')
 
-    figure.save_vega_json(tmpdir.join('figure.json').strpath)
+    json_file = tmpdir.join('figure.json').strpath
+    plot_prefix = tmpdir.join('figure').strpath
+    figure.save_vega_json(json_file)
+    interactive_screenshot(json_file, plot_prefix)
 
     compare_to_reference_json(tmpdir, 'basic')
 
