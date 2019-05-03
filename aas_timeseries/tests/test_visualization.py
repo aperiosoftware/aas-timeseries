@@ -1,13 +1,18 @@
 import os
 import tempfile
 
+from traceback import print_exc
+
 import pytest
 from traitlets import TraitError
 
 from astropy import units as u
 from astropy.timeseries import TimeSeries
 
+from matplotlib.testing.compare import compare_images
+
 from aas_timeseries.visualization import InteractiveTimeSeriesFigure
+from aas_timeseries.screenshot import interactive_screenshot
 
 DATA = os.path.abspath(os.path.join(os.path.dirname(__file__), 'data'))
 
@@ -23,16 +28,34 @@ def compare_to_reference_json(tmpdir, test_name):
 
     for filename in expected_files:
 
-        with open(os.path.join(DATA, test_name, filename)) as f:
-            expected = f.read().strip()
-        with open(os.path.join(tmpdir, filename)) as f:
-            actual = f.read().strip()
+        expected_file = os.path.join(DATA, test_name, filename)
+        actual_file = os.path.join(tmpdir, filename)
 
-        # Normalize line endings
-        expected = expected.replace('\r\n', '\n').replace('\r', '\n')
-        actual = actual.replace('\r\n', '\n').replace('\r', '\n')
+        if filename.endswith('.png'):
 
-        assert expected == actual
+            print(actual_file)
+
+            try:
+                msg = compare_images(expected_file, actual_file, tol=0)
+            except Exception:
+                msg = 'Image comparison failed:'
+                print_exc()
+
+            if msg is not None:
+                pytest.fail(msg, pytrace=False)
+
+        else:
+
+            with open(expected_file) as f:
+                expected = f.read().strip()
+            with open(actual_file) as f:
+                actual = f.read().strip()
+
+            # Normalize line endings
+            expected = expected.replace('\r\n', '\n').replace('\r', '\n')
+            actual = actual.replace('\r\n', '\n').replace('\r', '\n')
+
+            assert expected == actual
 
 
 def test_basic(tmpdir, deterministic_uuid):
