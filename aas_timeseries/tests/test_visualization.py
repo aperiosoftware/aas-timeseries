@@ -22,10 +22,16 @@ def compare_to_reference_json(tmpdir, test_name):
     assert expected_files == actual_files
 
     for filename in expected_files:
+
         with open(os.path.join(DATA, test_name, filename)) as f:
             expected = f.read().strip()
         with open(os.path.join(tmpdir, filename)) as f:
             actual = f.read().strip()
+
+        # Normalize line endings
+        expected = expected.replace('\r\n', '\n').replace('\r', '\n')
+        actual = actual.replace('\r\n', '\n').replace('\r', '\n')
+
         assert expected == actual
 
 
