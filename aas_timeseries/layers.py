@@ -1,5 +1,6 @@
 import uuid
 import weakref
+import numpy as np
 from traitlets import HasTraits
 from astropy import units as u
 from aas_timeseries.traits import (Unicode, CFloat, PositiveCFloat, Opacity, Color,
@@ -54,6 +55,11 @@ class BaseLayer(HasTraits):
     def to_vega(self):
         """
         Convert the layer to its Vega representation.
+        """
+
+    def to_mpl(self, ax, yunit=None):
+        """
+        Add the layer to a Matplotlib `~matplotlib.axes.Axes` instance.
         """
 
     @property
@@ -148,6 +154,21 @@ class Markers(TimeDependentLayer):
 
         return vega
 
+    def to_mpl(self, ax, yunit=None):
+
+        x = self.data.time_series[self.data.time_column].mjd
+        y = self.data.column_to_values(self.column, yunit)
+
+        ax.plot(x, y, '.', markersize=self.size,
+                color=self.color or DEFAULT_COLOR,
+                alpha=self.opacity)
+
+        if self.error:
+            yerr = self.data.column_to_values(self.error, yunit)
+            ax.errorbar(x, y, yerr=yerr, fmt='none',
+                        color=self.color or DEFAULT_COLOR,
+                        alpha=self.opacity)
+
     @property
     def _required_xdata(self):
         return [(self.data, self.time_column)]
@@ -181,6 +202,15 @@ class Line(TimeDependentLayer):
                                      'strokeOpacity': {'value': self.opacity},
                                      'strokeWidth': {'value': self.width}}}}
         return [vega]
+
+    def to_mpl(self, ax, yunit=None):
+
+        x = self.data.time_series[self.data.time_column].mjd
+        y = self.data.column_to_values(self.column, yunit)
+
+        ax.plot(x, y, '-',
+                color=self.color or DEFAULT_COLOR,
+                alpha=self.opacity)
 
     @property
     def _required_xdata(self):
@@ -226,6 +256,16 @@ class Range(TimeDependentLayer):
 
         return [vega]
 
+    def to_mpl(self, ax, yunit=None):
+
+        x = self.data.time_series[self.data.time_column].mjd
+        y1 = self.data.column_to_values(self.column_lower, yunit)
+        y2 = self.data.column_to_values(self.column_upper, yunit)
+
+        ax.fill_between(x, y1, y2,
+                        color=self.color or DEFAULT_COLOR,
+                        alpha=self.opacity)
+
     @property
     def _required_xdata(self):
         return [(self.data, self.time_column)]
@@ -261,6 +301,11 @@ class VerticalLine(BaseLayer):
                                      'stroke': {'value': self.color or DEFAULT_COLOR},
                                      'strokeOpacity': {'value': self.opacity}}}}
         return [vega]
+
+    def to_mpl(self, ax, yunit=None):
+        ax.axvline(self.time.mjd,
+                   color=self.color or DEFAULT_COLOR,
+                   alpha=self.opacity)
 
 
 class VerticalRange(BaseLayer):
@@ -298,6 +343,11 @@ class VerticalRange(BaseLayer):
 
         return [vega]
 
+    def to_mpl(self, ax, yunit=None):
+        ax.fill_betweenx([-1e30, 1e30], self.time_lower.mjd, self.time_upper.mjd,
+                         color=self.color or DEFAULT_COLOR,
+                         alpha=self.opacity)
+
 
 class HorizontalLine(BaseLayer):
     """
@@ -331,6 +381,13 @@ class HorizontalLine(BaseLayer):
                                      'stroke': {'value': self.color or DEFAULT_COLOR},
                                      'strokeOpacity': {'value': self.opacity}}}}
         return [vega]
+
+    def to_mpl(self, ax, yunit=None):
+        if yunit is None:
+            yunit = u.one
+        ax.axhline(self.value.to_value(yunit),
+                   color=self.color or DEFAULT_COLOR,
+                   alpha=self.opacity)
 
 
 class HorizontalRange(BaseLayer):
@@ -373,6 +430,15 @@ class HorizontalRange(BaseLayer):
                                      'strokeWidth': {'value': self.edge_width}}}}
         return [vega]
 
+    def to_mpl(self, ax, yunit=None):
+
+        value_lower = self.value_lower.to_value(yunit)
+        value_upper = self.value_upper.to_value(yunit)
+
+        ax.fill_between([-1e30, 1e30], value_lower, value_upper,
+                         color=self.color or DEFAULT_COLOR,
+                         alpha=self.opacity)
+
 
 class Text(BaseLayer):
     """
@@ -414,3 +480,15 @@ class Text(BaseLayer):
                                      'align': {'value': self.align},
                                      'angle': {'value': self.angle}}}}
         return [vega]
+
+    def to_mpl(self, ax, yunit=None):
+
+        if yunit is None:
+            yunit = u.one
+
+        x = self.time.mjd
+        value = self.value.to_value(yunit)
+
+        ax.text(x, value, self.text,
+                color=self.color or DEFAULT_COLOR,
+                alpha=self.opacity)

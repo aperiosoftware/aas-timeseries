@@ -149,6 +149,32 @@ class InteractiveTimeSeriesFigure(BaseView):
                 fzip.write(os.path.join(tmp_dir, filename), os.path.basename(filename))
             fzip.write(html_file, 'index.html')
 
+    def save_static(self, filename):
+
+        # Start off by figuring out what units we are using on the y axis.
+        # Note that we check the consistency of the units only here for
+        # simplicity otherwise any guessing while users add/remove layers is
+        # tricky.
+        if self.yunit == 'auto':
+            yunit = self._guess_yunit()
+        else:
+            yunit = self.yunit
+
+        from matplotlib import pyplot as plt
+
+        fig = plt.figure()
+        ax = fig.add_subplot(1, 1, 1)
+
+        for layer, settings in self._layers.items():
+            layer.to_mpl(ax, yunit=yunit)
+
+        dx = 57469.52133101852 - 57469.52119212963
+
+        ax.set_xlim(57469.52119212963 - 0.1 * dx, 57469.52133101852 + 0.1 * dx)
+        ax.set_ylim(-5, 20)
+
+        fig.savefig('test.png')
+
     def save_vega_json(self, filename, embed_data=False, minimize_data=True, override_style=False):
         """
         Export the JSON file, and optionally CSV data files.
