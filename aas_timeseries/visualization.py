@@ -223,14 +223,16 @@ class InteractiveTimeSeriesFigure(BaseView):
         for data in self._data.values():
 
             # Start off by constructing a new table with only the subset of
-            # columns required, and the time as an ISO string.
+            # columns required, and the time as an ISO string. Note that we
+            # need to explicitly specify that we want UTC times, then add the
+            # Z suffix since this isn't something that astropy does.
             table = Table()
             time_columns = []
             for colname in data.time_series.colnames:
                 if (not minimize_data or (data, colname) in required_xdata | required_ydata):
                     column = data.time_series[colname]
                     if isinstance(column, Time):
-                        table[colname] = column.isot
+                        table[colname] = np.char.add(column.utc.isot, 'Z')
                         time_columns.append(colname)
                     elif (data, colname) in required_xdata:
                         try:
