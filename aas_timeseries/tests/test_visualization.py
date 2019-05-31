@@ -1,3 +1,4 @@
+import os
 import pytest
 from traitlets import TraitError
 
@@ -6,7 +7,7 @@ from astropy.timeseries import TimeSeries
 
 from aas_timeseries.visualization import InteractiveTimeSeriesFigure
 from aas_timeseries.screenshot import interactive_screenshot
-from aas_timeseries.tests.helpers import compare_to_reference_json
+from aas_timeseries.tests.helpers import compare_to_reference_json, DATA
 
 
 class TestFigure:
@@ -299,3 +300,41 @@ class TestUnit:
         with pytest.raises(u.UnitsError) as exc:
             self.figure.save_vega_json(tmpdir.join('figure.json').strpath)
         assert exc.value.args[0] == "'mJy' (spectral flux density) and '' (dimensionless) are not convertible"
+
+
+class TestTimeAxes:
+
+    # Tests related to different time axes
+
+    def setup_method(self):
+        self.ts = TimeSeries.read(os.path.join(DATA, 'phase.csv'), format='ascii.csv')
+        self.ts['error'] = 0.02  # reduce for now
+        self.ts['relative_s'] = self.ts['relative'] * u.s
+
+    def test_mixed_time_axes(self, tmpdir, deterministic_uuid, image_tests):
+
+        # An extensive test that includes different types of time axes in
+        # different views.
+
+        fig = InteractiveTimeSeriesFigure(title='By time of observation')
+        fig.ylabel = 'Radial Velocity (km/s)'
+
+        # Absolute time
+        fig.add_markers(time_series=self.ts, column='flux', color='orange', error='error', size=50)
+        fig.add_line(time_series=self.ts, column='flux', color='black')
+
+        # Phase
+        view1 = fig.add_view(title='By phase', empty=True, time_mode='phase')
+        view1.add_markers(time_series=self.ts, time_column='phase', column='flux', color='orange', error='error', size=50)
+
+        # Relative time
+        view2 = fig.add_view(title='By relative time', empty=True, time_mode='relative')
+        view2.add_markers(time_series=self.ts, time_column='relative_s', column='flux', color='orange', error='error', size=50)
+
+        json_file = tmpdir.join('figure.json').strpath
+        plot_prefix = tmpdir.join('figure').strpath
+        fig.save_vega_json(json_file)
+        if image_tests:
+            interactive_screenshot(json_file, plot_prefix)
+
+        compare_to_reference_json(tmpdir, 'mixed_time_axes', image_tests=image_tests)

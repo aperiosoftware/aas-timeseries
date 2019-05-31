@@ -24,6 +24,8 @@ class BaseView:
         self._xlim = None
         self._ylim = None
         self._ylog = False
+        self._xlabel = None
+        self._ylabel = None
         self._time_mode = time_mode or 'absolute'
 
     @property
@@ -36,6 +38,29 @@ class BaseView:
     @ylog.setter
     def ylog(self, value):
         self._ylog = value
+
+    @property
+    def xlabel(self):
+        """
+        The label to use for the x-axis. If not specified, this is determined
+        automatically from the type of x-axis.
+        """
+        return self._xlabel
+
+    @xlabel.setter
+    def xlabel(self, value):
+        self._xlabel = value
+
+    @property
+    def ylabel(self):
+        """
+        The label to use for the y-axis.
+        """
+        return self._ylabel
+
+    @ylabel.setter
+    def ylabel(self, value):
+        self._ylabel = value
 
     @property
     def xlim(self):
@@ -450,6 +475,7 @@ class View(BaseView):
         self._figure = figure
         self._inherited_layers = inherited_layers or OrderedDict()
         self._data = figure._data
+        self.ylabel = figure.ylabel
 
     def show(self, layers):
         self._set_visible(layers, True)

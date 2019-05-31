@@ -18,7 +18,36 @@ __all__ = ['interactive_screenshot']
 
 ROOT = os.path.dirname(__file__)
 TIMEOUT = 60  # seconds
-WAIT_TIME = 2  # seconds
+WAIT_TIME = 0.1  # seconds
+
+SET_VIEW_CODE = """
+var view_ready = false;
+
+function on_view_ready() {{
+    view_ready = true;
+}}
+
+figure.setView({0}, {{'callback': on_view_ready}});
+"""
+
+
+def wait_for_true(app, page, var):
+    """
+    Wait until variable ``var`` is ``true`` in Javascript.
+    """
+    start = time.time()
+    while time.time() - start < TIMEOUT:
+        app.processEvents()
+        ready = page.runJavaScript('(typeof({0}) != "undefined") && {0} == 1;'.format(var), asynchronous=False)
+        if ready:
+            break
+    else:
+        raise ValueError("Timed out while waiting for {0}==true".format(var))
+
+    # Wait a little longer just to be sure
+    start = time.time()
+    while time.time() - start < WAIT_TIME:
+        app.processEvents()
 
 
 def interactive_screenshot(json_filename, prefix):
@@ -53,23 +82,9 @@ def interactive_screenshot(json_filename, prefix):
     web.resize(600, 400)
     web.show()
 
-    # Find the views that are present in the figure
+    # Wait for figure to be ready
 
-    start = time.time()
-    while time.time() - start < TIMEOUT:
-        app.processEvents()
-        ready = page.runJavaScript('(typeof(figure_ready) != "undefined") && figure_ready == 1;', asynchronous=False)
-        if ready:
-            break
-    else:
-        raise ValueError("Timed out while waiting for interactive figure to open")
-
-    # Temporary: at the moment it seems the figure isn't quite ready for real
-    # (https://github.com/aperiosoftware/timeseries.js/issues/65) so just wait
-    # a little longer
-    start = time.time()
-    while time.time() - start < WAIT_TIME:
-        app.processEvents()
+    wait_for_true(app, page, 'figure_ready')
 
     web.save_to_file(prefix + '.png')
 
@@ -79,15 +94,9 @@ def interactive_screenshot(json_filename, prefix):
     if len(views) > 1:
         for view_index in range(1, len(views)):
 
-            page.runJavaScript('figure.setView({0});'.format(view_index), asynchronous=False)
+            page.runJavaScript(SET_VIEW_CODE.format(view_index), asynchronous=False)
 
-            # There is currently no way to know if the view has been actually
-            # refreshed (https://github.com/aperiosoftware/timeseries.js/issues/64)
-            # so just wait a little.
-
-            start = time.time()
-            while time.time() - start < WAIT_TIME:
-                app.processEvents()
+            wait_for_true(app, page, 'view_ready')
 
             web.save_to_file(prefix + '_view{0}.png'.format(view_index))
 

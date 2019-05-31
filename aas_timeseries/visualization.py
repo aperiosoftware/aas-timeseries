@@ -291,17 +291,17 @@ class InteractiveTimeSeriesFigure(BaseView):
         # TODO: allow axis labels to be customized
 
         if self._time_mode == 'absolute':
-            x_title = 'Time'
+            x_title = self.xlabel or 'Time'
             x_type = 'time'
             x_input = 'iso'
             x_output = 'auto'
         elif self._time_mode == 'relative':
-            x_title = 'Relative Time'
+            x_title = self.xlabel or 'Relative Time'
             x_type = 'number'
             x_input = 'seconds'
             x_output = 'auto'
         elif self._time_mode == 'phase':
-            x_title = 'Phase'
+            x_title = self.xlabel or 'Phase'
             x_type = 'number'
             x_input = 'phase'
             x_output = 'unity'
@@ -311,7 +311,7 @@ class InteractiveTimeSeriesFigure(BaseView):
         json['axes'] = [{'orient': 'bottom', 'scale': 'xscale',
                          'title': x_title},
                         {'orient': 'left', 'scale': 'yscale',
-                         'title': 'Intensity'}]
+                         'title': self.ylabel or ''}]
 
         # Scales
         json['scales'] = [{'name': 'xscale',
@@ -351,17 +351,17 @@ class InteractiveTimeSeriesFigure(BaseView):
                 json['_views'].append(view_json)
 
                 if view['view']._time_mode == 'absolute':
-                    x_title = 'Time'
+                    x_title = self.xlabel or 'Time'
                     x_type = 'time'
                     x_input = 'iso'
                     x_output = 'auto'
                 elif view['view']._time_mode == 'relative':
-                    x_title = 'Relative Time'
+                    x_title = self.xlabel or 'Relative Time'
                     x_type = 'number'
                     x_input = 'seconds'
                     x_output = 'auto'
                 elif view['view']._time_mode == 'phase':
-                    x_title = 'Phase'
+                    x_title = self.xlabel or 'Phase'
                     x_type = 'number'
                     x_input = 'phase'
                     x_output = 'unity'
@@ -371,7 +371,7 @@ class InteractiveTimeSeriesFigure(BaseView):
                 view_json['axes'] = [{'orient': 'bottom', 'scale': 'xscale',
                                  'title': x_title},
                                 {'orient': 'left', 'scale': 'yscale',
-                                 'title': 'Intensity'}]
+                                 'title': self.ylabel or ''}]
 
                 view_json['scales'] = [{'name': 'xscale',
                                         'type': x_type,
