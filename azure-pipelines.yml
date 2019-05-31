@@ -4,7 +4,7 @@ jobs:
   parameters:
     name: Linux
     os: linux
-    tox_pre: HOME=/home/testuser DISPLAY=:99.0 sudo -u testuser
+    tox_pre: DISPLAY=:99.0
     tox_test_env: test-image
 
 - template: azure-template.yml

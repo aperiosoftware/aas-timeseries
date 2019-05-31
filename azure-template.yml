@@ -26,7 +26,7 @@ jobs:
     - script: brew install pandoc
       displayName: Installing pandoc
   - ${{ if eq(parameters.os, 'linux') }}:
-    - script: apt-get install -y pandoc
+    - script: sudo apt-get install -y pandoc
       displayName: Installing pandoc
   - ${{ if eq(parameters.os, 'windows') }}:
     - script: choco install pandoc
@@ -51,7 +51,7 @@ jobs:
     displayName: Building docs
 
   - script: |
-        python$(python.version) -m pip install -e .
+        python$(python.version) -m pip install -e . --pre
         python$(python.version) .validate-notebooks.py
     displayName: Validating notebooks
 
