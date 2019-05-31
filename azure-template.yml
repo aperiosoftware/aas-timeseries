@@ -12,7 +12,7 @@ jobs:
     ${{ if eq(parameters.os, 'windows') }}:
       vmImage: vs2017-win2016
   ${{ if eq(parameters.os, 'linux') }}:
-    container: aperiosoftware/aas-timeseries-image-tests:1.0
+    container: aperiosoftware/aas-timeseries-image-tests:1.1
   strategy:
     matrix:
       Python36:
