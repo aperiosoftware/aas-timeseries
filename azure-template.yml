@@ -1,5 +1,6 @@
 parameters:
-  display: ''
+  tox_pre: ''
+  tox_test_env: 'test'
 
 jobs:
 - job: ${{ format(parameters.name) }}
@@ -10,6 +11,8 @@ jobs:
       vmImage: Ubuntu 16.04
     ${{ if eq(parameters.os, 'windows') }}:
       vmImage: vs2017-win2016
+  ${{ if eq(parameters.os, 'linux') }}:
+    container: aperiosoftware/aas-timeseries-image-tests:1.2
   strategy:
     matrix:
       Python36:
@@ -30,28 +33,34 @@ jobs:
       displayName: Installing pandoc
 
   - ${{ if eq(parameters.os, 'linux') }}:
-    - script: /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1920x1200x24 -ac +extension GLX +render -noreset
+
+    - script: start-xvfb
       displayName: Setting up Xvfb
 
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: '$(python.version)'
-      architecture: 'x64'
+    - script: sudo update-alternatives --install /usr/bin/python python /usr/bin/python$(python.version) 1
+      displayName: Setting default Python version
 
-  - script: pip install tox
+  - ${{ if ne(parameters.os, 'linux') }}:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(python.version)'
+        architecture: 'x64'
+
+  - script: python -m pip install tox --user
     displayName: Installing tox
-  - script: ${{ parameters.display }} tox -e test
+
+  - script: ${{ parameters.tox_prefix }} python -m tox -e ${{ parameters.tox_test_env }}
     displayName: Running tests
 
-  - script: tox -e docs
+  - script: ${{ parameters.tox_prefix }} python -m tox -e docs
     displayName: Building docs
 
   - script: |
-        pip install -e .
+        python -m pip install -e . --pre --user
         python .validate-notebooks.py
     displayName: Validating notebooks
 
   - script: |
-        pip install codecov
-        codecov
+        python -m pip install codecov --user
+        python -m codecov
     displayName: Reporting coverage results to codecov

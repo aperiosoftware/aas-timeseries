@@ -6,6 +6,7 @@ from zipfile import ZipFile
 
 import numpy as np
 
+from astropy.time import Time, TimeDelta
 from astropy.table import Table
 from astropy import units as u
 from jupyter_aas_timeseries import TimeSeriesWidget
@@ -31,16 +32,20 @@ class InteractiveTimeSeriesFigure(BaseView):
         The padding inside the axes, in pixels
     resize : bool, optional
         Whether to resize the figure to the available space.
+    title : str, optinal
+        If views are added to the figure, this title is used for the default
+        view, otherwise 'Default' is used.
     """
 
-    def __init__(self, width=600, height=400, padding=36, resize=False):
-        super().__init__()
+    def __init__(self, width=600, height=400, padding=36, resize=False, title=None, time_mode=None):
+        super().__init__(time_mode=time_mode)
         self._width = width
         self._height = height
         self._resize = resize
         self._padding = padding
         self._yunit = 'auto'
         self._views = []
+        self._title = title
 
     @property
     def yunit(self):
@@ -73,11 +78,11 @@ class InteractiveTimeSeriesFigure(BaseView):
         # figure, then in the views, and return the first unit or lack of unit
         # found.
         for layer in self._layers:
-            for (data, colname) in layer._required_data:
+            for (data, colname) in layer._required_ydata:
                 return data.unit(colname)
         for view in self._views:
             for layer in view['view']._layers:
-                for (data, colname) in layer._required_data:
+                for (data, colname) in layer._required_ydata:
                     return data.unit(colname)
 
         # Since we didn't find anything, let's assume that the y axis should
@@ -85,7 +90,7 @@ class InteractiveTimeSeriesFigure(BaseView):
         # and check the units used there.
         return u.one
 
-    def add_view(self, title, description=None, include=None, exclude=None, empty=False):
+    def add_view(self, title, description=None, include=None, exclude=None, empty=False, time_mode=None):
 
         if empty:
             inherited_layers = {}
@@ -102,7 +107,7 @@ class InteractiveTimeSeriesFigure(BaseView):
         else:
             inherited_layers = self._layers.copy()
 
-        view = View(inherited_layers=inherited_layers)
+        view = View(figure=self, inherited_layers=inherited_layers, time_mode=time_mode)
 
         self._views.append({'title': title, 'description': description, 'view': view})
 
@@ -187,10 +192,13 @@ class InteractiveTimeSeriesFigure(BaseView):
         json['$schema'] = 'https://vega.github.io/schema/vega/v4.json'
 
         # Layout
+        json['title'] = self._title or 'Default'
         json['width'] = self._width
         json['height'] = self._height
         json['padding'] = 0
         json['autosize'] = {'type': 'fit', 'resize': self._resize}
+
+        json['_extend'] = {}
 
         # Data
 
@@ -198,13 +206,17 @@ class InteractiveTimeSeriesFigure(BaseView):
         # required. We do this by iterating over the layers in the main
         # figure and the views and keeping track of the set of (data, column)
         # that are needed.
-        required_data = []
+        required_xdata = []
+        required_ydata = []
         for layer in self._layers:
-            required_data.extend(layer._required_data)
+            required_xdata.extend(layer._required_xdata)
+            required_ydata.extend(layer._required_ydata)
         for view in self._views:
             for layer in view['view']._layers:
-                required_data.extend(layer._required_data)
-        required_data = set(required_data)
+                required_xdata.extend(layer._required_xdata)
+                required_ydata.extend(layer._required_ydata)
+        required_xdata = set(required_xdata)
+        required_ydata = set(required_ydata)
 
         json['data'] = []
 
@@ -213,20 +225,29 @@ class InteractiveTimeSeriesFigure(BaseView):
             # Start off by constructing a new table with only the subset of
             # columns required, and the time as an ISO string.
             table = Table()
-            table[data.time_column] = data.time_series.time.isot
+            time_columns = []
             for colname in data.time_series.colnames:
-                if colname != 'time' and (not minimize_data or (data, colname) in required_data):
-                    if (data, colname) in required_data:
+                if (not minimize_data or (data, colname) in required_xdata | required_ydata):
+                    column = data.time_series[colname]
+                    if isinstance(column, Time):
+                        table[colname] = column.isot
+                        time_columns.append(colname)
+                    elif (data, colname) in required_xdata:
+                        try:
+                            table[colname] = data.column_to_values(colname, u.s)
+                        except u.UnitsError:
+                            table[colname] = data.column_to_values(colname, u.one)
+                    elif (data, colname) in required_ydata:
                         table[colname] = data.column_to_values(colname, yunit)
                     else:
-                        table[colname] = data.time_series[colname]
+                        table[colname] = column
 
             # Next up, we create the information for the 'parse' Vega key
             # which indicates the format for each column.
             parse = {}
             for colname in table.colnames:
                 column = table[colname]
-                if colname == data.time_column:
+                if colname in time_columns:
                     parse[colname] = 'date'
                 elif column.dtype.kind in 'fi':
                     parse[colname] = 'number'
@@ -247,7 +268,9 @@ class InteractiveTimeSeriesFigure(BaseView):
                 s = StringIO()
                 table.write(s, format='ascii.basic', delimiter=',')
                 s.seek(0)
-                csv_string = s.read()
+                # NOTE: when embedding the data inside the JSON file, we should
+                # just use simple Unix line endings inside the serialized table.
+                csv_string = s.read().replace('\r\n', '\n')
                 vega['values'] = csv_string
             else:
                 data_filename = 'data_' + data.uuid + '.csv'
@@ -264,14 +287,35 @@ class InteractiveTimeSeriesFigure(BaseView):
             json['marks'].extend(layer.to_vega(yunit=yunit))
 
         # Axes
+
+        # TODO: allow axis labels to be customized
+
+        if self._time_mode == 'absolute':
+            x_title = self.xlabel or 'Time'
+            x_type = 'time'
+            x_input = 'iso'
+            x_output = 'auto'
+        elif self._time_mode == 'relative':
+            x_title = self.xlabel or 'Relative Time'
+            x_type = 'number'
+            x_input = 'seconds'
+            x_output = 'auto'
+        elif self._time_mode == 'phase':
+            x_title = self.xlabel or 'Phase'
+            x_type = 'number'
+            x_input = 'phase'
+            x_output = 'unity'
+
+        json['_extend'] = {'scales': [{'name': 'xscale', 'input': x_input, 'output': x_output}]}
+
         json['axes'] = [{'orient': 'bottom', 'scale': 'xscale',
-                         'title': 'Time'},
+                         'title': x_title},
                         {'orient': 'left', 'scale': 'yscale',
-                         'title': 'Intensity'}]
+                         'title': self.ylabel or ''}]
 
         # Scales
         json['scales'] = [{'name': 'xscale',
-                           'type': 'time',
+                           'type': x_type,
                            'range': 'width',
                            'zero': False,
                            'padding': self._padding},
@@ -283,65 +327,20 @@ class InteractiveTimeSeriesFigure(BaseView):
 
         # Limits
 
-        if self.xlim is None or self.ylim is None:
+        x_domain, y_domain = self._get_domains(yunit)
 
-            all_times = []
-            all_values = []
+        if x_domain is not None:
+            json['scales'][0]['domain'] = x_domain
 
-            # If there are symbol layers, we just use those to determine limits
-            if any(isinstance(layer, Markers) for layer in self._layers):
-                layer_types = (Markers,)
-            else:
-                layer_types = (Range, Line)
-
-            for layer in self._layers:
-                if isinstance(layer, layer_types):
-                    all_times.append(np.min(layer.data.time_series.time))
-                    all_times.append(np.max(layer.data.time_series.time))
-                    all_values.append(np.nanmin(layer.data.column_to_values(layer.column, yunit)))
-                    all_values.append(np.nanmax(layer.data.column_to_values(layer.column, yunit)))
-
-            if len(all_times) > 0:
-                xlim_auto = np.min(all_times), np.max(all_times)
-            else:
-                xlim_auto = None
-
-            if len(all_values) > 0:
-                ylim_auto = float(np.min(all_values)), float(np.max(all_values))
-            else:
-                ylim_auto = None
-
-        if self.xlim is None:
-            xlim = xlim_auto
-        else:
-            xlim = self.xlim
-
-        if self.ylim is None:
-            ylim = ylim_auto
-        else:
-            ylim = self.ylim
-            if isinstance(ylim[0], u.Quantity):
-                ylim = ylim[0].to_value(yunit), ylim[1].to_value(yunit)
-            elif yunit is not u.one:
-                raise u.UnitsError('Limits for y axis are dimensionless but '
-                                 f'expected units of {yunit}')
-
-        xlim = xlim_auto if xlim is None else xlim
-        ylim = ylim_auto if ylim is None else ylim
-
-        if xlim is not None:
-            json['scales'][0]['domain'] = ({'signal': time_to_vega(xlim[0])},
-                                           {'signal': time_to_vega(xlim[1])})
-
-        if ylim is not None:
-            json['scales'][1]['domain'] = list(ylim)
+        if y_domain is not None:
+            json['scales'][1]['domain'] = y_domain
 
         # Views
 
         if len(self._views) > 0:
 
             json['_views'] = []
-            json['_extramarks'] = []
+            json['_extend']['marks'] = []
 
             for view in self._views:
 
@@ -351,8 +350,31 @@ class InteractiveTimeSeriesFigure(BaseView):
 
                 json['_views'].append(view_json)
 
+                if view['view']._time_mode == 'absolute':
+                    x_title = self.xlabel or 'Time'
+                    x_type = 'time'
+                    x_input = 'iso'
+                    x_output = 'auto'
+                elif view['view']._time_mode == 'relative':
+                    x_title = self.xlabel or 'Relative Time'
+                    x_type = 'number'
+                    x_input = 'seconds'
+                    x_output = 'auto'
+                elif view['view']._time_mode == 'phase':
+                    x_title = self.xlabel or 'Phase'
+                    x_type = 'number'
+                    x_input = 'phase'
+                    x_output = 'unity'
+
+                view_json['_extend'] = {'scales': [{'name': 'xscale', 'input': x_input, 'output': x_output}]}
+
+                view_json['axes'] = [{'orient': 'bottom', 'scale': 'xscale',
+                                 'title': x_title},
+                                {'orient': 'left', 'scale': 'yscale',
+                                 'title': self.ylabel or ''}]
+
                 view_json['scales'] = [{'name': 'xscale',
-                                        'type': 'time',
+                                        'type': x_type,
                                         'range': 'width',
                                         'zero': False,
                                         'padding': self._padding},
@@ -363,31 +385,25 @@ class InteractiveTimeSeriesFigure(BaseView):
                                         'padding': self._padding}]
 
                 # Limits, if specified
-                if view['view'].xlim is not None:
-                    view_json['scales'][0]['domain'] = ({'signal': time_to_vega(view['view'].xlim[0])},
-                                                        {'signal': time_to_vega(view['view'].xlim[1])})
 
-                if view['view'].ylim is not None:
-                    ylim = view['view'].ylim
-                    if isinstance(ylim[0], u.Quantity):
-                        ylim = ylim[0].to_value(yunit), ylim[1].to_value(yunit)
-                    elif yunit is not u.one:
-                        title = view['title']
-                        raise u.UnitsError(f"Limits for y axis in view '{title}' "
-                                           f'are dimensionless but expected '
-                                           f'units of {yunit}')
-                    view_json['scales'][1]['domain'] = list(ylim)
+                x_domain, y_domain = view['view']._get_domains(yunit)
+
+                if x_domain is not None:
+                    view_json['scales'][0]['domain'] = x_domain
+
+                if y_domain is not None:
+                    view_json['scales'][1]['domain'] = y_domain
 
                 # layers
 
-                view_json['marks'] = []
+                view_json['markers'] = []
 
                 for layer, settings in view['view']._inherited_layers.items():
-                    view_json['marks'].append({'name': layer.uuid, 'visible': settings['visible']})
+                    view_json['markers'].append({'name': layer.uuid, 'visible': settings['visible']})
 
                 for layer, settings in view['view']._layers.items():
-                    json['_extramarks'].extend(layer.to_vega(yunit=yunit))
-                    view_json['marks'].append({'name': layer.uuid, 'visible': settings['visible']})
+                    json['_extend']['marks'].extend(layer.to_vega(yunit=yunit))
+                    view_json['markers'].append({'name': layer.uuid, 'visible': settings['visible']})
 
         with open(filename, 'w') as f:
             dump(json, f, indent='  ')

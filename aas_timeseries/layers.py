@@ -8,7 +8,7 @@ from aas_timeseries.traits import (Unicode, CFloat, PositiveCFloat, Opacity, Col
 
 __all__ = ['BaseLayer', 'Markers', 'Line', 'Range', 'VerticalLine',
            'VerticalRange', 'HorizontalLine', 'HorizontalRange', 'Text',
-           'time_to_vega']
+           'time_to_vega', 'TimeDependentLayer']
 
 DEFAULT_COLOR = '#000000'
 
@@ -30,6 +30,7 @@ class BaseLayer(HasTraits):
     """
     Base class for any layer object
     """
+
     label = Unicode(help='The label to use to designate the layers in the legend.')
 
     # Potential properties that could be implemented: toolTip
@@ -56,19 +57,35 @@ class BaseLayer(HasTraits):
         """
 
     @property
-    def _required_data(self):
+    def _required_xdata(self):
         """
         Return a list of (data, column) tuples giving the data/columns required
-        for the layer.
+        for the x-axis of the layer.
         """
         return []
+
+    @property
+    def _required_ydata(self):
+        """
+        Return a list of (data, column) tuples giving the data/columns required
+        for the y-axis of the layer.
+        """
+        return []
+
+
+class TimeDependentLayer(BaseLayer):
+    """
+    A common class for all layers that depend on time
+    """
+
+    time_column = ColumnTrait(None, help='The column to use.')
 
 
 MARKER_SHAPES = ['circle', 'square', 'cross', 'diamond', 'triangle-up',
                  'triangle-down', 'triangle-right', 'triangle-left']
 
 
-class Markers(BaseLayer):
+class Markers(TimeDependentLayer):
     """
     A set of time series data points represented by markers.
     """
@@ -100,16 +117,16 @@ class Markers(BaseLayer):
                  'description': self.label,
                  'clip': True,
                  'from': {'data': self.data.uuid},
-                 'encode': {'enter': {'x': {'scale': 'xscale', 'field': self.data.time_column},
+                 'encode': {'enter': {'x': {'scale': 'xscale', 'field': self.time_column},
                                       'y': {'scale': 'yscale', 'field': self.column},
                                       'shape': {'value': self.shape}},
-                            'update':{'shape': {'value': self.shape},
-                                      'size': {'value': self.size},
-                                      'fill': {'value': self.color or DEFAULT_COLOR},
-                                      'fillOpacity': {'value': self.opacity},
-                                      'stroke': {'value': self.edge_color or DEFAULT_COLOR},
-                                      'strokeOpacity': {'value': self.edge_opacity},
-                                      'strokeWidth': {'value': self.edge_width}}}}]
+                            'update': {'shape': {'value': self.shape},
+                                       'size': {'value': self.size},
+                                       'fill': {'value': self.color or DEFAULT_COLOR},
+                                       'fillOpacity': {'value': self.opacity},
+                                       'stroke': {'value': self.edge_color or DEFAULT_COLOR},
+                                       'strokeOpacity': {'value': self.edge_opacity},
+                                       'strokeWidth': {'value': self.edge_width}}}}]
 
         # The error bars (if requested)
         if self.error:
@@ -118,25 +135,29 @@ class Markers(BaseLayer):
                          'description': self.label,
                          'clip': True,
                          'from': {'data': self.data.uuid},
-                         'encode': {'enter': {'x': {'scale': 'xscale', 'field': self.data.time_column},
-                                         'y': {'scale': 'yscale', 'signal': f"datum['{self.column}'] - datum['{self.error}']"},
-                                         'y2': {'scale': 'yscale', 'signal': f"datum['{self.column}'] + datum['{self.error}']"}},
-                               'update':{'shape': {'value': self.shape},
-                                         'width': {'value': 1},
-                                         'fill': {'value': self.color or DEFAULT_COLOR},
-                                         'fillOpacity': {'value': self.opacity},
-                                         'stroke': {'value': self.edge_color or DEFAULT_COLOR},
-                                         'strokeOpacity': {'value': self.edge_opacity},
-                                         'strokeWidth': {'value': self.edge_width}}}})
+                         'encode': {'enter': {'x': {'scale': 'xscale', 'field': self.time_column},
+                                              'y': {'scale': 'yscale', 'signal': f"datum['{self.column}'] - datum['{self.error}']"},
+                                              'y2': {'scale': 'yscale', 'signal': f"datum['{self.column}'] + datum['{self.error}']"}},
+                                    'update': {'shape': {'value': self.shape},
+                                               'width': {'value': 1},
+                                               'fill': {'value': self.color or DEFAULT_COLOR},
+                                               'fillOpacity': {'value': self.opacity},
+                                               'stroke': {'value': self.edge_color or DEFAULT_COLOR},
+                                               'strokeOpacity': {'value': self.edge_opacity},
+                                               'strokeWidth': {'value': self.edge_width}}}})
 
         return vega
 
     @property
-    def _required_data(self):
+    def _required_xdata(self):
+        return [(self.data, self.time_column)]
+
+    @property
+    def _required_ydata(self):
         return [(self.data, self.column), (self.data, self.error)]
 
 
-class Line(BaseLayer):
+class Line(TimeDependentLayer):
     """
     A set of time series data points connected by a line.
     """
@@ -154,7 +175,7 @@ class Line(BaseLayer):
                 'description': self.label,
                 'clip': True,
                 'from': {'data': self.data.uuid},
-                'encode': {'enter': {'x': {'scale': 'xscale', 'field': self.data.time_column},
+                'encode': {'enter': {'x': {'scale': 'xscale', 'field': self.time_column},
                                      'y': {'scale': 'yscale', 'field': self.column},
                                      'stroke': {'value': self.color or DEFAULT_COLOR},
                                      'strokeOpacity': {'value': self.opacity},
@@ -162,11 +183,15 @@ class Line(BaseLayer):
         return [vega]
 
     @property
-    def _required_data(self):
+    def _required_xdata(self):
+        return [(self.data, self.time_column)]
+
+    @property
+    def _required_ydata(self):
         return [(self.data, self.column)]
 
 
-class Range(BaseLayer):
+class Range(TimeDependentLayer):
     """
     An interval defined by lower and upper values as a function of time.
     """
@@ -190,7 +215,7 @@ class Range(BaseLayer):
                 'description': self.label,
                 'clip': True,
                 'from': {'data': self.data.uuid},
-                'encode': {'enter': {'x': {'scale': 'xscale', 'field': self.data.time_column},
+                'encode': {'enter': {'x': {'scale': 'xscale', 'field': self.time_column},
                                      'y': {'scale': 'yscale', 'field': self.column_lower},
                                      'y2': {'scale': 'yscale', 'field': self.column_upper},
                                      'fill': {'value': self.color or DEFAULT_COLOR},
@@ -202,7 +227,11 @@ class Range(BaseLayer):
         return [vega]
 
     @property
-    def _required_data(self):
+    def _required_xdata(self):
+        return [(self.data, self.time_column)]
+
+    @property
+    def _required_ydata(self):
         return [(self.data, self.column_lower), (self.data, self.column_upper)]
 
 

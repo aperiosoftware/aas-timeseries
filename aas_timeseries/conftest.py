@@ -56,6 +56,10 @@ from astropy.tests.helper import enable_deprecations_as_exceptions
 # except NameError:   # Needed to support Astropy <= 1.0.0
 #     pass
 
+import uuid
+import pytest
+from faker import Faker
+
 try:
     import qtpy
 except ImportError:
@@ -63,15 +67,37 @@ except ImportError:
 else:
     QT_INSTALLED = True
 
+UUID4_ORIGINAL = uuid.uuid4
+
 app = None
+
+
+def pytest_addoption(parser):
+    parser.addoption("--image-tests", action="store_true", default=False,
+                     help="Run pixel-by-pixel image tests (this is intended to "
+                          "be used inside a reproducible docker image)")
+
+
+@pytest.fixture(scope="function")
+def image_tests(request):
+    return request.config.getvalue("image_tests")
 
 
 def pytest_configure(config):
     if QT_INSTALLED:
         global app
-        from PyQt5 import QtWebEngineWidgets
+        from qtpy import QtWebEngineWidgets
         from qtpy.QtWidgets import QApplication
         app = QApplication([''])
+
+
+@pytest.fixture(scope='function')
+def deterministic_uuid():
+    faker = Faker()
+    faker.seed(12345)
+    uuid.uuid4 = faker.uuid4
+    yield
+    uuid.uuid4 = UUID4_ORIGINAL
 
 
 def pytest_unconfigure(config):

@@ -1,6 +1,6 @@
 import uuid
 
-from astropy.units import Quantity, UnitsError
+from astropy.units import Quantity, UnitsError, UnitBase
 
 
 class Data:

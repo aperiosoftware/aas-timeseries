@@ -58,13 +58,16 @@ def get_data_server(verbose=False):
             return self._app.host
 
         def start_app(self):
+
             host = socket.gethostbyname('localhost')
-            for port in range(8000, 9000):
-                try:
-                    return app.run(host=host, port=port)
-                except Exception:
-                    pass
-            raise Exception("Could not start up data server")
+
+            # Find free port
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.bind(('localhost', 0))
+            port = sock.getsockname()[1]
+            sock.close()
+
+            return app.run(host=host, port=port)
 
         def serve_file(self, filename, real_name=True, extension=''):
             with open(filename, 'rb') as f:

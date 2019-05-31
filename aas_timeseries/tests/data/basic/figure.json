@@ -1,0 +1,471 @@
+{
+  "$schema": "https://vega.github.io/schema/vega/v4.json",
+  "title": "Default",
+  "width": 600,
+  "height": 400,
+  "padding": 0,
+  "autosize": {
+    "type": "fit",
+    "resize": false
+  },
+  "_extend": {
+    "scales": [
+      {
+        "name": "xscale",
+        "input": "iso",
+        "output": "auto"
+      }
+    ]
+  },
+  "data": [
+    {
+      "name": "daea58ba-4c73-4942-8d87-78e7d340bbcd",
+      "format": {
+        "type": "csv",
+        "parse": {
+          "time": "date",
+          "flux": "number",
+          "error": "number"
+        }
+      },
+      "url": "data_daea58ba-4c73-4942-8d87-78e7d340bbcd.csv"
+    }
+  ],
+  "marks": [
+    {
+      "type": "symbol",
+      "name": "452ec40a-3193-4a54-ae89-71105e503a67",
+      "description": "Markers",
+      "clip": true,
+      "from": {
+        "data": "daea58ba-4c73-4942-8d87-78e7d340bbcd"
+      },
+      "encode": {
+        "enter": {
+          "x": {
+            "scale": "xscale",
+            "field": "time"
+          },
+          "y": {
+            "scale": "yscale",
+            "field": "flux"
+          },
+          "shape": {
+            "value": "circle"
+          }
+        },
+        "update": {
+          "shape": {
+            "value": "circle"
+          },
+          "size": {
+            "value": 20
+          },
+          "fill": {
+            "value": "#a6cee3"
+          },
+          "fillOpacity": {
+            "value": 1
+          },
+          "stroke": {
+            "value": "#000000"
+          },
+          "strokeOpacity": {
+            "value": 0.2
+          },
+          "strokeWidth": {
+            "value": 0
+          }
+        }
+      }
+    },
+    {
+      "type": "line",
+      "name": "5f811cb9-2964-4f8b-afac-aa5090e5e945",
+      "description": "Line",
+      "clip": true,
+      "from": {
+        "data": "daea58ba-4c73-4942-8d87-78e7d340bbcd"
+      },
+      "encode": {
+        "enter": {
+          "x": {
+            "scale": "xscale",
+            "field": "time"
+          },
+          "y": {
+            "scale": "yscale",
+            "field": "flux"
+          },
+          "stroke": {
+            "value": "#000000"
+          },
+          "strokeOpacity": {
+            "value": 1
+          },
+          "strokeWidth": {
+            "value": 1
+          }
+        }
+      }
+    },
+    {
+      "type": "symbol",
+      "name": "42d6cb5c-6ed4-494b-9fc9-e3b11fcff454",
+      "description": "Markers with Errors",
+      "clip": true,
+      "from": {
+        "data": "daea58ba-4c73-4942-8d87-78e7d340bbcd"
+      },
+      "encode": {
+        "enter": {
+          "x": {
+            "scale": "xscale",
+            "field": "time"
+          },
+          "y": {
+            "scale": "yscale",
+            "field": "flux"
+          },
+          "shape": {
+            "value": "circle"
+          }
+        },
+        "update": {
+          "shape": {
+            "value": "circle"
+          },
+          "size": {
+            "value": 20
+          },
+          "fill": {
+            "value": "#b2df8a"
+          },
+          "fillOpacity": {
+            "value": 1
+          },
+          "stroke": {
+            "value": "#000000"
+          },
+          "strokeOpacity": {
+            "value": 0.2
+          },
+          "strokeWidth": {
+            "value": 0
+          }
+        }
+      }
+    },
+    {
+      "type": "rect",
+      "name": "42d6cb5c-6ed4-494b-9fc9-e3b11fcff454",
+      "description": "Markers with Errors",
+      "clip": true,
+      "from": {
+        "data": "daea58ba-4c73-4942-8d87-78e7d340bbcd"
+      },
+      "encode": {
+        "enter": {
+          "x": {
+            "scale": "xscale",
+            "field": "time"
+          },
+          "y": {
+            "scale": "yscale",
+            "signal": "datum['flux'] - datum['error']"
+          },
+          "y2": {
+            "scale": "yscale",
+            "signal": "datum['flux'] + datum['error']"
+          }
+        },
+        "update": {
+          "shape": {
+            "value": "circle"
+          },
+          "width": {
+            "value": 1
+          },
+          "fill": {
+            "value": "#b2df8a"
+          },
+          "fillOpacity": {
+            "value": 1
+          },
+          "stroke": {
+            "value": "#000000"
+          },
+          "strokeOpacity": {
+            "value": 0.2
+          },
+          "strokeWidth": {
+            "value": 0
+          }
+        }
+      }
+    },
+    {
+      "type": "rule",
+      "name": "9c9cea0c-2ca1-4789-a091-250e8fe46024",
+      "description": "Vertical Line",
+      "clip": true,
+      "encode": {
+        "enter": {
+          "x": {
+            "scale": "xscale",
+            "signal": "datetime(2016, 2, 22, 12, 30, 40)"
+          },
+          "y": {
+            "value": 0
+          },
+          "y2": {
+            "field": {
+              "group": "height"
+            }
+          },
+          "strokeWidth": {
+            "value": 1
+          },
+          "stroke": {
+            "value": "#000000"
+          },
+          "strokeOpacity": {
+            "value": 1
+          }
+        }
+      }
+    },
+    {
+      "type": "rect",
+      "name": "bcf74d7a-5ada-4121-afd2-b7a48d9fe5b9",
+      "description": "Vertical Range",
+      "clip": true,
+      "encode": {
+        "enter": {
+          "x": {
+            "scale": "xscale",
+            "signal": "datetime(2016, 2, 22, 12, 30, 31)"
+          },
+          "x2": {
+            "scale": "xscale",
+            "signal": "datetime(2016, 2, 22, 12, 30, 43)"
+          },
+          "y": {
+            "value": 0
+          },
+          "y2": {
+            "field": {
+              "group": "height"
+            }
+          },
+          "fill": {
+            "value": "#33a02c"
+          },
+          "fillOpacity": {
+            "value": 0.2
+          },
+          "stroke": {
+            "value": "#000000"
+          },
+          "strokeOpacity": {
+            "value": 0.2
+          },
+          "strokeWidth": {
+            "value": 0
+          }
+        }
+      }
+    },
+    {
+      "type": "rule",
+      "name": "87f26aee-175f-4cd2-bb9d-58e4f543bbcf",
+      "description": "Horizontal Line",
+      "clip": true,
+      "encode": {
+        "enter": {
+          "x": {
+            "value": 0
+          },
+          "x2": {
+            "field": {
+              "group": "width"
+            }
+          },
+          "y": {
+            "scale": "yscale",
+            "value": 3.0
+          },
+          "strokeWidth": {
+            "value": 1
+          },
+          "stroke": {
+            "value": "#000000"
+          },
+          "strokeOpacity": {
+            "value": 1
+          }
+        }
+      }
+    },
+    {
+      "type": "rect",
+      "name": "95c5fb98-6980-481f-bc42-8d42fa882692",
+      "description": "Horizontal Range",
+      "clip": true,
+      "encode": {
+        "enter": {
+          "x": {
+            "value": 0
+          },
+          "x2": {
+            "field": {
+              "group": "width"
+            }
+          },
+          "y": {
+            "scale": "yscale",
+            "value": 5.0
+          },
+          "y2": {
+            "scale": "yscale",
+            "value": 6.0
+          },
+          "fill": {
+            "value": "#a6cee3"
+          },
+          "fillOpacity": {
+            "value": 0.2
+          },
+          "stroke": {
+            "value": "#000000"
+          },
+          "strokeOpacity": {
+            "value": 0.2
+          },
+          "strokeWidth": {
+            "value": 0
+          }
+        }
+      }
+    },
+    {
+      "type": "area",
+      "name": "34a9af41-25ec-4845-aaa4-857e8101e89a",
+      "description": "Range",
+      "clip": true,
+      "from": {
+        "data": "daea58ba-4c73-4942-8d87-78e7d340bbcd"
+      },
+      "encode": {
+        "enter": {
+          "x": {
+            "scale": "xscale",
+            "field": "time"
+          },
+          "y": {
+            "scale": "yscale",
+            "field": "flux"
+          },
+          "y2": {
+            "scale": "yscale",
+            "field": "error"
+          },
+          "fill": {
+            "value": "#1f78b4"
+          },
+          "fillOpacity": {
+            "value": 0.2
+          },
+          "stroke": {
+            "value": "#000000"
+          },
+          "strokeOpacity": {
+            "value": 0.2
+          },
+          "strokeWidth": {
+            "value": 0
+          }
+        }
+      }
+    },
+    {
+      "type": "text",
+      "name": "d64a3ce0-30a1-46d5-93ed-748bb80e3b0d",
+      "description": "Range",
+      "clip": true,
+      "encode": {
+        "enter": {
+          "x": {
+            "scale": "xscale",
+            "signal": "datetime(2016, 2, 22, 12, 30, 37)"
+          },
+          "y": {
+            "scale": "yscale",
+            "value": 1.0
+          },
+          "text": {
+            "value": "My Label"
+          },
+          "fill": {
+            "value": "#000000"
+          },
+          "fillOpacity": {
+            "value": 1
+          },
+          "fontWeigth": {
+            "value": "normal"
+          },
+          "baseline": {
+            "value": "alphabetic"
+          },
+          "align": {
+            "value": "left"
+          },
+          "angle": {
+            "value": 0.0
+          }
+        }
+      }
+    }
+  ],
+  "axes": [
+    {
+      "orient": "bottom",
+      "scale": "xscale",
+      "title": "Time"
+    },
+    {
+      "orient": "left",
+      "scale": "yscale",
+      "title": "Intensity"
+    }
+  ],
+  "scales": [
+    {
+      "name": "xscale",
+      "type": "time",
+      "range": "width",
+      "zero": false,
+      "padding": 36,
+      "domain": [
+        {
+          "signal": "datetime(2016, 2, 22, 12, 30, 31)"
+        },
+        {
+          "signal": "datetime(2016, 2, 22, 12, 30, 43)"
+        }
+      ]
+    },
+    {
+      "name": "yscale",
+      "type": "linear",
+      "range": "height",
+      "zero": false,
+      "padding": 36,
+      "domain": [
+        1.0,
+        5.0
+      ]
+    }
+  ]
+}

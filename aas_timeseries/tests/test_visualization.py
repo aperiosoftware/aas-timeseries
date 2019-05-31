@@ -1,186 +1,204 @@
+import os
 import pytest
 from traitlets import TraitError
 
 from astropy import units as u
-from astropy_timeseries import TimeSeries
+from astropy.timeseries import TimeSeries
 
 from aas_timeseries.visualization import InteractiveTimeSeriesFigure
+from aas_timeseries.screenshot import interactive_screenshot
+from aas_timeseries.tests.helpers import compare_to_reference_json, DATA
 
 
-def test_basic(tmpdir):
+class TestFigure:
 
-    ts = TimeSeries(time='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
-    ts['flux'] = [1, 2, 3, 4, 5]
-    ts['error'] = [1, 2, 3, 4, 5]
+    def setup_method(self):
 
-    filename = tmpdir.join('figure.json').strpath
+        self.ts = TimeSeries(time_start='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
+        self.ts['flux'] = [1, 2, 3, 4, 5]
+        self.ts['error'] = [1, 2, 3, 4, 5]
 
-    figure = InteractiveTimeSeriesFigure()
-    figure.add_markers(time_series=ts, column='flux', label='Markers')
-    figure.add_line(time_series=ts, column='flux', label='Line')
-    figure.add_markers(time_series=ts, column='flux', error='error', label='Markers with Errors')
-    figure.add_vertical_line(ts.time[3], label='Vertical Line')
-    figure.add_vertical_range(ts.time[0], ts.time[-1], label='Vertical Range')
-    figure.add_horizontal_line(3, label='Horizontal Line')
-    figure.add_horizontal_range(5, 6, label='Horizontal Range')
-    figure.add_range(time_series=ts, column_lower='flux', column_upper='error', label='Range')
-    figure.add_text(time=ts.time[2], value=float(ts['flux'][0]), text='My Label', label='Range')
-    figure.save_vega_json(filename)
+    def test_basic(self, tmpdir, deterministic_uuid, image_tests):
 
+        # A test that uses all the types of layers. This includes an optional
+        # pixel-by-pixel image test that is enabled when using the --image-tests
+        # command-line argument.
 
-def test_save_options(tmpdir):
+        figure = InteractiveTimeSeriesFigure()
+        figure.add_markers(time_series=self.ts, column='flux', label='Markers')
+        figure.add_line(time_series=self.ts, column='flux', label='Line')
+        figure.add_markers(time_series=self.ts, column='flux', error='error', label='Markers with Errors')
+        figure.add_vertical_line(self.ts.time[3], label='Vertical Line')
+        figure.add_vertical_range(self.ts.time[0], self.ts.time[-1], label='Vertical Range')
+        figure.add_horizontal_line(3, label='Horizontal Line')
+        figure.add_horizontal_range(5, 6, label='Horizontal Range')
+        figure.add_range(time_series=self.ts, column_lower='flux', column_upper='error', label='Range')
+        figure.add_text(time=self.ts.time[2], value=float(self.ts['flux'][0]), text='My Label', label='Range')
+        figure.ylabel = 'Intensity'
 
-    ts = TimeSeries(time='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
-    ts['flux'] = [1, 2, 3, 4, 5]
-    ts['error'] = [1, 2, 3, 4, 5]
+        json_file = tmpdir.join('figure.json').strpath
+        plot_prefix = tmpdir.join('figure').strpath
+        figure.save_vega_json(json_file)
+        if image_tests:
+            interactive_screenshot(json_file, plot_prefix)
 
-    figure = InteractiveTimeSeriesFigure()
-    figure.add_markers(time_series=ts, column='flux', label='Markers')
-    figure.save_vega_json(tmpdir.join('figure1.json').strpath, embed_data=True)
-    figure.save_vega_json(tmpdir.join('figure2.json').strpath, minimize_data=False)
-    figure.export_interactive_bundle(tmpdir.join('figure.zip').strpath)
+        compare_to_reference_json(tmpdir, 'basic', image_tests=image_tests)
 
+    def test_save_options_embed(self, tmpdir, deterministic_uuid):
 
-def test_column_validation():
+        # Make sure that the data is correctly embedded inside the JSON file
 
-    # Test the validation provied by ColumnTrait
+        figure = InteractiveTimeSeriesFigure()
+        figure.add_markers(time_series=self.ts, column='flux', label='Markers')
+        figure.save_vega_json(tmpdir.join('figure.json').strpath, embed_data=True)
+        compare_to_reference_json(tmpdir, 'save_options_embed')
 
-    ts = TimeSeries(time='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
-    ts['flux'] = [1, 2, 3, 4, 5]
-    ts['error'] = [1, 2, 3, 4, 5]
+    def test_save_options_no_minimize(self, tmpdir, deterministic_uuid):
 
-    figure = InteractiveTimeSeriesFigure()
-    with pytest.raises(TraitError) as exc:
-        figure.add_markers(time_series=ts, column='flux2', label='Markers')
-    assert exc.value.args[0] == 'flux2 is not a valid column name'
+        # Make sure that the data contains all columns, even those not needed
 
+        figure = InteractiveTimeSeriesFigure()
+        figure.add_markers(time_series=self.ts, column='flux', label='Markers')
 
-def test_limits(tmpdir):
+        figure.save_vega_json(tmpdir.join('figure.json').strpath, minimize_data=False)
+        compare_to_reference_json(tmpdir, 'save_options_no_minimize')
 
-    ts = TimeSeries(time='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
-    ts['flux'] = [1, 2, 3, 4, 5]
-    ts['error'] = [1, 2, 3, 4, 5]
+    def test_save_options_export_bundle(self, tmpdir):
 
-    filename = tmpdir.join('figure.json').strpath
+        # Test saving the figure to a zip bundle
 
-    figure = InteractiveTimeSeriesFigure()
-    figure.add_markers(time_series=ts, column='flux', label='Markers')
-    figure.xlim = ts.time[0], ts.time[-1]
-    figure.ylim = 0, 10
-    figure.save_vega_json(filename)
+        figure = InteractiveTimeSeriesFigure()
+        figure.add_markers(time_series=self.ts, column='flux', label='Markers')
 
-    with pytest.raises(TypeError) as exc:
-        figure.xlim = 0, 1
-    assert exc.value.args[0] == 'xlim should be a typle of two Time instances'
+        figure.export_interactive_bundle(tmpdir.join('figure.zip').strpath)
 
-    with pytest.raises(ValueError) as exc:
-        figure.xlim = ts.time[0], ts.time[-1], ts.time[-4]
-    assert exc.value.args[0] == 'xlim should be a tuple of two elements'
+    def test_column_validation(self):
 
+        # Test the validation provied by ColumnTrait
 
-def test_views(tmpdir):
+        figure = InteractiveTimeSeriesFigure()
+        with pytest.raises(TraitError) as exc:
+            figure.add_markers(time_series=self.ts, column='flux2', label='Markers')
+        assert exc.value.args[0] == 'flux2 is not a valid column name'
 
-    ts = TimeSeries(time='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
-    ts['flux'] = [1, 2, 3, 4, 5]
-    ts['error'] = [1, 2, 3, 4, 5]
+    def test_limits(self, tmpdir):
 
-    filename = tmpdir.join('figure.json').strpath
+        # Test the validation when setting limits
 
-    figure = InteractiveTimeSeriesFigure()
+        filename = tmpdir.join('figure.json').strpath
 
-    markers = figure.add_markers(time_series=ts, column='flux', label='Markers')
-    line = figure.add_line(time_series=ts, column='flux', label='Line')
+        figure = InteractiveTimeSeriesFigure()
+        figure.add_markers(time_series=self.ts, column='flux', label='Markers')
+        figure.xlim = self.ts.time[0], self.ts.time[-1]
+        figure.ylim = 0, 10
+        figure.save_vega_json(filename)
 
-    # By default views inherit all layers from base figure
-    view1 = figure.add_view('Test1')
-    assert figure.layers == [markers, line]
-    assert view1.layers == [markers, line]
+        with pytest.raises(TypeError) as exc:
+            figure.xlim = 0, 1
+        assert exc.value.args[0] == 'xlim should be a typle of two Time instances'
 
-    # And we can add view-specific layers to them
-    vertical = view1.add_vertical_line(ts.time[3], label='Vertical Line')
-    assert figure.layers == [markers, line]
-    assert view1.layers == [markers, line, vertical]
+        with pytest.raises(ValueError) as exc:
+            figure.xlim = self.ts.time[0], self.ts.time[-1], self.ts.time[-4]
+        assert exc.value.args[0] == 'xlim should be a tuple of two elements'
 
-    # But adding layers to the figure after the view is created doesnt' cause
-    # them to get added to the view
-    horizontal = figure.add_horizontal_line(3., label='Horizontal Line')
-    assert figure.layers == [markers, line, horizontal]
-    assert view1.layers == [markers, line, vertical]
+    def test_views(self, tmpdir):
 
-    # We can use include to specify which initial layers to include
-    view2 = figure.add_view('Test1', include=[markers])
-    assert view2.layers == [markers]
+        # Make sure that views contain the right layers
 
-    # and exclude to, well, exclude layers
-    view3 = figure.add_view('Test1', exclude=[markers])
-    assert view3.layers == [line, horizontal]
+        filename = tmpdir.join('figure.json').strpath
 
-    # We also provide an 'empty' shortcut that means include=[]
-    view4 = figure.add_view('Test1', empty=True)
-    assert view4.layers == []
+        figure = InteractiveTimeSeriesFigure()
 
-    # We tell the user if the include or exclude list contain invalid values
-    with pytest.raises(ValueError) as exc:
-        figure.add_view('Test1', exclude=[vertical])
-    assert 'does not exist in base figure' in exc.value.args[0]
-    with pytest.raises(ValueError) as exc:
-        figure.add_view('Test1', include=[vertical])
-    assert 'does not exist in base figure' in exc.value.args[0]
+        markers = figure.add_markers(time_series=self.ts, column='flux', label='Markers')
+        line = figure.add_line(time_series=self.ts, column='flux', label='Line')
 
-    figure.save_vega_json(filename)
+        # By default views inherit all layers from base figure
+        view1 = figure.add_view('Test1')
+        assert figure.layers == [markers, line]
+        assert view1.layers == [markers, line]
 
+        # And we can add view-specific layers to them
+        vertical = view1.add_vertical_line(self.ts.time[3], label='Vertical Line')
+        assert figure.layers == [markers, line]
+        assert view1.layers == [markers, line, vertical]
 
-def test_remove():
+        # But adding layers to the figure after the view is created doesnt' cause
+        # them to get added to the view
+        horizontal = figure.add_horizontal_line(3., label='Horizontal Line')
+        assert figure.layers == [markers, line, horizontal]
+        assert view1.layers == [markers, line, vertical]
 
-    ts = TimeSeries(time='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
-    ts['flux'] = [1, 2, 3, 4, 5]
-    ts['error'] = [1, 2, 3, 4, 5]
+        # We can use include to specify which initial layers to include
+        view2 = figure.add_view('Test1', include=[markers])
+        assert view2.layers == [markers]
 
-    figure = InteractiveTimeSeriesFigure()
-    assert len(figure.layers) == 0
-    markers = figure.add_markers(time_series=ts, column='flux', label='Markers')
-    assert len(figure.layers) == 1
-    line = figure.add_line(time_series=ts, column='flux', label='Line')
-    assert len(figure.layers) == 2
+        # and exclude to, well, exclude layers
+        view3 = figure.add_view('Test1', exclude=[markers])
+        assert view3.layers == [line, horizontal]
 
-    view = figure.add_view('Test view')
-    assert len(view.layers) == 2
+        # We also provide an 'empty' shortcut that means include=[]
+        view4 = figure.add_view('Test1', empty=True)
+        assert view4.layers == []
 
-    range = view.add_vertical_range(ts.time[0], ts.time[-1], label='Vertical Range')
+        # We tell the user if the include or exclude list contain invalid values
+        with pytest.raises(ValueError) as exc:
+            figure.add_view('Test1', exclude=[vertical])
+        assert 'does not exist in base figure' in exc.value.args[0]
+        with pytest.raises(ValueError) as exc:
+            figure.add_view('Test1', include=[vertical])
+        assert 'does not exist in base figure' in exc.value.args[0]
 
-    assert len(figure.layers) == 2
-    assert len(view.layers) == 3
+        figure.save_vega_json(filename)
 
-    # Removing using the .remove() method on a layer removes it from the
-    # figure and all views where it is.
-    line.remove()
-    assert len(figure.layers) == 1
-    assert len(view.layers) == 2
+    def test_remove(self):
 
-    # Removing from the .remove() method on a view removes it just from the view
-    view.remove(markers)
-    assert len(figure.layers) == 1
-    assert len(view.layers) == 1
+        # Make sure that removing layers works correctly
 
-    # Check removing a view-specific layer
-    range.remove()
-    assert len(figure.layers) == 1
-    assert len(view.layers) == 0
+        figure = InteractiveTimeSeriesFigure()
+        assert len(figure.layers) == 0
+        markers = figure.add_markers(time_series=self.ts, column='flux', label='Markers')
+        assert len(figure.layers) == 1
+        line = figure.add_line(time_series=self.ts, column='flux', label='Line')
+        assert len(figure.layers) == 2
 
-    # Remove last layer from figure
-    markers.remove()
+        view = figure.add_view('Test view')
+        assert len(view.layers) == 2
 
-    with pytest.raises(Exception) as exc:
-        markers.remove()
-    assert exc.value.args[0] == "Layer 'Markers' is no longer in a figure/view"
+        range = view.add_vertical_range(self.ts.time[0], self.ts.time[-1], label='Vertical Range')
 
-    with pytest.raises(Exception) as exc:
-        figure.remove(markers)
-    assert exc.value.args[0] == "Layer 'Markers' is not in figure"
+        assert len(figure.layers) == 2
+        assert len(view.layers) == 3
 
-    with pytest.raises(Exception) as exc:
+        # Removing using the .remove() method on a layer removes it from the
+        # figure and all views where it is.
+        line.remove()
+        assert len(figure.layers) == 1
+        assert len(view.layers) == 2
+
+        # Removing from the .remove() method on a view removes it just from the view
         view.remove(markers)
-    assert exc.value.args[0] == "Layer 'Markers' is not in view"
+        assert len(figure.layers) == 1
+        assert len(view.layers) == 1
+
+        # Check removing a view-specific layer
+        range.remove()
+        assert len(figure.layers) == 1
+        assert len(view.layers) == 0
+
+        # Remove last layer from figure
+        markers.remove()
+
+        with pytest.raises(Exception) as exc:
+            markers.remove()
+        assert exc.value.args[0] == "Layer 'Markers' is no longer in a figure/view"
+
+        with pytest.raises(Exception) as exc:
+            figure.remove(markers)
+        assert exc.value.args[0] == "Layer 'Markers' is not in figure"
+
+        with pytest.raises(Exception) as exc:
+            view.remove(markers)
+        assert exc.value.args[0] == "Layer 'Markers' is not in view"
 
 
 class TestUnit:
@@ -190,7 +208,7 @@ class TestUnit:
 
     def setup_method(self, method):
 
-        self.ts = TimeSeries(time='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
+        self.ts = TimeSeries(time_start='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
         self.ts['flux'] = [1, 2, 3, 4, 5]
         self.ts['error'] = [1, 2, 3, 4, 5]
         self.ts['flux_with_unit'] = [1, 2, 3, 4, 5] * u.Jy
@@ -203,7 +221,7 @@ class TestUnit:
         self.figure.add_markers(time_series=self.ts, column='flux_with_unit', label='Markers')
         self.figure.save_vega_json(tmpdir.join('figure.json').strpath)
 
-    def test_full(self, tmpdir):
+    def test_all_markers(self, tmpdir):
         # A test with all the layer types and convertible units
         self.figure.add_markers(time_series=self.ts, column='flux_with_unit', label='Markers')
         self.figure.add_line(time_series=self.ts, column='flux_with_unit', label='Line')
@@ -239,7 +257,7 @@ class TestUnit:
         view.ylim = 1, 6
         with pytest.raises(u.UnitsError) as exc:
             self.figure.save_vega_json(tmpdir.join('figure.json').strpath)
-        assert exc.value.args[0] == "Limits for y axis in view 'my view' are dimensionless but expected units of Jy"
+        assert exc.value.args[0] == "Limits for y axis are dimensionless but expected units of Jy"
 
     def test_two_marker_layer_incompatible(self, tmpdir):
         self.figure.add_markers(time_series=self.ts, column='flux_with_unit', label='Markers')
@@ -283,3 +301,41 @@ class TestUnit:
         with pytest.raises(u.UnitsError) as exc:
             self.figure.save_vega_json(tmpdir.join('figure.json').strpath)
         assert exc.value.args[0] == "'mJy' (spectral flux density) and '' (dimensionless) are not convertible"
+
+
+class TestTimeAxes:
+
+    # Tests related to different time axes
+
+    def setup_method(self):
+        self.ts = TimeSeries.read(os.path.join(DATA, 'phase.csv'), format='ascii.csv')
+        self.ts['error'] = 0.02  # reduce for now
+        self.ts['relative_s'] = self.ts['relative'] * u.s
+
+    def test_mixed_time_axes(self, tmpdir, deterministic_uuid, image_tests):
+
+        # An extensive test that includes different types of time axes in
+        # different views.
+
+        fig = InteractiveTimeSeriesFigure(title='By time of observation')
+        fig.ylabel = 'Radial Velocity (km/s)'
+
+        # Absolute time
+        fig.add_markers(time_series=self.ts, column='flux', color='orange', error='error', size=50)
+        fig.add_line(time_series=self.ts, column='flux', color='black')
+
+        # Phase
+        view1 = fig.add_view(title='By phase', empty=True, time_mode='phase')
+        view1.add_markers(time_series=self.ts, time_column='phase', column='flux', color='orange', error='error', size=50)
+
+        # Relative time
+        view2 = fig.add_view(title='By relative time', empty=True, time_mode='relative')
+        view2.add_markers(time_series=self.ts, time_column='relative_s', column='flux', color='orange', error='error', size=50)
+
+        json_file = tmpdir.join('figure.json').strpath
+        plot_prefix = tmpdir.join('figure').strpath
+        fig.save_vega_json(json_file)
+        if image_tests:
+            interactive_screenshot(json_file, plot_prefix)
+
+        compare_to_reference_json(tmpdir, 'mixed_time_axes', image_tests=image_tests)

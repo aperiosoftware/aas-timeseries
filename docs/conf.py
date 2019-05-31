@@ -26,7 +26,6 @@
 # be accessible, and the documentation will not build correctly.
 
 import datetime
-import os
 import sys
 sys.path.insert(0, '..')
 
@@ -170,4 +169,6 @@ html_js_files = [
     DEFAULT_EMBED_REQUIREJS_URL,
 ]
 
-intersphinx_mapping['astropy_timeseries'] = ('https://astropy_timeseries.readthedocs.io/en/latest/', None)
+# Use developer docs for astropy
+intersphinx_mapping['astropy'] = ('https://docs.astropy.org/en/latest/', None)
+
