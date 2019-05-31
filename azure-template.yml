@@ -44,18 +44,18 @@ jobs:
 
   - script: pip install tox
     displayName: Installing tox
-  - script: ${{ parameters.tox_prefix }} python${{ python.version }} -m tox -e ${{ parameters.tox_test_env }}
+  - script: ${{ parameters.tox_prefix }} python$(python.version) -m tox -e ${{ parameters.tox_test_env }}
     displayName: Running tests
 
-  - script: ${{ parameters.tox_prefix }} python${{ python.version }} -m tox -e docs
+  - script: ${{ parameters.tox_prefix }} python$(python.version) -m tox -e docs
     displayName: Building docs
 
   - script: |
-        python${{ python.version }} -m pip install -e .
-        python${{ python.version }} .validate-notebooks.py
+        python$(python.version) -m pip install -e .
+        python$(python.version) .validate-notebooks.py
     displayName: Validating notebooks
 
   - script: |
-        python${{ python.version }} -m pip install codecov
-        python${{ python.version }} -m codecov
+        python$(python.version) -m pip install codecov
+        python$(python.version) -m codecov
     displayName: Reporting coverage results to codecov
