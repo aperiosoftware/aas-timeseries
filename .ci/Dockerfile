@@ -29,5 +29,9 @@ RUN python3.7 -m pip install pip --upgrade
 RUN python3.6 -m pip install PyQt5==5.12.2 PyQtWebEngine==5.12.1
 RUN python3.7 -m pip install PyQt5==5.12.2 PyQtWebEngine==5.12.1
 
+# Set up locale correctly
+RUN apt-get install -y language-pack-en
+ENV LANG en_US.UTF-8
+
 # Set up user
 RUN useradd -ms /bin/bash testuser
