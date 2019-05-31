@@ -33,8 +33,12 @@ jobs:
       displayName: Installing pandoc
 
   - ${{ if eq(parameters.os, 'linux') }}:
+
     - script: start-xvfb
       displayName: Setting up Xvfb
+
+    - script: sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python$(python.version) 1
+      displayName: Setting default Python version
 
   - ${{ if ne(parameters.os, 'linux') }}:
     - task: UsePythonVersion@0
@@ -42,21 +46,21 @@ jobs:
         versionSpec: '$(python.version)'
         architecture: 'x64'
 
-  - script: pip install tox --user
+  - script: python -m pip install tox --user
     displayName: Installing tox
 
-  - script: ${{ parameters.tox_prefix }} python$(python.version) -m tox -e ${{ parameters.tox_test_env }}
+  - script: ${{ parameters.tox_prefix }} python -m tox -e ${{ parameters.tox_test_env }}
     displayName: Running tests
 
-  - script: ${{ parameters.tox_prefix }} python$(python.version) -m tox -e docs
+  - script: ${{ parameters.tox_prefix }} python -m tox -e docs
     displayName: Building docs
 
   - script: |
-        python$(python.version) -m pip install -e . --pre --user
-        python$(python.version) .validate-notebooks.py
+        python -m pip install -e . --pre --user
+        python .validate-notebooks.py
     displayName: Validating notebooks
 
   - script: |
-        python$(python.version) -m pip install codecov --user
-        python$(python.version) -m codecov
+        python -m pip install codecov --user
+        python -m codecov
     displayName: Reporting coverage results to codecov
