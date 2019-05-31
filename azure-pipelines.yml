@@ -4,17 +4,15 @@ jobs:
   parameters:
     name: Linux
     os: linux
-    display: DISPLAY=:99.0
-    tox_env: test_image
+    tox_pre: HOME=/home/testuser DISPLAY=:99.0 sudo -u testuser
+    tox_test_env: test-image
 
 - template: azure-template.yml
   parameters:
     name: MacOSX
     os: macosx
-    tox_env: test
 
 - template: azure-template.yml
   parameters:
     name: Windows
     os: windows
-    tox_env: test

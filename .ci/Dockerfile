@@ -11,8 +11,9 @@ ENV DISPLAY=:99.0
 
 # Install Python, git, and the dependencies for Qt
 RUN apt-get update
-RUN apt-get install -y xvfb git \
+RUN apt-get install -y xvfb git sudo \
                        python3 python3-dev python3-pip python3-wheel \
+                       python3.7 python3.7-dev \
                        libgtk2.0-dev libgl1-mesa-glx libegl1-mesa libxrandr2 \
                        libxss1 libxcursor1 libxcomposite1 libasound2 libxi6 \
                        libxtst6 libnss3 libxslt1.1 libxkbcommon-x11-0
@@ -21,12 +22,12 @@ RUN apt-get install -y xvfb git \
 COPY start-xvfb /usr/bin
 
 # Install a more recent version of pip
-RUN pip3 install pip --upgrade
+RUN python3.6 -m pip install pip --upgrade
+RUN python3.7 -m pip install pip --upgrade
 
 # Install PyQt5
-RUN pip3 install PyQt5==5.12.2 PyQtWebEngine==5.12.1
+RUN python3.6 -m pip install PyQt5==5.12.2 PyQtWebEngine==5.12.1
+RUN python3.7 -m pip install PyQt5==5.12.2 PyQtWebEngine==5.12.1
 
 # Set up user
 RUN useradd -ms /bin/bash testuser
-USER testuser
-ENV PATH="/home/testuser/.local/bin:${PATH}"

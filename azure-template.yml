@@ -1,5 +1,6 @@
 parameters:
-  display: ''
+  tox_pre: ''
+  tox_test_env: 'test'
 
 jobs:
 - job: ${{ format(parameters.name) }}
@@ -32,28 +33,29 @@ jobs:
       displayName: Installing pandoc
 
   - ${{ if eq(parameters.os, 'linux') }}:
-    - script: /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1920x1200x24 -ac +extension GLX +render -noreset
+    - script: start-xvfb
       displayName: Setting up Xvfb
 
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: '$(python.version)'
-      architecture: 'x64'
+  - ${{ if ne(parameters.os, 'linux') }}:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(python.version)'
+        architecture: 'x64'
 
   - script: pip install tox
     displayName: Installing tox
-  - script: ${{ parameters.display }} tox -e ${{ parameters.tox_env }}
+  - script: ${{ parameters.tox_prefix }} python${{ python.version }} -m tox -e ${{ parameters.tox_test_env }}
     displayName: Running tests
 
-  - script: tox -e docs
+  - script: ${{ parameters.tox_prefix }} python${{ python.version }} -m tox -e docs
     displayName: Building docs
 
   - script: |
-        pip install -e .
-        python .validate-notebooks.py
+        python${{ python.version }} -m pip install -e .
+        python${{ python.version }} .validate-notebooks.py
     displayName: Validating notebooks
 
   - script: |
-        pip install codecov
-        codecov
+        python${{ python.version }} -m pip install codecov
+        python${{ python.version }} -m codecov
     displayName: Reporting coverage results to codecov
