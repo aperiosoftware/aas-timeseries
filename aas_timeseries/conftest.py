@@ -72,10 +72,21 @@ UUID4_ORIGINAL = uuid.uuid4
 app = None
 
 
+def pytest_addoption(parser):
+    parser.addoption("--image-tests", action="store_true", default=False,
+                     help="Run pixel-by-pixel image tests (this is intended to "
+                          "be used inside a reproducible docker image)")
+
+
+@pytest.fixture(scope="function")
+def image_tests(request):
+    return request.config.getvalue("image_tests")
+
+
 def pytest_configure(config):
     if QT_INSTALLED:
         global app
-        from PyQt5 import QtWebEngineWidgets
+        from qtpy import QtWebEngineWidgets
         from qtpy.QtWidgets import QApplication
         app = QApplication([''])
 

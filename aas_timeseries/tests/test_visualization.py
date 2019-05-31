@@ -17,12 +17,15 @@ from aas_timeseries.screenshot import interactive_screenshot
 DATA = os.path.abspath(os.path.join(os.path.dirname(__file__), 'data'))
 
 
-def compare_to_reference_json(tmpdir, test_name):
+def compare_to_reference_json(tmpdir, test_name, image_tests=False):
 
     tmpdir = tmpdir.strpath
 
     expected_files = sorted(os.listdir(os.path.join(DATA, test_name)))
     actual_files = sorted(os.listdir(tmpdir))
+
+    if not image_tests:
+        expected_files = [x for x in expected_files if not x.endswith('.png')]
 
     assert expected_files == actual_files
 
@@ -56,7 +59,7 @@ def compare_to_reference_json(tmpdir, test_name):
             assert expected == actual
 
 
-def test_basic(tmpdir, deterministic_uuid):
+def test_basic(tmpdir, deterministic_uuid, image_tests):
 
     ts = TimeSeries(time_start='2016-03-22T12:30:31', time_delta=3 * u.s, n_samples=5)
     ts['flux'] = [1, 2, 3, 4, 5]
@@ -76,9 +79,10 @@ def test_basic(tmpdir, deterministic_uuid):
     json_file = tmpdir.join('figure.json').strpath
     plot_prefix = tmpdir.join('figure').strpath
     figure.save_vega_json(json_file)
-    interactive_screenshot(json_file, plot_prefix)
+    if image_tests:
+        interactive_screenshot(json_file, plot_prefix)
 
-    compare_to_reference_json(tmpdir, 'basic')
+    compare_to_reference_json(tmpdir, 'basic', image_tests=image_tests)
 
 
 def test_save_options_embed(tmpdir, deterministic_uuid):
