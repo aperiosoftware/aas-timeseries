@@ -26,7 +26,7 @@ jobs:
     - script: brew install pandoc
       displayName: Installing pandoc
   - ${{ if eq(parameters.os, 'linux') }}:
-    - script: sudo apt-get install -y pandoc
+    - script: apt-get install -y pandoc
       displayName: Installing pandoc
   - ${{ if eq(parameters.os, 'windows') }}:
     - script: choco install pandoc
