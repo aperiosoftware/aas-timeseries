@@ -10,6 +10,8 @@ jobs:
       vmImage: Ubuntu 16.04
     ${{ if eq(parameters.os, 'windows') }}:
       vmImage: vs2017-win2016
+  ${{ if eq(parameters.os, 'linux') }}:
+    container: push aperiosoftware/aas-timeseries-image-tests:1.0
   strategy:
     matrix:
       Python36:
@@ -40,7 +42,7 @@ jobs:
 
   - script: pip install tox
     displayName: Installing tox
-  - script: ${{ parameters.display }} tox -e test
+  - script: ${{ parameters.display }} tox -e ${{ parameters.tox_env }}
     displayName: Running tests
 
   - script: tox -e docs

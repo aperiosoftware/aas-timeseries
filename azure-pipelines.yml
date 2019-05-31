@@ -5,13 +5,16 @@ jobs:
     name: Linux
     os: linux
     display: DISPLAY=:99.0
+    tox_env: test_image
 
 - template: azure-template.yml
   parameters:
     name: MacOSX
     os: macosx
+    tox_env: test
 
 - template: azure-template.yml
   parameters:
     name: Windows
     os: windows
+    tox_env: test
