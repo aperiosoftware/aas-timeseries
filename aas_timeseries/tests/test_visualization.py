@@ -34,6 +34,7 @@ class TestFigure:
         figure.add_horizontal_range(5, 6, label='Horizontal Range')
         figure.add_range(time_series=self.ts, column_lower='flux', column_upper='error', label='Range')
         figure.add_text(time=self.ts.time[2], value=float(self.ts['flux'][0]), text='My Label', label='Range')
+        figure.ylabel = 'Intensity'
 
         json_file = tmpdir.join('figure.json').strpath
         plot_prefix = tmpdir.join('figure').strpath

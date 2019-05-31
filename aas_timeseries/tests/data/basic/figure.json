@@ -437,7 +437,7 @@
     {
       "orient": "left",
       "scale": "yscale",
-      "title": ""
+      "title": "Intensity"
     }
   ],
   "scales": [
