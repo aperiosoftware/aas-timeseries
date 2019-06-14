@@ -9,7 +9,6 @@ import numpy as np
 from astropy.time import Time, TimeDelta
 from astropy.table import Table
 from astropy import units as u
-from jupyter_aas_timeseries import TimeSeriesWidget
 
 from aas_timeseries.colors import auto_assign_colors
 from aas_timeseries.views import BaseView, View
@@ -442,6 +441,7 @@ class InteractiveTimeSeriesFigure(BaseView):
         notebook or lab).
         """
         # FIXME: should be able to do without a file
+        from jupyter_aas_timeseries import TimeSeriesWidget
         tmpfile = tempfile.mktemp()
         self.save_vega_json(tmpfile, embed_data=True, minimize_data=True)
         widget = TimeSeriesWidget(tmpfile)
