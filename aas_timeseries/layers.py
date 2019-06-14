@@ -38,7 +38,6 @@ class BaseLayer(HasTraits):
 
     def __init__(self, parent=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.uuid = str(uuid.uuid4())
         # NOTE: we use weakref to avoid circular references
         self.parent = weakref.ref(parent)
 
@@ -115,11 +114,13 @@ class Markers(TimeDependentLayer):
     edge_opacity = Opacity(0.2, help='The opacity of the edge color from 0 (transparent) to 1 (opaque).')
     edge_width = PositiveCFloat(0, help='The thickness of the edge, in pixels.')
 
+    error_width = PositiveCFloat(1, help='The width of the error bar, in pixels.')
+
     def to_vega(self, yunit=None):
 
         # The main markers
         vega = [{'type': 'symbol',
-                 'name': self.uuid,
+                 'name': str(uuid.uuid4()),
                  'description': self.label,
                  'clip': True,
                  'from': {'data': self.data.uuid},
@@ -137,7 +138,7 @@ class Markers(TimeDependentLayer):
         # The error bars (if requested)
         if self.error:
             vega.append({'type': 'rect',
-                         'name': self.uuid,
+                         'name': str(uuid.uuid4()),
                          'description': self.label,
                          'clip': True,
                          'from': {'data': self.data.uuid},
@@ -145,7 +146,7 @@ class Markers(TimeDependentLayer):
                                               'y': {'scale': 'yscale', 'signal': f"datum['{self.column}'] - datum['{self.error}']"},
                                               'y2': {'scale': 'yscale', 'signal': f"datum['{self.column}'] + datum['{self.error}']"}},
                                     'update': {'shape': {'value': self.shape},
-                                               'width': {'value': 1},
+                                               'width': {'value': self.error_width},
                                                'fill': {'value': self.color or DEFAULT_COLOR},
                                                'fillOpacity': {'value': self.opacity},
                                                'stroke': {'value': self.edge_color or DEFAULT_COLOR},
@@ -156,18 +157,18 @@ class Markers(TimeDependentLayer):
 
     def to_mpl(self, ax, yunit=None):
 
-        x = self.data.time_series[self.data.time_column].mjd
+        x = self.data.time_series[self.data.time_column]
         y = self.data.column_to_values(self.column, yunit)
 
-        ax.plot(x, y, '.', markersize=self.size,
-                color=self.color or DEFAULT_COLOR,
-                alpha=self.opacity)
+        ax.scatter(x, y, s=self.size / 2,
+                   color=self.color or DEFAULT_COLOR,
+                   alpha=self.opacity)
 
         if self.error:
             yerr = self.data.column_to_values(self.error, yunit)
             ax.errorbar(x, y, yerr=yerr, fmt='none',
                         color=self.color or DEFAULT_COLOR,
-                        alpha=self.opacity)
+                        alpha=self.opacity, linewidth=self.error_width)
 
     @property
     def _required_xdata(self):
@@ -192,7 +193,7 @@ class Line(TimeDependentLayer):
 
     def to_vega(self, yunit=None):
         vega = {'type': 'line',
-                'name': self.uuid,
+                'name': str(uuid.uuid4()),
                 'description': self.label,
                 'clip': True,
                 'from': {'data': self.data.uuid},
@@ -205,10 +206,11 @@ class Line(TimeDependentLayer):
 
     def to_mpl(self, ax, yunit=None):
 
-        x = self.data.time_series[self.data.time_column].mjd
+        x = self.data.time_series[self.data.time_column]
         y = self.data.column_to_values(self.column, yunit)
 
         ax.plot(x, y, '-',
+                linewidth=self.width,
                 color=self.color or DEFAULT_COLOR,
                 alpha=self.opacity)
 
@@ -241,7 +243,7 @@ class Range(TimeDependentLayer):
 
     def to_vega(self, yunit=None):
         vega = {'type': 'area',
-                'name': self.uuid,
+                'name': str(uuid.uuid4()),
                 'description': self.label,
                 'clip': True,
                 'from': {'data': self.data.uuid},
@@ -258,7 +260,7 @@ class Range(TimeDependentLayer):
 
     def to_mpl(self, ax, yunit=None):
 
-        x = self.data.time_series[self.data.time_column].mjd
+        x = self.data.time_series[self.data.time_column]
         y1 = self.data.column_to_values(self.column_lower, yunit)
         y2 = self.data.column_to_values(self.column_upper, yunit)
 
@@ -291,7 +293,7 @@ class VerticalLine(BaseLayer):
     def to_vega(self, yunit=None):
 
         vega = {'type': 'rule',
-                'name': self.uuid,
+                'name': str(uuid.uuid4()),
                 'description': self.label,
                 'clip': True,
                 'encode': {'enter': {'x': {'scale': 'xscale', 'signal': time_to_vega(self.time)},
@@ -303,7 +305,8 @@ class VerticalLine(BaseLayer):
         return [vega]
 
     def to_mpl(self, ax, yunit=None):
-        ax.axvline(self.time.mjd,
+        ax.axvline(self.time,
+                   linewidth=self.width,
                    color=self.color or DEFAULT_COLOR,
                    alpha=self.opacity)
 
@@ -328,7 +331,7 @@ class VerticalRange(BaseLayer):
     def to_vega(self, yunit=None):
 
         vega = {'type': 'rect',
-                'name': self.uuid,
+                'name': str(uuid.uuid4()),
                 'description': self.label,
                 'clip': True,
                 'encode': {'enter': {'x': {'scale': 'xscale', 'signal': time_to_vega(self.time_lower)},
@@ -344,7 +347,7 @@ class VerticalRange(BaseLayer):
         return [vega]
 
     def to_mpl(self, ax, yunit=None):
-        ax.fill_betweenx([-1e30, 1e30], self.time_lower.mjd, self.time_upper.mjd,
+        ax.fill_betweenx([-1e30, 1e30], self.time_lower, self.time_upper,
                          color=self.color or DEFAULT_COLOR,
                          alpha=self.opacity)
 
@@ -371,7 +374,7 @@ class HorizontalLine(BaseLayer):
         value = self.value.to_value(yunit)
 
         vega = {'type': 'rule',
-                'name': self.uuid,
+                'name': str(uuid.uuid4()),
                 'description': self.label,
                 'clip': True,
                 'encode': {'enter': {'x': {'value': 0},
@@ -386,6 +389,7 @@ class HorizontalLine(BaseLayer):
         if yunit is None:
             yunit = u.one
         ax.axhline(self.value.to_value(yunit),
+                   linewidth=self.width,
                    color=self.color or DEFAULT_COLOR,
                    alpha=self.opacity)
 
@@ -416,7 +420,7 @@ class HorizontalRange(BaseLayer):
         value_upper = self.value_upper.to_value(yunit)
 
         vega = {'type': 'rect',
-                'name': self.uuid,
+                'name': str(uuid.uuid4()),
                 'description': self.label,
                 'clip': True,
                 'encode': {'enter': {'x': {'value': 0},
@@ -467,7 +471,7 @@ class Text(BaseLayer):
         value = self.value.to_value(yunit)
 
         vega = {'type': 'text',
-                'name': self.uuid,
+                'name': str(uuid.uuid4()),
                 'description': self.label,
                 'clip': True,
                 'encode': {'enter': {'x': {'scale': 'xscale', 'signal': time_to_vega(self.time)},
@@ -486,7 +490,7 @@ class Text(BaseLayer):
         if yunit is None:
             yunit = u.one
 
-        x = self.time.mjd
+        x = self.time
         value = self.value.to_value(yunit)
 
         ax.text(x, value, self.text,

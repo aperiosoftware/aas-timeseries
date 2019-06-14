@@ -6,15 +6,20 @@ from zipfile import ZipFile
 
 import numpy as np
 
-from astropy.time import Time, TimeDelta
+from astropy.time import Time
 from astropy.table import Table
 from astropy import units as u
 
+from aas_timeseries.backports import time_support
 from aas_timeseries.colors import auto_assign_colors
 from aas_timeseries.views import BaseView, View
-from aas_timeseries.layers import time_to_vega, Markers, Range, Line
 
 __all__ = ['InteractiveTimeSeriesFigure']
+
+
+def pad_limits(limits, padding):
+    vrange = (limits[1] - limits[0]) * padding
+    return limits[0] - vrange, limits[1] + vrange
 
 
 class InteractiveTimeSeriesFigure(BaseView):
@@ -27,8 +32,8 @@ class InteractiveTimeSeriesFigure(BaseView):
         The preferred width of the figure, in pixels.
     height : int, optional
         The preferred height of the figure, in pixels.
-    padding : int, optional
-        The padding inside the axes, in pixels
+    padding : float, optional
+        The padding inside the axes, as a fraction of the size of the axes
     resize : bool, optional
         Whether to resize the figure to the available space.
     title : str, optinal
@@ -36,7 +41,7 @@ class InteractiveTimeSeriesFigure(BaseView):
         view, otherwise 'Default' is used.
     """
 
-    def __init__(self, width=600, height=400, padding=36, resize=False, title=None, time_mode=None):
+    def __init__(self, width=600, height=400, padding=0.1, resize=False, title=None, time_mode=None):
         super().__init__(time_mode=time_mode)
         self._width = width
         self._height = height
@@ -148,7 +153,13 @@ class InteractiveTimeSeriesFigure(BaseView):
                 fzip.write(os.path.join(tmp_dir, filename), os.path.basename(filename))
             fzip.write(html_file, 'index.html')
 
-    def save_static(self, filename):
+    def save_static(self, filename, override_style=False):
+
+        # Auto-assign colors if needed
+        colors = auto_assign_colors(self._layers)
+        for layer, color in zip(self._layers, colors):
+            if override_style or layer.color is None:
+                layer.color = color
 
         # Start off by figuring out what units we are using on the y axis.
         # Note that we check the consistency of the units only here for
@@ -161,18 +172,26 @@ class InteractiveTimeSeriesFigure(BaseView):
 
         from matplotlib import pyplot as plt
 
-        fig = plt.figure()
-        ax = fig.add_subplot(1, 1, 1)
+        with time_support(format='iso', scale='utc'):
 
-        for layer, settings in self._layers.items():
-            layer.to_mpl(ax, yunit=yunit)
+            fig = plt.figure(figsize=(self._width / 100, self._height / 100))
+            ax = fig.add_axes([0.15, 0.1, 0.8, 0.88])
 
-        dx = 57469.52133101852 - 57469.52119212963
+            for layer, settings in self._layers.items():
+                layer.to_mpl(ax, yunit=yunit)
 
-        ax.set_xlim(57469.52119212963 - 0.1 * dx, 57469.52133101852 + 0.1 * dx)
-        ax.set_ylim(-5, 20)
+        x_domain, y_domain = self._get_domains(yunit, as_vega=False)
 
-        fig.savefig('test.png')
+        ax.set_xlim(*x_domain)
+        ax.set_ylim(*y_domain)
+
+        # Apply padding - we just get the limits again because the x limits
+        # above may have been Time objects, so we get the limits again from
+        # Matplotlib.
+        ax.set_xlim(*pad_limits(ax.get_xlim(), self._padding))
+        ax.set_ylim(*pad_limits(ax.get_ylim(), self._padding))
+
+        fig.savefig(filename)
 
     def save_vega_json(self, filename, embed_data=False, minimize_data=True, override_style=False):
         """
@@ -345,12 +364,12 @@ class InteractiveTimeSeriesFigure(BaseView):
                            'type': x_type,
                            'range': 'width',
                            'zero': False,
-                           'padding': self._padding},
+                           'padding': self._padding * self._width},
                           {'name': 'yscale',
                            'type': 'log' if self.ylog else 'linear',
                            'range': 'height',
                            'zero': False,
-                           'padding': self._padding}]
+                           'padding': self._padding * self._height}]
 
         # Limits
 
@@ -404,12 +423,12 @@ class InteractiveTimeSeriesFigure(BaseView):
                                         'type': x_type,
                                         'range': 'width',
                                         'zero': False,
-                                        'padding': self._padding},
+                                        'padding': self._padding * self._width},
                                        {'name': 'yscale',
                                         'type': 'log' if view['view'].ylog else 'linear',
                                         'range': 'height',
                                         'zero': False,
-                                        'padding': self._padding}]
+                                        'padding': self._padding * self._height}]
 
                 # Limits, if specified
 

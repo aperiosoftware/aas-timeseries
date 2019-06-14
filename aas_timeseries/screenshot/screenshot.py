@@ -79,7 +79,7 @@ def interactive_screenshot(json_filename, prefix):
         app = QtWidgets.QApplication([''])
 
     web, page = get_qt_web_widget(url)
-    web.resize(600, 400)
+    web.resize(figure['width'], figure['height'])
     web.show()
 
     # Wait for figure to be ready

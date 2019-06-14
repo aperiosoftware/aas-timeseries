@@ -395,7 +395,7 @@ class BaseView:
     def layers(self):
         return list(self._layers)
 
-    def _get_domains(self, yunit):
+    def _get_domains(self, yunit, as_vega=True):
 
         if self.xlim is None or self.ylim is None:
 
@@ -453,9 +453,9 @@ class BaseView:
         ylim = ylim_auto if ylim is None else ylim
 
         if xlim is not None:
-            if self._time_mode == 'absolute':
+            if self._time_mode == 'absolute' and as_vega:
                 x_domain = ({'signal': time_to_vega(xlim[0])},
-                                               {'signal': time_to_vega(xlim[1])})
+                            {'signal': time_to_vega(xlim[1])})
             else:
                 x_domain = list(xlim)
         else:
