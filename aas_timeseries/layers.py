@@ -32,6 +32,8 @@ class BaseLayer(HasTraits):
     Base class for any layer object
     """
 
+    n_uuids = 1
+
     label = Unicode(help='The label to use to designate the layers in the legend.')
 
     # Potential properties that could be implemented: toolTip
@@ -40,6 +42,7 @@ class BaseLayer(HasTraits):
         super().__init__(*args, **kwargs)
         # NOTE: we use weakref to avoid circular references
         self.parent = weakref.ref(parent)
+        self.uuids = [str(uuid.uuid4()) for i in range(self.n_uuids)]
 
     def remove(self):
         """
@@ -95,6 +98,8 @@ class Markers(TimeDependentLayer):
     A set of time series data points represented by markers.
     """
 
+    n_uuids = 2
+
     data = DataTrait(help='The time series object containing the data.')
     column = ColumnTrait(None, help='The field in the time series containing the data.')
     error = ColumnTrait(None, help='The field in the time series '
@@ -120,7 +125,7 @@ class Markers(TimeDependentLayer):
 
         # The main markers
         vega = [{'type': 'symbol',
-                 'name': str(uuid.uuid4()),
+                 'name': self.uuids[0],
                  'description': self.label,
                  'clip': True,
                  'from': {'data': self.data.uuid},
@@ -138,7 +143,7 @@ class Markers(TimeDependentLayer):
         # The error bars (if requested)
         if self.error:
             vega.append({'type': 'rect',
-                         'name': str(uuid.uuid4()),
+                         'name': self.uuids[1],
                          'description': self.label,
                          'clip': True,
                          'from': {'data': self.data.uuid},
@@ -157,7 +162,7 @@ class Markers(TimeDependentLayer):
 
     def to_mpl(self, ax, yunit=None):
 
-        x = self.data.time_series[self.data.time_column]
+        x = self.data.time_series[self.time_column]
         y = self.data.column_to_values(self.column, yunit)
 
         ax.scatter(x, y, s=self.size / 2,
@@ -193,7 +198,7 @@ class Line(TimeDependentLayer):
 
     def to_vega(self, yunit=None):
         vega = {'type': 'line',
-                'name': str(uuid.uuid4()),
+                'name': self.uuids[0],
                 'description': self.label,
                 'clip': True,
                 'from': {'data': self.data.uuid},
@@ -206,7 +211,7 @@ class Line(TimeDependentLayer):
 
     def to_mpl(self, ax, yunit=None):
 
-        x = self.data.time_series[self.data.time_column]
+        x = self.data.time_series[self.time_column]
         y = self.data.column_to_values(self.column, yunit)
 
         ax.plot(x, y, '-',
@@ -243,7 +248,7 @@ class Range(TimeDependentLayer):
 
     def to_vega(self, yunit=None):
         vega = {'type': 'area',
-                'name': str(uuid.uuid4()),
+                'name': self.uuids[0],
                 'description': self.label,
                 'clip': True,
                 'from': {'data': self.data.uuid},
@@ -260,7 +265,7 @@ class Range(TimeDependentLayer):
 
     def to_mpl(self, ax, yunit=None):
 
-        x = self.data.time_series[self.data.time_column]
+        x = self.data.time_series[self.time_column]
         y1 = self.data.column_to_values(self.column_lower, yunit)
         y2 = self.data.column_to_values(self.column_upper, yunit)
 
@@ -293,7 +298,7 @@ class VerticalLine(BaseLayer):
     def to_vega(self, yunit=None):
 
         vega = {'type': 'rule',
-                'name': str(uuid.uuid4()),
+                'name': self.uuids[0],
                 'description': self.label,
                 'clip': True,
                 'encode': {'enter': {'x': {'scale': 'xscale', 'signal': time_to_vega(self.time)},
@@ -331,7 +336,7 @@ class VerticalRange(BaseLayer):
     def to_vega(self, yunit=None):
 
         vega = {'type': 'rect',
-                'name': str(uuid.uuid4()),
+                'name': self.uuids[0],
                 'description': self.label,
                 'clip': True,
                 'encode': {'enter': {'x': {'scale': 'xscale', 'signal': time_to_vega(self.time_lower)},
@@ -374,7 +379,7 @@ class HorizontalLine(BaseLayer):
         value = self.value.to_value(yunit)
 
         vega = {'type': 'rule',
-                'name': str(uuid.uuid4()),
+                'name': self.uuids[0],
                 'description': self.label,
                 'clip': True,
                 'encode': {'enter': {'x': {'value': 0},
@@ -420,7 +425,7 @@ class HorizontalRange(BaseLayer):
         value_upper = self.value_upper.to_value(yunit)
 
         vega = {'type': 'rect',
-                'name': str(uuid.uuid4()),
+                'name': self.uuids[0],
                 'description': self.label,
                 'clip': True,
                 'encode': {'enter': {'x': {'value': 0},
@@ -471,7 +476,7 @@ class Text(BaseLayer):
         value = self.value.to_value(yunit)
 
         vega = {'type': 'text',
-                'name': str(uuid.uuid4()),
+                'name': self.uuids[0],
                 'description': self.label,
                 'clip': True,
                 'encode': {'enter': {'x': {'scale': 'xscale', 'signal': time_to_vega(self.time)},

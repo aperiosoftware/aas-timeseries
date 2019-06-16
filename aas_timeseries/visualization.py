@@ -10,6 +10,8 @@ from astropy.time import Time
 from astropy.table import Table
 from astropy import units as u
 
+from astropy.visualization import quantity_support
+
 from aas_timeseries.backports import time_support
 from aas_timeseries.colors import auto_assign_colors
 from aas_timeseries.views import BaseView, View
@@ -153,7 +155,7 @@ class InteractiveTimeSeriesFigure(BaseView):
                 fzip.write(os.path.join(tmp_dir, filename), os.path.basename(filename))
             fzip.write(html_file, 'index.html')
 
-    def save_static(self, filename, override_style=False):
+    def save_static(self, prefix, format='png', override_style=False):
 
         # Auto-assign colors if needed
         colors = auto_assign_colors(self._layers)
@@ -172,26 +174,47 @@ class InteractiveTimeSeriesFigure(BaseView):
 
         from matplotlib import pyplot as plt
 
-        with time_support(format='iso', scale='utc'):
+        for iview, view in enumerate([self] + self._views):
 
-            fig = plt.figure(figsize=(self._width / 100, self._height / 100))
-            ax = fig.add_axes([0.15, 0.1, 0.8, 0.88])
+            if view is not self:
+                view = view['view']
 
-            for layer, settings in self._layers.items():
-                layer.to_mpl(ax, yunit=yunit)
+            with time_support(format='iso', scale='utc'):
+                with quantity_support():
 
-        x_domain, y_domain = self._get_domains(yunit, as_vega=False)
+                    fig = plt.figure(figsize=(self._width / 100, self._height / 100))
+                    ax = fig.add_axes([0.15, 0.1, 0.8, 0.88])
 
-        ax.set_xlim(*x_domain)
-        ax.set_ylim(*y_domain)
+                    for layer in view.layers:
+                        layer.to_mpl(ax, yunit=yunit)
 
-        # Apply padding - we just get the limits again because the x limits
-        # above may have been Time objects, so we get the limits again from
-        # Matplotlib.
-        ax.set_xlim(*pad_limits(ax.get_xlim(), self._padding))
-        ax.set_ylim(*pad_limits(ax.get_ylim(), self._padding))
+            x_domain, y_domain = view._get_domains(yunit, as_vega=False)
 
-        fig.savefig(filename)
+            ax.set_xlim(*x_domain)
+            ax.set_ylim(*y_domain)
+
+            # Apply padding - we just get the limits again because the x limits
+            # above may have been Time objects, so we get the limits again from
+            # Matplotlib.
+            ax.set_xlim(*pad_limits(ax.get_xlim(), self._padding))
+            ax.set_ylim(*pad_limits(ax.get_ylim(), self._padding))
+
+            if view is self:
+                filename = prefix + '.' + format
+            else:
+                filename = prefix + '_view' + str(iview) + '.' + format
+
+            if view._time_mode == 'absolute':
+                x_title = view.xlabel or 'Time'
+            elif view._time_mode == 'relative':
+                x_title = view.xlabel or 'Relative Time'
+            elif view._time_mode == 'phase':
+                x_title = view.xlabel or 'Phase'
+
+            ax.set_xlabel(x_title)
+            ax.set_ylabel(view.ylabel)
+
+            fig.savefig(filename)
 
     def save_vega_json(self, filename, embed_data=False, minimize_data=True, override_style=False):
         """
@@ -445,11 +468,13 @@ class InteractiveTimeSeriesFigure(BaseView):
                 view_json['markers'] = []
 
                 for layer, settings in view['view']._inherited_layers.items():
-                    view_json['markers'].append({'name': layer.uuid, 'visible': settings['visible']})
+                    for uuid in layer.uuids:
+                        view_json['markers'].append({'name': uuid, 'visible': settings['visible']})
 
                 for layer, settings in view['view']._layers.items():
                     json['_extend']['marks'].extend(layer.to_vega(yunit=yunit))
-                    view_json['markers'].append({'name': layer.uuid, 'visible': settings['visible']})
+                    for uuid in layer.uuids:
+                        view_json['markers'].append({'name': uuid, 'visible': settings['visible']})
 
         with open(filename, 'w') as f:
             dump(json, f, indent='  ')
