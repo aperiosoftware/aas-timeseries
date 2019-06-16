@@ -176,6 +176,11 @@ class InteractiveTimeSeriesFigure(BaseView):
 
         from matplotlib import pyplot as plt
 
+        from aas_timeseries.matplotlib import (PhaseAsDegreesLocator,
+                                               PhaseAsDegreesFormatter,
+                                               PhaseAsRadiansLocator,
+                                               PhaseAsRadiansFormatter)
+
         # Start off by figuring out what units we are using on the y axis.
         # Note that we check the consistency of the units only here for
         # simplicity otherwise any guessing while users add/remove layers is
@@ -197,11 +202,15 @@ class InteractiveTimeSeriesFigure(BaseView):
             if view is not self:
                 view = view['view']
 
-            if self.time_format == 'auto':
+            # Note that if we aren't dealing with non-absolute times, the
+            # following settings don't matter since the time_support context
+            # manager won't have any effect.
+
+            if view.time_format == 'auto' or view.time_mode != 'absolute':
                 time_format = 'iso'
                 simplify = True
             else:
-                time_format = self.time_format
+                time_format = view.time_format
                 simplify = False
 
             with time_support(format=time_format, simplify=simplify, scale='utc'):
@@ -213,6 +222,14 @@ class InteractiveTimeSeriesFigure(BaseView):
 
                     for layer in view.layers:
                         layer.to_mpl(ax, yunit=yunit)
+
+            if view.time_mode == 'phase':
+                if view.time_format == 'degrees':
+                    ax.xaxis.set_major_locator(PhaseAsDegreesLocator())
+                    ax.xaxis.set_major_formatter(PhaseAsDegreesFormatter())
+                elif view.time_format == 'radians':
+                    ax.xaxis.set_major_locator(PhaseAsRadiansLocator())
+                    ax.xaxis.set_major_formatter(PhaseAsRadiansFormatter())
 
             x_domain, y_domain = view._get_domains(yunit, as_vega=False)
 

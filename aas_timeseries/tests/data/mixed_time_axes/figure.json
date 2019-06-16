@@ -191,6 +191,196 @@
         },
         "name": "d64a3ce0-30a1-46d5-93ed-748bb80e3b0d",
         "type": "rect"
+      },
+      {
+        "clip": true,
+        "description": "",
+        "encode": {
+          "enter": {
+            "shape": {
+              "value": "circle"
+            },
+            "x": {
+              "field": "phase",
+              "scale": "xscale"
+            },
+            "y": {
+              "field": "flux",
+              "scale": "yscale"
+            }
+          },
+          "update": {
+            "fill": {
+              "value": "#ffa500"
+            },
+            "fillOpacity": {
+              "value": 1
+            },
+            "shape": {
+              "value": "circle"
+            },
+            "size": {
+              "value": 50
+            },
+            "stroke": {
+              "value": "#000000"
+            },
+            "strokeOpacity": {
+              "value": 0.2
+            },
+            "strokeWidth": {
+              "value": 0
+            }
+          }
+        },
+        "from": {
+          "data": "daea58ba-4c73-4942-8d87-78e7d340bbcd"
+        },
+        "name": "6a5ccc2c-be99-454a-b0d2-6ee6fa928906",
+        "type": "symbol"
+      },
+      {
+        "clip": true,
+        "description": "",
+        "encode": {
+          "enter": {
+            "x": {
+              "field": "phase",
+              "scale": "xscale"
+            },
+            "y": {
+              "scale": "yscale",
+              "signal": "datum['flux'] - datum['error']"
+            },
+            "y2": {
+              "scale": "yscale",
+              "signal": "datum['flux'] + datum['error']"
+            }
+          },
+          "update": {
+            "fill": {
+              "value": "#ffa500"
+            },
+            "fillOpacity": {
+              "value": 1
+            },
+            "shape": {
+              "value": "circle"
+            },
+            "stroke": {
+              "value": "#000000"
+            },
+            "strokeOpacity": {
+              "value": 0.2
+            },
+            "strokeWidth": {
+              "value": 0
+            },
+            "width": {
+              "value": 1
+            }
+          }
+        },
+        "from": {
+          "data": "daea58ba-4c73-4942-8d87-78e7d340bbcd"
+        },
+        "name": "a9f559fc-f0b3-4868-81b5-577d00e266d0",
+        "type": "rect"
+      },
+      {
+        "clip": true,
+        "description": "",
+        "encode": {
+          "enter": {
+            "shape": {
+              "value": "circle"
+            },
+            "x": {
+              "field": "phase",
+              "scale": "xscale"
+            },
+            "y": {
+              "field": "flux",
+              "scale": "yscale"
+            }
+          },
+          "update": {
+            "fill": {
+              "value": "#ffa500"
+            },
+            "fillOpacity": {
+              "value": 1
+            },
+            "shape": {
+              "value": "circle"
+            },
+            "size": {
+              "value": 50
+            },
+            "stroke": {
+              "value": "#000000"
+            },
+            "strokeOpacity": {
+              "value": 0.2
+            },
+            "strokeWidth": {
+              "value": 0
+            }
+          }
+        },
+        "from": {
+          "data": "daea58ba-4c73-4942-8d87-78e7d340bbcd"
+        },
+        "name": "a70ce1b5-1978-4ec0-895c-fa4f2dcaabd5",
+        "type": "symbol"
+      },
+      {
+        "clip": true,
+        "description": "",
+        "encode": {
+          "enter": {
+            "x": {
+              "field": "phase",
+              "scale": "xscale"
+            },
+            "y": {
+              "scale": "yscale",
+              "signal": "datum['flux'] - datum['error']"
+            },
+            "y2": {
+              "scale": "yscale",
+              "signal": "datum['flux'] + datum['error']"
+            }
+          },
+          "update": {
+            "fill": {
+              "value": "#ffa500"
+            },
+            "fillOpacity": {
+              "value": 1
+            },
+            "shape": {
+              "value": "circle"
+            },
+            "stroke": {
+              "value": "#000000"
+            },
+            "strokeOpacity": {
+              "value": 0.2
+            },
+            "strokeWidth": {
+              "value": 0
+            },
+            "width": {
+              "value": 1
+            }
+          }
+        },
+        "from": {
+          "data": "daea58ba-4c73-4942-8d87-78e7d340bbcd"
+        },
+        "name": "ae711399-e2b2-448b-9b1b-cf726a1eccda",
+        "type": "rect"
       }
     ],
     "scales": [
@@ -276,7 +466,7 @@
         {
           "orient": "bottom",
           "scale": "xscale",
-          "title": "Relative Time"
+          "title": "Relative Time (s)"
         },
         {
           "orient": "left",
@@ -321,6 +511,194 @@
         }
       ],
       "title": "By relative time"
+    },
+    {
+      "_extend": {
+        "scales": [
+          {
+            "input": "iso",
+            "name": "xscale",
+            "output": "jd"
+          }
+        ]
+      },
+      "axes": [
+        {
+          "orient": "bottom",
+          "scale": "xscale",
+          "title": "Time"
+        },
+        {
+          "orient": "left",
+          "scale": "yscale",
+          "title": "Radial Velocity (km/s)"
+        }
+      ],
+      "description": null,
+      "markers": [
+        {
+          "name": "452ec40a-3193-4a54-ae89-71105e503a67",
+          "visible": true
+        },
+        {
+          "name": "5f811cb9-2964-4f8b-afac-aa5090e5e945",
+          "visible": true
+        },
+        {
+          "name": "42d6cb5c-6ed4-494b-9fc9-e3b11fcff454",
+          "visible": true
+        }
+      ],
+      "name": "d1f6f86c-029a-4245-bb91-433a6aa79987",
+      "scales": [
+        {
+          "domain": [
+            {
+              "signal": "datetime(2016, 2, 22, 12, 30, 28)"
+            },
+            {
+              "signal": "datetime(2016, 2, 22, 12, 34, 20)"
+            }
+          ],
+          "name": "xscale",
+          "padding": 36,
+          "range": "width",
+          "type": "time",
+          "zero": false
+        },
+        {
+          "domain": [
+            0.69,
+            1.02
+          ],
+          "name": "yscale",
+          "padding": 36,
+          "range": "height",
+          "type": "linear",
+          "zero": false
+        }
+      ],
+      "title": "Julian Date formatting"
+    },
+    {
+      "_extend": {
+        "scales": [
+          {
+            "input": "phase",
+            "name": "xscale",
+            "output": "degrees"
+          }
+        ]
+      },
+      "axes": [
+        {
+          "orient": "bottom",
+          "scale": "xscale",
+          "title": "Phase"
+        },
+        {
+          "orient": "left",
+          "scale": "yscale",
+          "title": "Radial Velocity (km/s)"
+        }
+      ],
+      "description": null,
+      "markers": [
+        {
+          "name": "6a5ccc2c-be99-454a-b0d2-6ee6fa928906",
+          "visible": true
+        },
+        {
+          "name": "a9f559fc-f0b3-4868-81b5-577d00e266d0",
+          "visible": true
+        }
+      ],
+      "name": "d1f6f86c-029a-4245-bb91-433a6aa79987",
+      "scales": [
+        {
+          "domain": [
+            0.0,
+            1.0
+          ],
+          "name": "xscale",
+          "padding": 36,
+          "range": "width",
+          "type": "number",
+          "zero": false
+        },
+        {
+          "domain": [
+            0.69,
+            1.02
+          ],
+          "name": "yscale",
+          "padding": 36,
+          "range": "height",
+          "type": "linear",
+          "zero": false
+        }
+      ],
+      "title": "By phase"
+    },
+    {
+      "_extend": {
+        "scales": [
+          {
+            "input": "phase",
+            "name": "xscale",
+            "output": "radians"
+          }
+        ]
+      },
+      "axes": [
+        {
+          "orient": "bottom",
+          "scale": "xscale",
+          "title": "Phase"
+        },
+        {
+          "orient": "left",
+          "scale": "yscale",
+          "title": "Radial Velocity (km/s)"
+        }
+      ],
+      "description": null,
+      "markers": [
+        {
+          "name": "a70ce1b5-1978-4ec0-895c-fa4f2dcaabd5",
+          "visible": true
+        },
+        {
+          "name": "ae711399-e2b2-448b-9b1b-cf726a1eccda",
+          "visible": true
+        }
+      ],
+      "name": "d1f6f86c-029a-4245-bb91-433a6aa79987",
+      "scales": [
+        {
+          "domain": [
+            0.0,
+            1.0
+          ],
+          "name": "xscale",
+          "padding": 36,
+          "range": "width",
+          "type": "number",
+          "zero": false
+        },
+        {
+          "domain": [
+            0.69,
+            1.02
+          ],
+          "name": "yscale",
+          "padding": 36,
+          "range": "height",
+          "type": "linear",
+          "zero": false
+        }
+      ],
+      "title": "By phase"
     }
   ],
   "autosize": {

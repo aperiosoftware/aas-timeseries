@@ -13,7 +13,7 @@ __all__ = ['BaseView', 'View']
 
 VALID_TIME_FORMATS = {}
 VALID_TIME_FORMATS['absolute'] = ['jd', 'mjd', 'unix', 'iso', 'auto']
-VALID_TIME_FORMATS['relative'] = ['seconds', 'auto']
+VALID_TIME_FORMATS['relative'] = ['seconds']
 VALID_TIME_FORMATS['phase'] = ['unity', 'degrees', 'radians']
 
 VALID_TIME_MODES = ['absolute', 'relative', 'phase']
@@ -41,6 +41,10 @@ class BaseView:
         self._time_mode = time_mode or 'absolute'
 
     @property
+    def time_mode(self):
+        return self._time_mode
+
+    @property
     def ylog(self):
         """
         Whether the y axis is linear (`False`) or log (`True`).
@@ -63,7 +67,7 @@ class BaseView:
             if self._time_mode == 'absolute':
                 return 'Time'
             elif self._time_mode == 'relative':
-                return 'Relative Time'
+                return 'Relative Time (s)'
             elif self._time_mode == 'phase':
                 return 'Phase'
 

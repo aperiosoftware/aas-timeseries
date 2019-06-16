@@ -41,6 +41,7 @@ class TestFigure:
         figure.save_vega_json(json_file)
         if image_tests:
             interactive_screenshot(json_file, plot_prefix)
+            figure.save_static(plot_prefix + '_mpl', format='png')
 
         compare_to_reference_json(tmpdir, 'basic', image_tests=image_tests)
 
@@ -332,29 +333,25 @@ class TestTimeAxes:
         view2 = fig.add_view(title='By relative time', empty=True, time_mode='relative')
         view2.add_markers(time_series=self.ts, time_column='relative_s', column='flux', color='orange', error='error', size=50)
 
-        default_format = tmpdir.mkdir('default')
+        # Absolute time (with julian date formatting)
+        view3 = fig.add_view(title='Julian Date formatting')
+        view3.time_format = 'jd'
 
-        json_file = default_format.join('figure.json').strpath
-        plot_prefix = default_format.join('figure').strpath
+        # Phase (with degrees formatting)
+        view4 = fig.add_view(title='By phase', empty=True, time_mode='phase')
+        view4.add_markers(time_series=self.ts, time_column='phase', column='flux', color='orange', error='error', size=50)
+        view4.time_format = 'degrees'
+
+        # Phase (with radians formatting)
+        view5 = fig.add_view(title='By phase', empty=True, time_mode='phase')
+        view5.add_markers(time_series=self.ts, time_column='phase', column='flux', color='orange', error='error', size=50)
+        view5.time_format = 'radians'
+
+        json_file = tmpdir.join('figure.json').strpath
+        plot_prefix = tmpdir.join('figure').strpath
         fig.save_vega_json(json_file)
         if image_tests:
             interactive_screenshot(json_file, plot_prefix)
             fig.save_static(plot_prefix + '_mpl', format='png')
 
-        compare_to_reference_json(default_format, 'mixed_time_axes', image_tests=image_tests)
-
-        # Customize the time formats
-        fig.time_format = 'jd'
-        view1.time_format = 'degrees'
-        view2.time_format = 'seconds'
-
-        custom_format = tmpdir.mkdir('custom')
-
-        json_file = custom_format.join('figure.json').strpath
-        plot_prefix = custom_format.join('figure').strpath
-        fig.save_vega_json(json_file)
-        if image_tests:
-            interactive_screenshot(json_file, plot_prefix)
-            fig.save_static(plot_prefix + '_mpl', format='png')
-
-        compare_to_reference_json(custom_format, 'mixed_time_axes_custom_format', image_tests=image_tests)
+        compare_to_reference_json(tmpdir, 'mixed_time_axes', image_tests=image_tests)
