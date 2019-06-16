@@ -6,6 +6,8 @@ from zipfile import ZipFile
 
 import numpy as np
 
+from matplotlib import pyplot as plt
+
 from astropy.time import Time
 from astropy.table import Table
 from astropy import units as u
@@ -15,6 +17,10 @@ from astropy.visualization import quantity_support
 from aas_timeseries.backports import time_support
 from aas_timeseries.colors import auto_assign_colors
 from aas_timeseries.views import BaseView, View
+from aas_timeseries.matplotlib import (PhaseAsDegreesLocator,
+                                       PhaseAsDegreesFormatter,
+                                       PhaseAsRadiansLocator,
+                                       PhaseAsRadiansFormatter)
 
 __all__ = ['InteractiveTimeSeriesFigure']
 
@@ -173,13 +179,6 @@ class InteractiveTimeSeriesFigure(BaseView):
             If this parameter is set to `True`, all colors will be reassigned,
             even if already set.
         """
-
-        from matplotlib import pyplot as plt
-
-        from aas_timeseries.matplotlib import (PhaseAsDegreesLocator,
-                                               PhaseAsDegreesFormatter,
-                                               PhaseAsRadiansLocator,
-                                               PhaseAsRadiansFormatter)
 
         # Start off by figuring out what units we are using on the y axis.
         # Note that we check the consistency of the units only here for

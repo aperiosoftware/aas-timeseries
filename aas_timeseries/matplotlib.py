@@ -11,8 +11,13 @@ class PhaseAsDegreesLocator(MaxNLocator):
     Matplotlib locator for phases in the range [0:1] as degrees.
     """
 
+    def __init__(self, *args, **kwargs):
+        kwargs['nbins'] = 6
+        super().__init__(*args, **kwargs)
+
     def tick_values(self, vmin, vmax):
-        return super().tick_values(vmin * 360, vmax * 360) / 360.
+        values = super().tick_values(vmin * 360, vmax * 360) / 360.
+        return values[(values >= vmin) & (values <= vmax)]
 
     def __call__(self):
         vmin, vmax = self.axis.get_view_interval()
@@ -38,12 +43,13 @@ class PhaseAsRadiansLocator(MaxNLocator):
 
     def tick_values(self, vmin, vmax):
         if vmax - vmin > 2.:
-            return super().tick_values(vmin, vmax)
+            values = super().tick_values(vmin, vmax)
         else:
             power = np.ceil(-np.log2((vmax - vmin) / 3))
             imin = np.floor(vmin / 2**-power)
             imax = np.ceil(vmax / 2**-power)
-            return np.arange(imin, imax + 1) * 2 ** -power
+            values = np.arange(imin, imax + 1) * 2 ** -power
+        return values[(values >= vmin) & (values <= vmax)]
 
     def __call__(self):
         vmin, vmax = self.axis.get_view_interval()
