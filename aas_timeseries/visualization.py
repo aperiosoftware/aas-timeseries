@@ -43,7 +43,7 @@ class InteractiveTimeSeriesFigure(BaseView):
         view, otherwise 'Default' is used.
     """
 
-    def __init__(self, width=600, height=400, padding=0.1, resize=False, title=None, time_mode=None):
+    def __init__(self, width=600, height=400, padding=36, resize=False, title=None, time_mode=None):
         super().__init__(time_mode=time_mode)
         self._width = width
         self._height = height
@@ -196,8 +196,8 @@ class InteractiveTimeSeriesFigure(BaseView):
             # Apply padding - we just get the limits again because the x limits
             # above may have been Time objects, so we get the limits again from
             # Matplotlib.
-            ax.set_xlim(*pad_limits(ax.get_xlim(), self._padding))
-            ax.set_ylim(*pad_limits(ax.get_ylim(), self._padding))
+            ax.set_xlim(*pad_limits(ax.get_xlim(), self._padding / self._width))
+            ax.set_ylim(*pad_limits(ax.get_ylim(), self._padding / self._height))
 
             if view is self:
                 filename = prefix + '.' + format
@@ -349,135 +349,100 @@ class InteractiveTimeSeriesFigure(BaseView):
 
             json['data'].append(vega)
 
-        # Layers
+        for view in [self] + self._views:
 
-        json['marks'] = []
-        for layer, settings in self._layers.items():
-            json['marks'].extend(layer.to_vega(yunit=yunit))
+            if view is self:
 
-        # Axes
+                view_json = json
 
-        # TODO: allow axis labels to be customized
-
-        if self._time_mode == 'absolute':
-            x_title = self.xlabel or 'Time'
-            x_type = 'time'
-            x_input = 'iso'
-            x_output = 'auto'
-        elif self._time_mode == 'relative':
-            x_title = self.xlabel or 'Relative Time'
-            x_type = 'number'
-            x_input = 'seconds'
-            x_output = 'auto'
-        elif self._time_mode == 'phase':
-            x_title = self.xlabel or 'Phase'
-            x_type = 'number'
-            x_input = 'phase'
-            x_output = 'unity'
-
-        json['_extend'] = {'scales': [{'name': 'xscale', 'input': x_input, 'output': x_output}]}
-
-        json['axes'] = [{'orient': 'bottom', 'scale': 'xscale',
-                         'title': x_title},
-                        {'orient': 'left', 'scale': 'yscale',
-                         'title': self.ylabel or ''}]
-
-        # Scales
-        json['scales'] = [{'name': 'xscale',
-                           'type': x_type,
-                           'range': 'width',
-                           'zero': False,
-                           'padding': self._padding * self._width},
-                          {'name': 'yscale',
-                           'type': 'log' if self.ylog else 'linear',
-                           'range': 'height',
-                           'zero': False,
-                           'padding': self._padding * self._height}]
-
-        # Limits
-
-        x_domain, y_domain = self._get_domains(yunit)
-
-        if x_domain is not None:
-            json['scales'][0]['domain'] = x_domain
-
-        if y_domain is not None:
-            json['scales'][1]['domain'] = y_domain
-
-        # Views
-
-        if len(self._views) > 0:
-
-            json['_views'] = []
-            json['_extend']['marks'] = []
-
-            for view in self._views:
+            else:
 
                 view_json = {'name': self.uuid,
                              'title': view['title'],
                              'description': view['description']}
 
+                if '_views' not in json:
+                    json['_views'] = []
+
                 json['_views'].append(view_json)
 
-                if view['view']._time_mode == 'absolute':
-                    x_title = self.xlabel or 'Time'
-                    x_type = 'time'
-                    x_input = 'iso'
-                    x_output = 'auto'
-                elif view['view']._time_mode == 'relative':
-                    x_title = self.xlabel or 'Relative Time'
-                    x_type = 'number'
-                    x_input = 'seconds'
-                    x_output = 'auto'
-                elif view['view']._time_mode == 'phase':
-                    x_title = self.xlabel or 'Phase'
-                    x_type = 'number'
-                    x_input = 'phase'
-                    x_output = 'unity'
+                view = view['view']
 
-                view_json['_extend'] = {'scales': [{'name': 'xscale', 'input': x_input, 'output': x_output}]}
+            if view._time_mode == 'absolute':
+                x_title = self.xlabel or 'Time'
+                x_type = 'time'
+                x_input = 'iso'
+                x_output = 'auto'
+            elif view._time_mode == 'relative':
+                x_title = self.xlabel or 'Relative Time'
+                x_type = 'number'
+                x_input = 'seconds'
+                x_output = 'auto'
+            elif view._time_mode == 'phase':
+                x_title = self.xlabel or 'Phase'
+                x_type = 'number'
+                x_input = 'phase'
+                x_output = 'unity'
 
-                view_json['axes'] = [{'orient': 'bottom', 'scale': 'xscale',
-                                 'title': x_title},
-                                {'orient': 'left', 'scale': 'yscale',
-                                 'title': self.ylabel or ''}]
+            view_json['_extend'] = {'scales': [{'name': 'xscale',
+                                                'input': x_input,
+                                                'output': x_output}]}
 
-                view_json['scales'] = [{'name': 'xscale',
-                                        'type': x_type,
-                                        'range': 'width',
-                                        'zero': False,
-                                        'padding': self._padding * self._width},
-                                       {'name': 'yscale',
-                                        'type': 'log' if view['view'].ylog else 'linear',
-                                        'range': 'height',
-                                        'zero': False,
-                                        'padding': self._padding * self._height}]
+            view_json['axes'] = [{'orient': 'bottom',
+                                  'scale': 'xscale',
+                                  'title': x_title},
+                                 {'orient': 'left',
+                                  'scale': 'yscale',
+                                  'title': view.ylabel or ''}]
 
-                # Limits, if specified
+            view_json['scales'] = [{'name': 'xscale',
+                                    'type': x_type,
+                                    'range': 'width',
+                                    'zero': False,
+                                    'padding': self._padding},
+                                   {'name': 'yscale',
+                                    'type': 'log' if view.ylog else 'linear',
+                                    'range': 'height',
+                                    'zero': False,
+                                    'padding': self._padding}]
 
-                x_domain, y_domain = view['view']._get_domains(yunit)
+            # Limits, if specified
 
-                if x_domain is not None:
-                    view_json['scales'][0]['domain'] = x_domain
+            x_domain, y_domain = view._get_domains(yunit)
 
-                if y_domain is not None:
-                    view_json['scales'][1]['domain'] = y_domain
+            if x_domain is not None:
+                view_json['scales'][0]['domain'] = x_domain
 
-                # layers
+            if y_domain is not None:
+                view_json['scales'][1]['domain'] = y_domain
+
+            if view is self:
+
+                view_json['marks'] = []
+                for layer, settings in self._layers.items():
+                    view_json['marks'].extend(layer.to_vega(yunit=yunit))
+
+            else:
 
                 view_json['markers'] = []
 
-                for layer, settings in view['view']._inherited_layers.items():
+                for layer, settings in view._inherited_layers.items():
                     for uuid in layer.uuids:
-                        view_json['markers'].append({'name': uuid, 'visible': settings['visible']})
+                        view_json['markers'].append({'name': uuid,
+                                                     'visible': settings['visible']})
 
-                for layer, settings in view['view']._layers.items():
+                for layer, settings in view._layers.items():
+
+                    if 'marks' not in json['_extend']:
+                        json['_extend']['marks'] = []
+
                     json['_extend']['marks'].extend(layer.to_vega(yunit=yunit))
                     for uuid in layer.uuids:
-                        view_json['markers'].append({'name': uuid, 'visible': settings['visible']})
+                        view_json['markers'].append({'name': uuid,
+                                                     'visible': settings['visible']})
 
         with open(filename, 'w') as f:
-            dump(json, f, indent='  ')
+            dump(json, f, indent='  ', sort_keys=True)
 
     def preview_interactive(self):
         """
