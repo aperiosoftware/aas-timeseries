@@ -150,6 +150,13 @@ class InteractiveTimeSeriesFigure(BaseView):
                 fzip.write(os.path.join(tmp_dir, filename), os.path.basename(filename))
             fzip.write(html_file, 'index.html')
 
+    def _check_colors(self, override_style=False):
+        # Auto-assign colors if needed
+        colors = auto_assign_colors(self._layers)
+        for layer, color in zip(self._layers, colors):
+            if override_style or layer.color is None:
+                layer.color = color
+
     def save_static(self, prefix, format='png', override_style=False):
         """
         Export the figure to one or more static files using Matplotlib. If views
@@ -173,16 +180,10 @@ class InteractiveTimeSeriesFigure(BaseView):
         # Note that we check the consistency of the units only here for
         # simplicity otherwise any guessing while users add/remove layers is
         # tricky.
-        if self.yunit == 'auto':
-            yunit = self._guess_yunit()
-        else:
-            yunit = self.yunit
+        yunit = self._guess_yunit() if self.yunit == 'auto' else self.yunit
 
         # Auto-assign colors if needed
-        colors = auto_assign_colors(self._layers)
-        for layer, color in zip(self._layers, colors):
-            if override_style or layer.color is None:
-                layer.color = color
+        self._check_colors(override_style=override_style)
 
         # We now loop over the main figure and all the views, and produce a
         # static plot for each of them.
@@ -253,16 +254,10 @@ class InteractiveTimeSeriesFigure(BaseView):
         # Note that we check the consistency of the units only here for
         # simplicity otherwise any guessing while users add/remove layers is
         # tricky.
-        if self.yunit == 'auto':
-            yunit = self._guess_yunit()
-        else:
-            yunit = self.yunit
+        yunit = self._guess_yunit() if self.yunit == 'auto' else self.yunit
 
         # Auto-assign colors if needed
-        colors = auto_assign_colors(self._layers)
-        for layer, color in zip(self._layers, colors):
-            if override_style or layer.color is None:
-                layer.color = color
+        self._check_colors(override_style=override_style)
 
         # Start off with empty JSON
         json = {}
@@ -304,7 +299,9 @@ class InteractiveTimeSeriesFigure(BaseView):
             # Start off by constructing a new table with only the subset of
             # columns required, and the time as an ISO string. Note that we
             # need to explicitly specify that we want UTC times, then add the
-            # Z suffix since this isn't something that astropy does.
+            # Z suffix since this isn't something that astropy does. For
+            # relative times we always use seconds, and for phases we use values
+            # in the range [0:1].
             table = Table()
             time_columns = []
             for colname in data.time_series.colnames:
@@ -360,6 +357,9 @@ class InteractiveTimeSeriesFigure(BaseView):
                 vega['url'] = data_filename
 
             json['data'].append(vega)
+
+        # At this point, we loop over all the views (including the main view
+        # given by self) and output these to the JSON.
 
         for view in [self] + self._views:
 
