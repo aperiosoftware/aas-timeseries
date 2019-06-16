@@ -339,6 +339,7 @@ class TestTimeAxes:
         fig.save_vega_json(json_file)
         if image_tests:
             interactive_screenshot(json_file, plot_prefix)
+            fig.save_static(plot_prefix + '_mpl', format='png')
 
         compare_to_reference_json(default_format, 'mixed_time_axes', image_tests=image_tests)
 
@@ -354,5 +355,6 @@ class TestTimeAxes:
         fig.save_vega_json(json_file)
         if image_tests:
             interactive_screenshot(json_file, plot_prefix)
+            fig.save_static(plot_prefix + '_mpl', format='png')
 
         compare_to_reference_json(custom_format, 'mixed_time_axes_custom_format', image_tests=image_tests)

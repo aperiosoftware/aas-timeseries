@@ -209,7 +209,7 @@ class InteractiveTimeSeriesFigure(BaseView):
 
                     fig = plt.figure(figsize=(self._width / 100,
                                               self._height / 100))
-                    ax = fig.add_axes([0.15, 0.1, 0.8, 0.88])
+                    ax = fig.add_axes([0.15, 0.12, 0.8, 0.86])
 
                     for layer in view.layers:
                         layer.to_mpl(ax, yunit=yunit)
