@@ -1,148 +1,152 @@
 {
   "$schema": "https://vega.github.io/schema/vega/v4.json",
-  "title": "Default",
-  "width": 600,
-  "height": 400,
-  "padding": 0,
-  "autosize": {
-    "type": "fit",
-    "resize": false
-  },
   "_extend": {
     "scales": [
       {
-        "name": "xscale",
         "input": "iso",
+        "name": "xscale",
         "output": "auto"
       }
     ]
   },
+  "autosize": {
+    "resize": false,
+    "type": "fit"
+  },
+  "axes": [
+    {
+      "orient": "bottom",
+      "scale": "xscale",
+      "title": "Time"
+    },
+    {
+      "orient": "left",
+      "scale": "yscale",
+      "title": "Intensity"
+    }
+  ],
   "data": [
     {
-      "name": "daea58ba-4c73-4942-8d87-78e7d340bbcd",
       "format": {
-        "type": "csv",
         "parse": {
-          "time": "date",
+          "error": "number",
           "flux": "number",
-          "error": "number"
-        }
+          "time": "date"
+        },
+        "type": "csv"
       },
+      "name": "daea58ba-4c73-4942-8d87-78e7d340bbcd",
       "url": "data_daea58ba-4c73-4942-8d87-78e7d340bbcd.csv"
     }
   ],
+  "height": 400,
   "marks": [
     {
-      "type": "symbol",
-      "name": "452ec40a-3193-4a54-ae89-71105e503a67",
-      "description": "Markers",
       "clip": true,
-      "from": {
-        "data": "daea58ba-4c73-4942-8d87-78e7d340bbcd"
-      },
+      "description": "Markers",
       "encode": {
         "enter": {
-          "x": {
-            "scale": "xscale",
-            "field": "time"
-          },
-          "y": {
-            "scale": "yscale",
-            "field": "flux"
-          },
           "shape": {
             "value": "circle"
+          },
+          "x": {
+            "field": "time",
+            "scale": "xscale"
+          },
+          "y": {
+            "field": "flux",
+            "scale": "yscale"
           }
         },
         "update": {
-          "shape": {
-            "value": "circle"
-          },
-          "size": {
-            "value": 20
-          },
           "fill": {
             "value": "#a6cee3"
           },
           "fillOpacity": {
             "value": 1
           },
-          "stroke": {
-            "value": "#000000"
-          },
-          "strokeOpacity": {
-            "value": 0.2
-          },
-          "strokeWidth": {
-            "value": 0
-          }
-        }
-      }
-    },
-    {
-      "type": "line",
-      "name": "5f811cb9-2964-4f8b-afac-aa5090e5e945",
-      "description": "Line",
-      "clip": true,
-      "from": {
-        "data": "daea58ba-4c73-4942-8d87-78e7d340bbcd"
-      },
-      "encode": {
-        "enter": {
-          "x": {
-            "scale": "xscale",
-            "field": "time"
-          },
-          "y": {
-            "scale": "yscale",
-            "field": "flux"
-          },
-          "stroke": {
-            "value": "#000000"
-          },
-          "strokeOpacity": {
-            "value": 1
-          },
-          "strokeWidth": {
-            "value": 1
-          }
-        }
-      }
-    },
-    {
-      "type": "symbol",
-      "name": "42d6cb5c-6ed4-494b-9fc9-e3b11fcff454",
-      "description": "Markers with Errors",
-      "clip": true,
-      "from": {
-        "data": "daea58ba-4c73-4942-8d87-78e7d340bbcd"
-      },
-      "encode": {
-        "enter": {
-          "x": {
-            "scale": "xscale",
-            "field": "time"
-          },
-          "y": {
-            "scale": "yscale",
-            "field": "flux"
-          },
-          "shape": {
-            "value": "circle"
-          }
-        },
-        "update": {
           "shape": {
             "value": "circle"
           },
           "size": {
             "value": 20
           },
+          "stroke": {
+            "value": "#000000"
+          },
+          "strokeOpacity": {
+            "value": 0.2
+          },
+          "strokeWidth": {
+            "value": 0
+          }
+        }
+      },
+      "from": {
+        "data": "daea58ba-4c73-4942-8d87-78e7d340bbcd"
+      },
+      "name": "452ec40a-3193-4a54-ae89-71105e503a67",
+      "type": "symbol"
+    },
+    {
+      "clip": true,
+      "description": "Line",
+      "encode": {
+        "enter": {
+          "stroke": {
+            "value": "#000000"
+          },
+          "strokeOpacity": {
+            "value": 1
+          },
+          "strokeWidth": {
+            "value": 1
+          },
+          "x": {
+            "field": "time",
+            "scale": "xscale"
+          },
+          "y": {
+            "field": "flux",
+            "scale": "yscale"
+          }
+        }
+      },
+      "from": {
+        "data": "daea58ba-4c73-4942-8d87-78e7d340bbcd"
+      },
+      "name": "5f811cb9-2964-4f8b-afac-aa5090e5e945",
+      "type": "line"
+    },
+    {
+      "clip": true,
+      "description": "Markers with Errors",
+      "encode": {
+        "enter": {
+          "shape": {
+            "value": "circle"
+          },
+          "x": {
+            "field": "time",
+            "scale": "xscale"
+          },
+          "y": {
+            "field": "flux",
+            "scale": "yscale"
+          }
+        },
+        "update": {
           "fill": {
             "value": "#b2df8a"
           },
           "fillOpacity": {
             "value": 1
+          },
+          "shape": {
+            "value": "circle"
+          },
+          "size": {
+            "value": 20
           },
           "stroke": {
             "value": "#000000"
@@ -154,21 +158,21 @@
             "value": 0
           }
         }
-      }
-    },
-    {
-      "type": "rect",
-      "name": "42d6cb5c-6ed4-494b-9fc9-e3b11fcff454",
-      "description": "Markers with Errors",
-      "clip": true,
+      },
       "from": {
         "data": "daea58ba-4c73-4942-8d87-78e7d340bbcd"
       },
+      "name": "42d6cb5c-6ed4-494b-9fc9-e3b11fcff454",
+      "type": "symbol"
+    },
+    {
+      "clip": true,
+      "description": "Markers with Errors",
       "encode": {
         "enter": {
           "x": {
-            "scale": "xscale",
-            "field": "time"
+            "field": "time",
+            "scale": "xscale"
           },
           "y": {
             "scale": "yscale",
@@ -180,17 +184,14 @@
           }
         },
         "update": {
-          "shape": {
-            "value": "circle"
-          },
-          "width": {
-            "value": 1
-          },
           "fill": {
             "value": "#b2df8a"
           },
           "fillOpacity": {
             "value": 1
+          },
+          "shape": {
+            "value": "circle"
           },
           "stroke": {
             "value": "#000000"
@@ -200,17 +201,32 @@
           },
           "strokeWidth": {
             "value": 0
+          },
+          "width": {
+            "value": 1
           }
         }
-      }
+      },
+      "from": {
+        "data": "daea58ba-4c73-4942-8d87-78e7d340bbcd"
+      },
+      "name": "42d6cb5c-6ed4-494b-9fc9-e3b11fcff454",
+      "type": "rect"
     },
     {
-      "type": "rule",
-      "name": "9c9cea0c-2ca1-4789-a091-250e8fe46024",
-      "description": "Vertical Line",
       "clip": true,
+      "description": "Vertical Line",
       "encode": {
         "enter": {
+          "stroke": {
+            "value": "#000000"
+          },
+          "strokeOpacity": {
+            "value": 1
+          },
+          "strokeWidth": {
+            "value": 1
+          },
           "x": {
             "scale": "xscale",
             "signal": "datetime(2016, 2, 22, 12, 30, 40)"
@@ -222,26 +238,32 @@
             "field": {
               "group": "height"
             }
+          }
+        }
+      },
+      "name": "9c9cea0c-2ca1-4789-a091-250e8fe46024",
+      "type": "rule"
+    },
+    {
+      "clip": true,
+      "description": "Vertical Range",
+      "encode": {
+        "enter": {
+          "fill": {
+            "value": "#33a02c"
           },
-          "strokeWidth": {
-            "value": 1
+          "fillOpacity": {
+            "value": 0.2
           },
           "stroke": {
             "value": "#000000"
           },
           "strokeOpacity": {
-            "value": 1
-          }
-        }
-      }
-    },
-    {
-      "type": "rect",
-      "name": "bcf74d7a-5ada-4121-afd2-b7a48d9fe5b9",
-      "description": "Vertical Range",
-      "clip": true,
-      "encode": {
-        "enter": {
+            "value": 0.2
+          },
+          "strokeWidth": {
+            "value": 0
+          },
           "x": {
             "scale": "xscale",
             "signal": "datetime(2016, 2, 22, 12, 30, 31)"
@@ -257,9 +279,50 @@
             "field": {
               "group": "height"
             }
+          }
+        }
+      },
+      "name": "bcf74d7a-5ada-4121-afd2-b7a48d9fe5b9",
+      "type": "rect"
+    },
+    {
+      "clip": true,
+      "description": "Horizontal Line",
+      "encode": {
+        "enter": {
+          "stroke": {
+            "value": "#000000"
           },
+          "strokeOpacity": {
+            "value": 1
+          },
+          "strokeWidth": {
+            "value": 1
+          },
+          "x": {
+            "value": 0
+          },
+          "x2": {
+            "field": {
+              "group": "width"
+            }
+          },
+          "y": {
+            "scale": "yscale",
+            "value": 3.0
+          }
+        }
+      },
+      "name": "87f26aee-175f-4cd2-bb9d-58e4f543bbcf",
+      "type": "rule"
+    },
+    {
+      "clip": true,
+      "description": "Horizontal Range",
+      "encode": {
+        "enter": {
           "fill": {
-            "value": "#33a02c"
+            "value": "#a6cee3"
           },
           "fillOpacity": {
             "value": 0.2
@@ -272,48 +335,7 @@
           },
           "strokeWidth": {
             "value": 0
-          }
-        }
-      }
-    },
-    {
-      "type": "rule",
-      "name": "87f26aee-175f-4cd2-bb9d-58e4f543bbcf",
-      "description": "Horizontal Line",
-      "clip": true,
-      "encode": {
-        "enter": {
-          "x": {
-            "value": 0
           },
-          "x2": {
-            "field": {
-              "group": "width"
-            }
-          },
-          "y": {
-            "scale": "yscale",
-            "value": 3.0
-          },
-          "strokeWidth": {
-            "value": 1
-          },
-          "stroke": {
-            "value": "#000000"
-          },
-          "strokeOpacity": {
-            "value": 1
-          }
-        }
-      }
-    },
-    {
-      "type": "rect",
-      "name": "95c5fb98-6980-481f-bc42-8d42fa882692",
-      "description": "Horizontal Range",
-      "clip": true,
-      "encode": {
-        "enter": {
           "x": {
             "value": 0
           },
@@ -329,47 +351,17 @@
           "y2": {
             "scale": "yscale",
             "value": 6.0
-          },
-          "fill": {
-            "value": "#a6cee3"
-          },
-          "fillOpacity": {
-            "value": 0.2
-          },
-          "stroke": {
-            "value": "#000000"
-          },
-          "strokeOpacity": {
-            "value": 0.2
-          },
-          "strokeWidth": {
-            "value": 0
           }
         }
-      }
+      },
+      "name": "95c5fb98-6980-481f-bc42-8d42fa882692",
+      "type": "rect"
     },
     {
-      "type": "area",
-      "name": "34a9af41-25ec-4845-aaa4-857e8101e89a",
-      "description": "Range",
       "clip": true,
-      "from": {
-        "data": "daea58ba-4c73-4942-8d87-78e7d340bbcd"
-      },
+      "description": "Range",
       "encode": {
         "enter": {
-          "x": {
-            "scale": "xscale",
-            "field": "time"
-          },
-          "y": {
-            "scale": "yscale",
-            "field": "flux"
-          },
-          "y2": {
-            "scale": "yscale",
-            "field": "error"
-          },
           "fill": {
             "value": "#1f78b4"
           },
@@ -384,27 +376,40 @@
           },
           "strokeWidth": {
             "value": 0
-          }
-        }
-      }
-    },
-    {
-      "type": "text",
-      "name": "d64a3ce0-30a1-46d5-93ed-748bb80e3b0d",
-      "description": "Range",
-      "clip": true,
-      "encode": {
-        "enter": {
+          },
           "x": {
-            "scale": "xscale",
-            "signal": "datetime(2016, 2, 22, 12, 30, 37)"
+            "field": "time",
+            "scale": "xscale"
           },
           "y": {
-            "scale": "yscale",
-            "value": 1.0
+            "field": "flux",
+            "scale": "yscale"
           },
-          "text": {
-            "value": "My Label"
+          "y2": {
+            "field": "error",
+            "scale": "yscale"
+          }
+        }
+      },
+      "from": {
+        "data": "daea58ba-4c73-4942-8d87-78e7d340bbcd"
+      },
+      "name": "34a9af41-25ec-4845-aaa4-857e8101e89a",
+      "type": "area"
+    },
+    {
+      "clip": true,
+      "description": "Range",
+      "encode": {
+        "enter": {
+          "align": {
+            "value": "left"
+          },
+          "angle": {
+            "value": 0.0
+          },
+          "baseline": {
+            "value": "alphabetic"
           },
           "fill": {
             "value": "#000000"
@@ -415,38 +420,26 @@
           "fontWeigth": {
             "value": "normal"
           },
-          "baseline": {
-            "value": "alphabetic"
+          "text": {
+            "value": "My Label"
           },
-          "align": {
-            "value": "left"
+          "x": {
+            "scale": "xscale",
+            "signal": "datetime(2016, 2, 22, 12, 30, 37)"
           },
-          "angle": {
-            "value": 0.0
+          "y": {
+            "scale": "yscale",
+            "value": 1.0
           }
         }
-      }
+      },
+      "name": "d64a3ce0-30a1-46d5-93ed-748bb80e3b0d",
+      "type": "text"
     }
   ],
-  "axes": [
-    {
-      "orient": "bottom",
-      "scale": "xscale",
-      "title": "Time"
-    },
-    {
-      "orient": "left",
-      "scale": "yscale",
-      "title": "Intensity"
-    }
-  ],
+  "padding": 0,
   "scales": [
     {
-      "name": "xscale",
-      "type": "time",
-      "range": "width",
-      "zero": false,
-      "padding": 36,
       "domain": [
         {
           "signal": "datetime(2016, 2, 22, 12, 30, 31)"
@@ -454,18 +447,25 @@
         {
           "signal": "datetime(2016, 2, 22, 12, 30, 43)"
         }
-      ]
+      ],
+      "name": "xscale",
+      "padding": 36,
+      "range": "width",
+      "type": "time",
+      "zero": false
     },
     {
-      "name": "yscale",
-      "type": "linear",
-      "range": "height",
-      "zero": false,
-      "padding": 36,
       "domain": [
         1.0,
         5.0
-      ]
+      ],
+      "name": "yscale",
+      "padding": 36,
+      "range": "height",
+      "type": "linear",
+      "zero": false
     }
-  ]
+  ],
+  "title": "Default",
+  "width": 600
 }

@@ -1,56 +1,36 @@
 {
   "$schema": "https://vega.github.io/schema/vega/v4.json",
-  "title": "By time of observation",
-  "width": 600,
-  "height": 400,
-  "padding": 0,
-  "autosize": {
-    "type": "fit",
-    "resize": false
-  },
   "_extend": {
-    "scales": [
-      {
-        "name": "xscale",
-        "input": "iso",
-        "output": "auto"
-      }
-    ],
     "marks": [
       {
-        "type": "symbol",
-        "name": "9c9cea0c-2ca1-4789-a091-250e8fe46024",
-        "description": "",
         "clip": true,
-        "from": {
-          "data": "daea58ba-4c73-4942-8d87-78e7d340bbcd"
-        },
+        "description": "",
         "encode": {
           "enter": {
-            "x": {
-              "scale": "xscale",
-              "field": "phase"
-            },
-            "y": {
-              "scale": "yscale",
-              "field": "flux"
-            },
             "shape": {
               "value": "circle"
+            },
+            "x": {
+              "field": "phase",
+              "scale": "xscale"
+            },
+            "y": {
+              "field": "flux",
+              "scale": "yscale"
             }
           },
           "update": {
-            "shape": {
-              "value": "circle"
-            },
-            "size": {
-              "value": 50
-            },
             "fill": {
               "value": "#ffa500"
             },
             "fillOpacity": {
               "value": 1
+            },
+            "shape": {
+              "value": "circle"
+            },
+            "size": {
+              "value": 50
             },
             "stroke": {
               "value": "#000000"
@@ -62,21 +42,21 @@
               "value": 0
             }
           }
-        }
-      },
-      {
-        "type": "rect",
-        "name": "9c9cea0c-2ca1-4789-a091-250e8fe46024",
-        "description": "",
-        "clip": true,
+        },
         "from": {
           "data": "daea58ba-4c73-4942-8d87-78e7d340bbcd"
         },
+        "name": "9c9cea0c-2ca1-4789-a091-250e8fe46024",
+        "type": "symbol"
+      },
+      {
+        "clip": true,
+        "description": "",
         "encode": {
           "enter": {
             "x": {
-              "scale": "xscale",
-              "field": "phase"
+              "field": "phase",
+              "scale": "xscale"
             },
             "y": {
               "scale": "yscale",
@@ -88,17 +68,14 @@
             }
           },
           "update": {
-            "shape": {
-              "value": "circle"
-            },
-            "width": {
-              "value": 1
-            },
             "fill": {
               "value": "#ffa500"
             },
             "fillOpacity": {
               "value": 1
+            },
+            "shape": {
+              "value": "circle"
             },
             "stroke": {
               "value": "#000000"
@@ -108,45 +85,48 @@
             },
             "strokeWidth": {
               "value": 0
+            },
+            "width": {
+              "value": 1
             }
           }
-        }
-      },
-      {
-        "type": "symbol",
-        "name": "87f26aee-175f-4cd2-bb9d-58e4f543bbcf",
-        "description": "",
-        "clip": true,
+        },
         "from": {
           "data": "daea58ba-4c73-4942-8d87-78e7d340bbcd"
         },
+        "name": "9c9cea0c-2ca1-4789-a091-250e8fe46024",
+        "type": "rect"
+      },
+      {
+        "clip": true,
+        "description": "",
         "encode": {
           "enter": {
-            "x": {
-              "scale": "xscale",
-              "field": "relative_s"
-            },
-            "y": {
-              "scale": "yscale",
-              "field": "flux"
-            },
             "shape": {
               "value": "circle"
+            },
+            "x": {
+              "field": "relative_s",
+              "scale": "xscale"
+            },
+            "y": {
+              "field": "flux",
+              "scale": "yscale"
             }
           },
           "update": {
+            "fill": {
+              "value": "#ffa500"
+            },
+            "fillOpacity": {
+              "value": 1
+            },
             "shape": {
               "value": "circle"
             },
             "size": {
               "value": 50
             },
-            "fill": {
-              "value": "#ffa500"
-            },
-            "fillOpacity": {
-              "value": 1
-            },
             "stroke": {
               "value": "#000000"
             },
@@ -157,21 +137,21 @@
               "value": 0
             }
           }
-        }
-      },
-      {
-        "type": "rect",
-        "name": "87f26aee-175f-4cd2-bb9d-58e4f543bbcf",
-        "description": "",
-        "clip": true,
+        },
         "from": {
           "data": "daea58ba-4c73-4942-8d87-78e7d340bbcd"
         },
+        "name": "87f26aee-175f-4cd2-bb9d-58e4f543bbcf",
+        "type": "symbol"
+      },
+      {
+        "clip": true,
+        "description": "",
         "encode": {
           "enter": {
             "x": {
-              "scale": "xscale",
-              "field": "relative_s"
+              "field": "relative_s",
+              "scale": "xscale"
             },
             "y": {
               "scale": "yscale",
@@ -183,17 +163,14 @@
             }
           },
           "update": {
-            "shape": {
-              "value": "circle"
-            },
-            "width": {
-              "value": 1
-            },
             "fill": {
               "value": "#ffa500"
             },
             "fillOpacity": {
               "value": 1
+            },
+            "shape": {
+              "value": "circle"
             },
             "stroke": {
               "value": "#000000"
@@ -203,205 +180,34 @@
             },
             "strokeWidth": {
               "value": 0
+            },
+            "width": {
+              "value": 1
             }
           }
-        }
+        },
+        "from": {
+          "data": "daea58ba-4c73-4942-8d87-78e7d340bbcd"
+        },
+        "name": "87f26aee-175f-4cd2-bb9d-58e4f543bbcf",
+        "type": "rect"
+      }
+    ],
+    "scales": [
+      {
+        "input": "iso",
+        "name": "xscale",
+        "output": "auto"
       }
     ]
   },
-  "data": [
-    {
-      "name": "daea58ba-4c73-4942-8d87-78e7d340bbcd",
-      "format": {
-        "type": "csv",
-        "parse": {
-          "time": "date",
-          "phase": "number",
-          "flux": "number",
-          "error": "number",
-          "relative_s": "number"
-        }
-      },
-      "url": "data_daea58ba-4c73-4942-8d87-78e7d340bbcd.csv"
-    }
-  ],
-  "marks": [
-    {
-      "type": "symbol",
-      "name": "452ec40a-3193-4a54-ae89-71105e503a67",
-      "description": "",
-      "clip": true,
-      "from": {
-        "data": "daea58ba-4c73-4942-8d87-78e7d340bbcd"
-      },
-      "encode": {
-        "enter": {
-          "x": {
-            "scale": "xscale",
-            "field": "time"
-          },
-          "y": {
-            "scale": "yscale",
-            "field": "flux"
-          },
-          "shape": {
-            "value": "circle"
-          }
-        },
-        "update": {
-          "shape": {
-            "value": "circle"
-          },
-          "size": {
-            "value": 50
-          },
-          "fill": {
-            "value": "#ffa500"
-          },
-          "fillOpacity": {
-            "value": 1
-          },
-          "stroke": {
-            "value": "#000000"
-          },
-          "strokeOpacity": {
-            "value": 0.2
-          },
-          "strokeWidth": {
-            "value": 0
-          }
-        }
-      }
-    },
-    {
-      "type": "rect",
-      "name": "452ec40a-3193-4a54-ae89-71105e503a67",
-      "description": "",
-      "clip": true,
-      "from": {
-        "data": "daea58ba-4c73-4942-8d87-78e7d340bbcd"
-      },
-      "encode": {
-        "enter": {
-          "x": {
-            "scale": "xscale",
-            "field": "time"
-          },
-          "y": {
-            "scale": "yscale",
-            "signal": "datum['flux'] - datum['error']"
-          },
-          "y2": {
-            "scale": "yscale",
-            "signal": "datum['flux'] + datum['error']"
-          }
-        },
-        "update": {
-          "shape": {
-            "value": "circle"
-          },
-          "width": {
-            "value": 1
-          },
-          "fill": {
-            "value": "#ffa500"
-          },
-          "fillOpacity": {
-            "value": 1
-          },
-          "stroke": {
-            "value": "#000000"
-          },
-          "strokeOpacity": {
-            "value": 0.2
-          },
-          "strokeWidth": {
-            "value": 0
-          }
-        }
-      }
-    },
-    {
-      "type": "line",
-      "name": "5f811cb9-2964-4f8b-afac-aa5090e5e945",
-      "description": "",
-      "clip": true,
-      "from": {
-        "data": "daea58ba-4c73-4942-8d87-78e7d340bbcd"
-      },
-      "encode": {
-        "enter": {
-          "x": {
-            "scale": "xscale",
-            "field": "time"
-          },
-          "y": {
-            "scale": "yscale",
-            "field": "flux"
-          },
-          "stroke": {
-            "value": "#000000"
-          },
-          "strokeOpacity": {
-            "value": 1
-          },
-          "strokeWidth": {
-            "value": 1
-          }
-        }
-      }
-    }
-  ],
-  "axes": [
-    {
-      "orient": "bottom",
-      "scale": "xscale",
-      "title": "Time"
-    },
-    {
-      "orient": "left",
-      "scale": "yscale",
-      "title": "Radial Velocity (km/s)"
-    }
-  ],
-  "scales": [
-    {
-      "name": "xscale",
-      "type": "time",
-      "range": "width",
-      "zero": false,
-      "padding": 36,
-      "domain": [
-        {
-          "signal": "datetime(2016, 2, 22, 12, 30, 28)"
-        },
-        {
-          "signal": "datetime(2016, 2, 22, 12, 34, 20)"
-        }
-      ]
-    },
-    {
-      "name": "yscale",
-      "type": "linear",
-      "range": "height",
-      "zero": false,
-      "padding": 36,
-      "domain": [
-        0.69,
-        1.02
-      ]
-    }
-  ],
   "_views": [
     {
-      "name": "d1f6f86c-029a-4245-bb91-433a6aa79987",
-      "title": "By phase",
-      "description": null,
       "_extend": {
         "scales": [
           {
-            "name": "xscale",
             "input": "phase",
+            "name": "xscale",
             "output": "unity"
           }
         ]
@@ -418,46 +224,46 @@
           "title": "Radial Velocity (km/s)"
         }
       ],
-      "scales": [
-        {
-          "name": "xscale",
-          "type": "number",
-          "range": "width",
-          "zero": false,
-          "padding": 36,
-          "domain": [
-            0.0,
-            1.0
-          ]
-        },
-        {
-          "name": "yscale",
-          "type": "linear",
-          "range": "height",
-          "zero": false,
-          "padding": 36,
-          "domain": [
-            0.69,
-            1.02
-          ]
-        }
-      ],
+      "description": null,
       "markers": [
         {
           "name": "9c9cea0c-2ca1-4789-a091-250e8fe46024",
           "visible": true
         }
-      ]
+      ],
+      "name": "d1f6f86c-029a-4245-bb91-433a6aa79987",
+      "scales": [
+        {
+          "domain": [
+            0.0,
+            1.0
+          ],
+          "name": "xscale",
+          "padding": 36,
+          "range": "width",
+          "type": "number",
+          "zero": false
+        },
+        {
+          "domain": [
+            0.69,
+            1.02
+          ],
+          "name": "yscale",
+          "padding": 36,
+          "range": "height",
+          "type": "linear",
+          "zero": false
+        }
+      ],
+      "title": "By phase"
     },
     {
-      "name": "d1f6f86c-029a-4245-bb91-433a6aa79987",
-      "title": "By relative time",
-      "description": null,
       "_extend": {
         "scales": [
           {
-            "name": "xscale",
             "input": "seconds",
+            "name": "xscale",
             "output": "auto"
           }
         ]
@@ -474,36 +280,230 @@
           "title": "Radial Velocity (km/s)"
         }
       ],
-      "scales": [
-        {
-          "name": "xscale",
-          "type": "number",
-          "range": "width",
-          "zero": false,
-          "padding": 36,
-          "domain": [
-            0.0,
-            232.0
-          ]
-        },
-        {
-          "name": "yscale",
-          "type": "linear",
-          "range": "height",
-          "zero": false,
-          "padding": 36,
-          "domain": [
-            0.69,
-            1.02
-          ]
-        }
-      ],
+      "description": null,
       "markers": [
         {
           "name": "87f26aee-175f-4cd2-bb9d-58e4f543bbcf",
           "visible": true
         }
-      ]
+      ],
+      "name": "d1f6f86c-029a-4245-bb91-433a6aa79987",
+      "scales": [
+        {
+          "domain": [
+            0.0,
+            232.0
+          ],
+          "name": "xscale",
+          "padding": 36,
+          "range": "width",
+          "type": "number",
+          "zero": false
+        },
+        {
+          "domain": [
+            0.69,
+            1.02
+          ],
+          "name": "yscale",
+          "padding": 36,
+          "range": "height",
+          "type": "linear",
+          "zero": false
+        }
+      ],
+      "title": "By relative time"
     }
-  ]
+  ],
+  "autosize": {
+    "resize": false,
+    "type": "fit"
+  },
+  "axes": [
+    {
+      "orient": "bottom",
+      "scale": "xscale",
+      "title": "Time"
+    },
+    {
+      "orient": "left",
+      "scale": "yscale",
+      "title": "Radial Velocity (km/s)"
+    }
+  ],
+  "data": [
+    {
+      "format": {
+        "parse": {
+          "error": "number",
+          "flux": "number",
+          "phase": "number",
+          "relative_s": "number",
+          "time": "date"
+        },
+        "type": "csv"
+      },
+      "name": "daea58ba-4c73-4942-8d87-78e7d340bbcd",
+      "url": "data_daea58ba-4c73-4942-8d87-78e7d340bbcd.csv"
+    }
+  ],
+  "height": 400,
+  "marks": [
+    {
+      "clip": true,
+      "description": "",
+      "encode": {
+        "enter": {
+          "shape": {
+            "value": "circle"
+          },
+          "x": {
+            "field": "time",
+            "scale": "xscale"
+          },
+          "y": {
+            "field": "flux",
+            "scale": "yscale"
+          }
+        },
+        "update": {
+          "fill": {
+            "value": "#ffa500"
+          },
+          "fillOpacity": {
+            "value": 1
+          },
+          "shape": {
+            "value": "circle"
+          },
+          "size": {
+            "value": 50
+          },
+          "stroke": {
+            "value": "#000000"
+          },
+          "strokeOpacity": {
+            "value": 0.2
+          },
+          "strokeWidth": {
+            "value": 0
+          }
+        }
+      },
+      "from": {
+        "data": "daea58ba-4c73-4942-8d87-78e7d340bbcd"
+      },
+      "name": "452ec40a-3193-4a54-ae89-71105e503a67",
+      "type": "symbol"
+    },
+    {
+      "clip": true,
+      "description": "",
+      "encode": {
+        "enter": {
+          "x": {
+            "field": "time",
+            "scale": "xscale"
+          },
+          "y": {
+            "scale": "yscale",
+            "signal": "datum['flux'] - datum['error']"
+          },
+          "y2": {
+            "scale": "yscale",
+            "signal": "datum['flux'] + datum['error']"
+          }
+        },
+        "update": {
+          "fill": {
+            "value": "#ffa500"
+          },
+          "fillOpacity": {
+            "value": 1
+          },
+          "shape": {
+            "value": "circle"
+          },
+          "stroke": {
+            "value": "#000000"
+          },
+          "strokeOpacity": {
+            "value": 0.2
+          },
+          "strokeWidth": {
+            "value": 0
+          },
+          "width": {
+            "value": 1
+          }
+        }
+      },
+      "from": {
+        "data": "daea58ba-4c73-4942-8d87-78e7d340bbcd"
+      },
+      "name": "452ec40a-3193-4a54-ae89-71105e503a67",
+      "type": "rect"
+    },
+    {
+      "clip": true,
+      "description": "",
+      "encode": {
+        "enter": {
+          "stroke": {
+            "value": "#000000"
+          },
+          "strokeOpacity": {
+            "value": 1
+          },
+          "strokeWidth": {
+            "value": 1
+          },
+          "x": {
+            "field": "time",
+            "scale": "xscale"
+          },
+          "y": {
+            "field": "flux",
+            "scale": "yscale"
+          }
+        }
+      },
+      "from": {
+        "data": "daea58ba-4c73-4942-8d87-78e7d340bbcd"
+      },
+      "name": "5f811cb9-2964-4f8b-afac-aa5090e5e945",
+      "type": "line"
+    }
+  ],
+  "padding": 0,
+  "scales": [
+    {
+      "domain": [
+        {
+          "signal": "datetime(2016, 2, 22, 12, 30, 28)"
+        },
+        {
+          "signal": "datetime(2016, 2, 22, 12, 34, 20)"
+        }
+      ],
+      "name": "xscale",
+      "padding": 36,
+      "range": "width",
+      "type": "time",
+      "zero": false
+    },
+    {
+      "domain": [
+        0.69,
+        1.02
+      ],
+      "name": "yscale",
+      "padding": 36,
+      "range": "height",
+      "type": "linear",
+      "zero": false
+    }
+  ],
+  "title": "By time of observation",
+  "width": 600
 }
