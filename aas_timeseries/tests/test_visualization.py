@@ -332,10 +332,27 @@ class TestTimeAxes:
         view2 = fig.add_view(title='By relative time', empty=True, time_mode='relative')
         view2.add_markers(time_series=self.ts, time_column='relative_s', column='flux', color='orange', error='error', size=50)
 
-        json_file = tmpdir.join('figure.json').strpath
-        plot_prefix = tmpdir.join('figure').strpath
+        default_format = tmpdir.mkdir('default')
+
+        json_file = default_format.join('figure.json').strpath
+        plot_prefix = default_format.join('figure').strpath
         fig.save_vega_json(json_file)
         if image_tests:
             interactive_screenshot(json_file, plot_prefix)
 
-        compare_to_reference_json(tmpdir, 'mixed_time_axes', image_tests=image_tests)
+        compare_to_reference_json(default_format, 'mixed_time_axes', image_tests=image_tests)
+
+        # Customize the time formats
+        fig.time_format = 'jd'
+        view1.time_format = 'degrees'
+        view2.time_format = 'seconds'
+
+        custom_format = tmpdir.mkdir('custom')
+
+        json_file = custom_format.join('figure.json').strpath
+        plot_prefix = custom_format.join('figure').strpath
+        fig.save_vega_json(json_file)
+        if image_tests:
+            interactive_screenshot(json_file, plot_prefix)
+
+        compare_to_reference_json(custom_format, 'mixed_time_axes_custom_format', image_tests=image_tests)

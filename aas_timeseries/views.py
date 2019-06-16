@@ -11,7 +11,11 @@ from aas_timeseries.layers import BaseLayer, Markers, Line, VerticalLine, Vertic
 
 __all__ = ['BaseView', 'View']
 
-VALID_TIME_FORMATS = ['jd', 'mjd', 'unix', 'iso', 'auto']
+VALID_TIME_FORMATS = {}
+VALID_TIME_FORMATS['absolute'] = ['jd', 'mjd', 'unix', 'iso', 'auto']
+VALID_TIME_FORMATS['relative'] = ['seconds', 'auto']
+VALID_TIME_FORMATS['phase'] = ['unity', 'degrees', 'radians']
+
 VALID_TIME_MODES = ['absolute', 'relative', 'phase']
 
 
@@ -134,10 +138,10 @@ class BaseView:
 
     @time_format.setter
     def time_format(self, value):
-        if value in VALID_TIME_FORMATS:
+        if value in VALID_TIME_FORMATS[self._time_mode]:
             self._time_format = value
         else:
-            raise ValueError('time_format should be one of ' + '/'.join(VALID_TIME_FORMATS))
+            raise ValueError('time_format should be one of ' + '/'.join(VALID_TIME_FORMATS[self._time_mode]))
 
     def _validate_time_column(self, time_series, time_column):
         column = time_series[time_column]
