@@ -11,6 +11,9 @@ from aas_timeseries.layers import BaseLayer, Markers, Line, VerticalLine, Vertic
 
 __all__ = ['BaseView', 'View']
 
+VALID_TIME_FORMATS = ['jd', 'mjd', 'unix', 'iso', 'auto']
+VALID_TIME_MODES = ['absolute', 'relative', 'phase']
+
 
 class BaseView:
     """
@@ -26,6 +29,11 @@ class BaseView:
         self._ylog = False
         self._xlabel = ''
         self._ylabel = ''
+        self._time_format = ''
+
+        if time_mode is not None and time_mode not in VALID_TIME_MODES:
+            raise ValueError("time_mode should be one of " + "/".join(VALID_TIME_MODES))
+
         self._time_mode = time_mode or 'absolute'
 
     @property
@@ -108,6 +116,28 @@ class BaseView:
             raise ValueError('Either both or neither limit has to be specified '
                              'as a Quantity')
         self._ylim = range
+
+    @property
+    def time_format(self):
+        """
+        The format to use for the x-axis.
+        """
+        if self._time_format:
+            return self._time_format
+        else:
+            if self._time_mode == 'absolute':
+                return 'auto'
+            elif self._time_mode == 'relative':
+                return 'auto'
+            elif self._time_mode == 'phase':
+                return 'unity'
+
+    @time_format.setter
+    def time_format(self, value):
+        if value in VALID_TIME_FORMATS:
+            self._time_format = value
+        else:
+            raise ValueError('time_format should be one of ' + '/'.join(VALID_TIME_FORMATS))
 
     def _validate_time_column(self, time_series, time_column):
         column = time_series[time_column]

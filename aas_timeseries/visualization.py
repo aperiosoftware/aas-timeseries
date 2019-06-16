@@ -197,7 +197,14 @@ class InteractiveTimeSeriesFigure(BaseView):
             if view is not self:
                 view = view['view']
 
-            with time_support(format='iso', scale='utc'):
+            if self.time_format == 'auto':
+                time_format = 'iso'
+                simplify = True
+            else:
+                time_format = self.time_format
+                simplify = False
+
+            with time_support(format=time_format, simplify=simplify, scale='utc'):
                 with quantity_support():
 
                     fig = plt.figure(figsize=(self._width / 100,
@@ -383,19 +390,16 @@ class InteractiveTimeSeriesFigure(BaseView):
             if view._time_mode == 'absolute':
                 x_type = 'time'
                 x_input = 'iso'
-                x_output = 'auto'
             elif view._time_mode == 'relative':
                 x_type = 'number'
                 x_input = 'seconds'
-                x_output = 'auto'
             elif view._time_mode == 'phase':
                 x_type = 'number'
                 x_input = 'phase'
-                x_output = 'unity'
 
             view_json['_extend'] = {'scales': [{'name': 'xscale',
                                                 'input': x_input,
-                                                'output': x_output}]}
+                                                'output': view.time_format}]}
 
             view_json['axes'] = [{'orient': 'bottom',
                                   'scale': 'xscale',
