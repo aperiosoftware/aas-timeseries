@@ -19,11 +19,6 @@ from aas_timeseries.views import BaseView, View
 __all__ = ['InteractiveTimeSeriesFigure']
 
 
-def pad_limits(limits, padding):
-    vrange = (limits[1] - limits[0]) * padding
-    return limits[0] - vrange, limits[1] + vrange
-
-
 class InteractiveTimeSeriesFigure(BaseView):
     """
     An interactive time series figure.
@@ -156,12 +151,23 @@ class InteractiveTimeSeriesFigure(BaseView):
             fzip.write(html_file, 'index.html')
 
     def save_static(self, prefix, format='png', override_style=False):
+        """
+        Export the figure to one or more static files using Matplotlib. If views
+        are present then one plot is produced for each view.
 
-        # Auto-assign colors if needed
-        colors = auto_assign_colors(self._layers)
-        for layer, color in zip(self._layers, colors):
-            if override_style or layer.color is None:
-                layer.color = color
+        Parameters
+        ----------
+        prefix : str
+            The name of the plot (without extension).
+        format : str
+            Any valid format supported by Matplotlib.
+        override_style : bool, optional
+            By default, any unspecified colors will be automatically chosen.
+            If this parameter is set to `True`, all colors will be reassigned,
+            even if already set.
+        """
+
+        from matplotlib import pyplot as plt
 
         # Start off by figuring out what units we are using on the y axis.
         # Note that we check the consistency of the units only here for
@@ -172,7 +178,18 @@ class InteractiveTimeSeriesFigure(BaseView):
         else:
             yunit = self.yunit
 
-        from matplotlib import pyplot as plt
+        # Auto-assign colors if needed
+        colors = auto_assign_colors(self._layers)
+        for layer, color in zip(self._layers, colors):
+            if override_style or layer.color is None:
+                layer.color = color
+
+        # We now loop over the main figure and all the views, and produce a
+        # static plot for each of them.
+
+        def pad_limits(limits, padding):
+            vrange = (limits[1] - limits[0]) * padding
+            return limits[0] - vrange, limits[1] + vrange
 
         for iview, view in enumerate([self] + self._views):
 
@@ -182,7 +199,8 @@ class InteractiveTimeSeriesFigure(BaseView):
             with time_support(format='iso', scale='utc'):
                 with quantity_support():
 
-                    fig = plt.figure(figsize=(self._width / 100, self._height / 100))
+                    fig = plt.figure(figsize=(self._width / 100,
+                                              self._height / 100))
                     ax = fig.add_axes([0.15, 0.1, 0.8, 0.88])
 
                     for layer in view.layers:
@@ -204,19 +222,13 @@ class InteractiveTimeSeriesFigure(BaseView):
             else:
                 filename = prefix + '_view' + str(iview) + '.' + format
 
-            if view._time_mode == 'absolute':
-                x_title = view.xlabel or 'Time'
-            elif view._time_mode == 'relative':
-                x_title = view.xlabel or 'Relative Time'
-            elif view._time_mode == 'phase':
-                x_title = view.xlabel or 'Phase'
-
-            ax.set_xlabel(x_title)
+            ax.set_xlabel(view.xlabel)
             ax.set_ylabel(view.ylabel)
 
             fig.savefig(filename)
 
-    def save_vega_json(self, filename, embed_data=False, minimize_data=True, override_style=False):
+    def save_vega_json(self, filename, embed_data=False,
+                       minimize_data=True, override_style=False):
         """
         Export the JSON file, and optionally CSV data files.
 
@@ -369,17 +381,14 @@ class InteractiveTimeSeriesFigure(BaseView):
                 view = view['view']
 
             if view._time_mode == 'absolute':
-                x_title = self.xlabel or 'Time'
                 x_type = 'time'
                 x_input = 'iso'
                 x_output = 'auto'
             elif view._time_mode == 'relative':
-                x_title = self.xlabel or 'Relative Time'
                 x_type = 'number'
                 x_input = 'seconds'
                 x_output = 'auto'
             elif view._time_mode == 'phase':
-                x_title = self.xlabel or 'Phase'
                 x_type = 'number'
                 x_input = 'phase'
                 x_output = 'unity'
@@ -390,10 +399,10 @@ class InteractiveTimeSeriesFigure(BaseView):
 
             view_json['axes'] = [{'orient': 'bottom',
                                   'scale': 'xscale',
-                                  'title': x_title},
+                                  'title': view.xlabel},
                                  {'orient': 'left',
                                   'scale': 'yscale',
-                                  'title': view.ylabel or ''}]
+                                  'title': view.ylabel}]
 
             view_json['scales'] = [{'name': 'xscale',
                                     'type': x_type,

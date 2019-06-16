@@ -24,8 +24,8 @@ class BaseView:
         self._xlim = None
         self._ylim = None
         self._ylog = False
-        self._xlabel = None
-        self._ylabel = None
+        self._xlabel = ''
+        self._ylabel = ''
         self._time_mode = time_mode or 'absolute'
 
     @property
@@ -45,7 +45,15 @@ class BaseView:
         The label to use for the x-axis. If not specified, this is determined
         automatically from the type of x-axis.
         """
-        return self._xlabel
+        if self._xlabel:
+            return self._xlabel
+        else:
+            if self._time_mode == 'absolute':
+                return 'Time'
+            elif self._time_mode == 'relative':
+                return 'Relative Time'
+            elif self._time_mode == 'phase':
+                return 'Phase'
 
     @xlabel.setter
     def xlabel(self, value):
