@@ -39,7 +39,7 @@ from astropy.utils.exceptions import ErfaError
 
 __all__ = ['time_support']
 
-__doctest_requires__ = {'time_support': ['matplotlib']}
+__doctest_skip__ = ['*']
 
 UNSUPPORTED_FORMATS = ('datetime', 'datetime64')
 YMDHMS_FORMATS = ('fits', 'iso', 'isot', 'yday')
