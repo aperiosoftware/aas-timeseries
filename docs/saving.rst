@@ -39,3 +39,20 @@ all formats that are supported by the Matplotlib package.
 If you want to customize the appearance of the plot, such as the font type you
 can make use of the `Matplotlib rcparams
 <https://matplotlib.org/users/customizing.html#matplotlib-rcparams>`_ settings.
+
+Colors
+------
+
+When contructing the figure, you can assign colors to specific layers (see the
+layer documentation for more details). However, you can also not assign
+colors, and instead let them be assigned automatically when saving the figure.
+In this case, the colors will be chosen from the `Colorbrewer2 Paired
+<http://colorbrewer2.org/#type=qualitative&scheme=Paired&n=3>`_ colormap, which
+is colorblind safe.
+
+If you already assigned colors to layers, but you want to override these and
+replace them with colors taken from the above colormap, you can use the
+``override_style=True`` option for the
+:meth:`~aas_timeseries.InteractiveTimeSeriesFigure.save_vega_json`,
+:meth:`~aas_timeseries.InteractiveTimeSeriesFigure.export_interactive_bundle`,
+and :meth:`~aas_timeseries.InteractiveTimeSeriesFigure.save_static` methods.
