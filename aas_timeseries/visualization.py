@@ -6,14 +6,21 @@ from zipfile import ZipFile
 
 import numpy as np
 
-from astropy.time import Time, TimeDelta
+from matplotlib import pyplot as plt
+
+from astropy.time import Time
 from astropy.table import Table
 from astropy import units as u
-from jupyter_aas_timeseries import TimeSeriesWidget
 
+from astropy.visualization import quantity_support
+
+from aas_timeseries.backports import time_support
 from aas_timeseries.colors import auto_assign_colors
 from aas_timeseries.views import BaseView, View
-from aas_timeseries.layers import time_to_vega, Markers, Range, Line
+from aas_timeseries.matplotlib import (PhaseAsDegreesLocator,
+                                       PhaseAsDegreesFormatter,
+                                       PhaseAsRadiansLocator,
+                                       PhaseAsRadiansFormatter)
 
 __all__ = ['InteractiveTimeSeriesFigure']
 
@@ -28,8 +35,8 @@ class InteractiveTimeSeriesFigure(BaseView):
         The preferred width of the figure, in pixels.
     height : int, optional
         The preferred height of the figure, in pixels.
-    padding : int, optional
-        The padding inside the axes, in pixels
+    padding : float, optional
+        The padding inside the axes, as a fraction of the size of the axes
     resize : bool, optional
         Whether to resize the figure to the available space.
     title : str, optinal
@@ -149,7 +156,103 @@ class InteractiveTimeSeriesFigure(BaseView):
                 fzip.write(os.path.join(tmp_dir, filename), os.path.basename(filename))
             fzip.write(html_file, 'index.html')
 
-    def save_vega_json(self, filename, embed_data=False, minimize_data=True, override_style=False):
+    def _check_colors(self, override_style=False):
+        # Auto-assign colors if needed
+        colors = auto_assign_colors(self._layers)
+        for layer, color in zip(self._layers, colors):
+            if override_style or layer.color is None:
+                layer.color = color
+
+    def save_static(self, prefix, format='png', override_style=False):
+        """
+        Export the figure to one or more static files using Matplotlib. If views
+        are present then one plot is produced for each view.
+
+        Parameters
+        ----------
+        prefix : str
+            The name of the plot (without extension).
+        format : str
+            Any valid format supported by Matplotlib.
+        override_style : bool, optional
+            By default, any unspecified colors will be automatically chosen.
+            If this parameter is set to `True`, all colors will be reassigned,
+            even if already set.
+        """
+
+        # Start off by figuring out what units we are using on the y axis.
+        # Note that we check the consistency of the units only here for
+        # simplicity otherwise any guessing while users add/remove layers is
+        # tricky.
+        yunit = self._guess_yunit() if self.yunit == 'auto' else self.yunit
+
+        # Auto-assign colors if needed
+        self._check_colors(override_style=override_style)
+
+        # We now loop over the main figure and all the views, and produce a
+        # static plot for each of them.
+
+        def pad_limits(limits, padding):
+            vrange = (limits[1] - limits[0]) * padding
+            return limits[0] - vrange, limits[1] + vrange
+
+        for iview, view in enumerate([self] + self._views):
+
+            if view is not self:
+                view = view['view']
+
+            # Note that if we aren't dealing with non-absolute times, the
+            # following settings don't matter since the time_support context
+            # manager won't have any effect.
+
+            if view.time_format == 'auto' or view.time_mode != 'absolute':
+                time_format = 'iso'
+                simplify = True
+            else:
+                time_format = view.time_format
+                simplify = False
+
+            with time_support(format=time_format, simplify=simplify, scale='utc'):
+                with quantity_support():
+
+                    fig = plt.figure(figsize=(self._width / 100,
+                                              self._height / 100))
+                    ax = fig.add_axes([0.15, 0.12, 0.8, 0.86])
+
+                    for layer in view.layers:
+                        layer.to_mpl(ax, yunit=yunit)
+
+            if view.time_mode == 'phase':
+                if view.time_format == 'degrees':
+                    ax.xaxis.set_major_locator(PhaseAsDegreesLocator())
+                    ax.xaxis.set_major_formatter(PhaseAsDegreesFormatter())
+                elif view.time_format == 'radians':
+                    ax.xaxis.set_major_locator(PhaseAsRadiansLocator())
+                    ax.xaxis.set_major_formatter(PhaseAsRadiansFormatter())
+
+            x_domain, y_domain = view._get_domains(yunit, as_vega=False)
+
+            ax.set_xlim(*x_domain)
+            ax.set_ylim(*y_domain)
+
+            # Apply padding - we just get the limits again because the x limits
+            # above may have been Time objects, so we get the limits again from
+            # Matplotlib.
+            ax.set_xlim(*pad_limits(ax.get_xlim(), self._padding / self._width))
+            ax.set_ylim(*pad_limits(ax.get_ylim(), self._padding / self._height))
+
+            if view is self:
+                filename = prefix + '.' + format
+            else:
+                filename = prefix + '_view' + str(iview) + '.' + format
+
+            ax.set_xlabel(view.xlabel)
+            ax.set_ylabel(view.ylabel)
+
+            fig.savefig(filename)
+
+    def save_vega_json(self, filename, embed_data=False,
+                       minimize_data=True, override_style=False):
         """
         Export the JSON file, and optionally CSV data files.
 
@@ -174,16 +277,10 @@ class InteractiveTimeSeriesFigure(BaseView):
         # Note that we check the consistency of the units only here for
         # simplicity otherwise any guessing while users add/remove layers is
         # tricky.
-        if self.yunit == 'auto':
-            yunit = self._guess_yunit()
-        else:
-            yunit = self.yunit
+        yunit = self._guess_yunit() if self.yunit == 'auto' else self.yunit
 
         # Auto-assign colors if needed
-        colors = auto_assign_colors(self._layers)
-        for layer, color in zip(self._layers, colors):
-            if override_style or layer.color is None:
-                layer.color = color
+        self._check_colors(override_style=override_style)
 
         # Start off with empty JSON
         json = {}
@@ -225,7 +322,9 @@ class InteractiveTimeSeriesFigure(BaseView):
             # Start off by constructing a new table with only the subset of
             # columns required, and the time as an ISO string. Note that we
             # need to explicitly specify that we want UTC times, then add the
-            # Z suffix since this isn't something that astropy does.
+            # Z suffix since this isn't something that astropy does. For
+            # relative times we always use seconds, and for phases we use values
+            # in the range [0:1].
             table = Table()
             time_columns = []
             for colname in data.time_series.colnames:
@@ -282,133 +381,97 @@ class InteractiveTimeSeriesFigure(BaseView):
 
             json['data'].append(vega)
 
-        # Layers
+        # At this point, we loop over all the views (including the main view
+        # given by self) and output these to the JSON.
 
-        json['marks'] = []
-        for layer, settings in self._layers.items():
-            json['marks'].extend(layer.to_vega(yunit=yunit))
+        for view in [self] + self._views:
 
-        # Axes
+            if view is self:
 
-        # TODO: allow axis labels to be customized
+                view_json = json
 
-        if self._time_mode == 'absolute':
-            x_title = self.xlabel or 'Time'
-            x_type = 'time'
-            x_input = 'iso'
-            x_output = 'auto'
-        elif self._time_mode == 'relative':
-            x_title = self.xlabel or 'Relative Time'
-            x_type = 'number'
-            x_input = 'seconds'
-            x_output = 'auto'
-        elif self._time_mode == 'phase':
-            x_title = self.xlabel or 'Phase'
-            x_type = 'number'
-            x_input = 'phase'
-            x_output = 'unity'
-
-        json['_extend'] = {'scales': [{'name': 'xscale', 'input': x_input, 'output': x_output}]}
-
-        json['axes'] = [{'orient': 'bottom', 'scale': 'xscale',
-                         'title': x_title},
-                        {'orient': 'left', 'scale': 'yscale',
-                         'title': self.ylabel or ''}]
-
-        # Scales
-        json['scales'] = [{'name': 'xscale',
-                           'type': x_type,
-                           'range': 'width',
-                           'zero': False,
-                           'padding': self._padding},
-                          {'name': 'yscale',
-                           'type': 'log' if self.ylog else 'linear',
-                           'range': 'height',
-                           'zero': False,
-                           'padding': self._padding}]
-
-        # Limits
-
-        x_domain, y_domain = self._get_domains(yunit)
-
-        if x_domain is not None:
-            json['scales'][0]['domain'] = x_domain
-
-        if y_domain is not None:
-            json['scales'][1]['domain'] = y_domain
-
-        # Views
-
-        if len(self._views) > 0:
-
-            json['_views'] = []
-            json['_extend']['marks'] = []
-
-            for view in self._views:
+            else:
 
                 view_json = {'name': self.uuid,
                              'title': view['title'],
                              'description': view['description']}
 
+                if '_views' not in json:
+                    json['_views'] = []
+
                 json['_views'].append(view_json)
 
-                if view['view']._time_mode == 'absolute':
-                    x_title = self.xlabel or 'Time'
-                    x_type = 'time'
-                    x_input = 'iso'
-                    x_output = 'auto'
-                elif view['view']._time_mode == 'relative':
-                    x_title = self.xlabel or 'Relative Time'
-                    x_type = 'number'
-                    x_input = 'seconds'
-                    x_output = 'auto'
-                elif view['view']._time_mode == 'phase':
-                    x_title = self.xlabel or 'Phase'
-                    x_type = 'number'
-                    x_input = 'phase'
-                    x_output = 'unity'
+                view = view['view']
 
-                view_json['_extend'] = {'scales': [{'name': 'xscale', 'input': x_input, 'output': x_output}]}
+            if view._time_mode == 'absolute':
+                x_type = 'time'
+                x_input = 'iso'
+            elif view._time_mode == 'relative':
+                x_type = 'number'
+                x_input = 'seconds'
+            elif view._time_mode == 'phase':
+                x_type = 'number'
+                x_input = 'unity'
 
-                view_json['axes'] = [{'orient': 'bottom', 'scale': 'xscale',
-                                 'title': x_title},
-                                {'orient': 'left', 'scale': 'yscale',
-                                 'title': self.ylabel or ''}]
+            view_json['_extend'] = {'scales': [{'name': 'xscale',
+                                                'input': x_input,
+                                                'output': view.time_format}]}
 
-                view_json['scales'] = [{'name': 'xscale',
-                                        'type': x_type,
-                                        'range': 'width',
-                                        'zero': False,
-                                        'padding': self._padding},
-                                       {'name': 'yscale',
-                                        'type': 'log' if view['view'].ylog else 'linear',
-                                        'range': 'height',
-                                        'zero': False,
-                                        'padding': self._padding}]
+            view_json['axes'] = [{'orient': 'bottom',
+                                  'scale': 'xscale',
+                                  'title': view.xlabel},
+                                 {'orient': 'left',
+                                  'scale': 'yscale',
+                                  'title': view.ylabel}]
 
-                # Limits, if specified
+            view_json['scales'] = [{'name': 'xscale',
+                                    'type': x_type,
+                                    'range': 'width',
+                                    'zero': False,
+                                    'padding': self._padding},
+                                   {'name': 'yscale',
+                                    'type': 'log' if view.ylog else 'linear',
+                                    'range': 'height',
+                                    'zero': False,
+                                    'padding': self._padding}]
 
-                x_domain, y_domain = view['view']._get_domains(yunit)
+            # Limits, if specified
 
-                if x_domain is not None:
-                    view_json['scales'][0]['domain'] = x_domain
+            x_domain, y_domain = view._get_domains(yunit)
 
-                if y_domain is not None:
-                    view_json['scales'][1]['domain'] = y_domain
+            if x_domain is not None:
+                view_json['scales'][0]['domain'] = x_domain
 
-                # layers
+            if y_domain is not None:
+                view_json['scales'][1]['domain'] = y_domain
+
+            if view is self:
+
+                view_json['marks'] = []
+                for layer, settings in self._layers.items():
+                    view_json['marks'].extend(layer.to_vega(yunit=yunit))
+
+            else:
 
                 view_json['markers'] = []
 
-                for layer, settings in view['view']._inherited_layers.items():
-                    view_json['markers'].append({'name': layer.uuid, 'visible': settings['visible']})
+                for layer, settings in view._inherited_layers.items():
+                    for uuid in layer.uuids:
+                        view_json['markers'].append({'name': uuid,
+                                                     'visible': settings['visible']})
 
-                for layer, settings in view['view']._layers.items():
+                for layer, settings in view._layers.items():
+
+                    if 'marks' not in json['_extend']:
+                        json['_extend']['marks'] = []
+
                     json['_extend']['marks'].extend(layer.to_vega(yunit=yunit))
-                    view_json['markers'].append({'name': layer.uuid, 'visible': settings['visible']})
+                    for uuid in layer.uuids:
+                        view_json['markers'].append({'name': uuid,
+                                                     'visible': settings['visible']})
 
         with open(filename, 'w') as f:
-            dump(json, f, indent='  ')
+            dump(json, f, indent='  ', sort_keys=True)
 
     def preview_interactive(self):
         """
@@ -416,6 +479,7 @@ class InteractiveTimeSeriesFigure(BaseView):
         notebook or lab).
         """
         # FIXME: should be able to do without a file
+        from jupyter_aas_timeseries import TimeSeriesWidget
         tmpfile = tempfile.mktemp()
         self.save_vega_json(tmpfile, embed_data=True, minimize_data=True)
         widget = TimeSeriesWidget(tmpfile)

@@ -11,6 +11,13 @@ from aas_timeseries.layers import BaseLayer, Markers, Line, VerticalLine, Vertic
 
 __all__ = ['BaseView', 'View']
 
+VALID_TIME_FORMATS = {}
+VALID_TIME_FORMATS['absolute'] = ['jd', 'mjd', 'unix', 'iso', 'auto']
+VALID_TIME_FORMATS['relative'] = ['seconds']
+VALID_TIME_FORMATS['phase'] = ['unity', 'degrees', 'radians']
+
+VALID_TIME_MODES = ['absolute', 'relative', 'phase']
+
 
 class BaseView:
     """
@@ -24,9 +31,18 @@ class BaseView:
         self._xlim = None
         self._ylim = None
         self._ylog = False
-        self._xlabel = None
-        self._ylabel = None
+        self._xlabel = ''
+        self._ylabel = ''
+        self._time_format = ''
+
+        if time_mode is not None and time_mode not in VALID_TIME_MODES:
+            raise ValueError("time_mode should be one of " + "/".join(VALID_TIME_MODES))
+
         self._time_mode = time_mode or 'absolute'
+
+    @property
+    def time_mode(self):
+        return self._time_mode
 
     @property
     def ylog(self):
@@ -45,7 +61,15 @@ class BaseView:
         The label to use for the x-axis. If not specified, this is determined
         automatically from the type of x-axis.
         """
-        return self._xlabel
+        if self._xlabel:
+            return self._xlabel
+        else:
+            if self._time_mode == 'absolute':
+                return 'Time'
+            elif self._time_mode == 'relative':
+                return 'Relative Time (s)'
+            elif self._time_mode == 'phase':
+                return 'Phase'
 
     @xlabel.setter
     def xlabel(self, value):
@@ -100,6 +124,28 @@ class BaseView:
             raise ValueError('Either both or neither limit has to be specified '
                              'as a Quantity')
         self._ylim = range
+
+    @property
+    def time_format(self):
+        """
+        The format to use for the x-axis.
+        """
+        if self._time_format:
+            return self._time_format
+        else:
+            if self._time_mode == 'absolute':
+                return 'auto'
+            elif self._time_mode == 'relative':
+                return 'seconds'
+            elif self._time_mode == 'phase':
+                return 'unity'
+
+    @time_format.setter
+    def time_format(self, value):
+        if value in VALID_TIME_FORMATS[self._time_mode]:
+            self._time_format = value
+        else:
+            raise ValueError('time_format should be one of ' + '/'.join(VALID_TIME_FORMATS[self._time_mode]))
 
     def _validate_time_column(self, time_series, time_column):
         column = time_series[time_column]
@@ -395,7 +441,7 @@ class BaseView:
     def layers(self):
         return list(self._layers)
 
-    def _get_domains(self, yunit):
+    def _get_domains(self, yunit, as_vega=True):
 
         if self.xlim is None or self.ylim is None:
 
@@ -453,9 +499,9 @@ class BaseView:
         ylim = ylim_auto if ylim is None else ylim
 
         if xlim is not None:
-            if self._time_mode == 'absolute':
+            if self._time_mode == 'absolute' and as_vega:
                 x_domain = ({'signal': time_to_vega(xlim[0])},
-                                               {'signal': time_to_vega(xlim[1])})
+                            {'signal': time_to_vega(xlim[1])})
             else:
                 x_domain = list(xlim)
         else:

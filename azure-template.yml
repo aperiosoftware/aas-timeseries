@@ -56,7 +56,7 @@ jobs:
     displayName: Building docs
 
   - script: |
-        python -m pip install -e . --pre --user
+        python -m pip install -e . --user
         python .validate-notebooks.py
     displayName: Validating notebooks
 

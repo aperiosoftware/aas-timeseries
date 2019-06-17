@@ -1,85 +1,18 @@
 {
   "$schema": "https://vega.github.io/schema/vega/v4.json",
-  "title": "Default",
-  "width": 600,
-  "height": 400,
-  "padding": 0,
-  "autosize": {
-    "type": "fit",
-    "resize": false
-  },
   "_extend": {
     "scales": [
       {
-        "name": "xscale",
         "input": "iso",
+        "name": "xscale",
         "output": "auto"
       }
     ]
   },
-  "data": [
-    {
-      "name": "daea58ba-4c73-4942-8d87-78e7d340bbcd",
-      "format": {
-        "type": "csv",
-        "parse": {
-          "time": "date",
-          "flux": "number",
-          "error": "number"
-        }
-      },
-      "url": "data_daea58ba-4c73-4942-8d87-78e7d340bbcd.csv"
-    }
-  ],
-  "marks": [
-    {
-      "type": "symbol",
-      "name": "452ec40a-3193-4a54-ae89-71105e503a67",
-      "description": "Markers",
-      "clip": true,
-      "from": {
-        "data": "daea58ba-4c73-4942-8d87-78e7d340bbcd"
-      },
-      "encode": {
-        "enter": {
-          "x": {
-            "scale": "xscale",
-            "field": "time"
-          },
-          "y": {
-            "scale": "yscale",
-            "field": "flux"
-          },
-          "shape": {
-            "value": "circle"
-          }
-        },
-        "update": {
-          "shape": {
-            "value": "circle"
-          },
-          "size": {
-            "value": 20
-          },
-          "fill": {
-            "value": "#000000"
-          },
-          "fillOpacity": {
-            "value": 1
-          },
-          "stroke": {
-            "value": "#000000"
-          },
-          "strokeOpacity": {
-            "value": 0.2
-          },
-          "strokeWidth": {
-            "value": 0
-          }
-        }
-      }
-    }
-  ],
+  "autosize": {
+    "resize": false,
+    "type": "fit"
+  },
   "axes": [
     {
       "orient": "bottom",
@@ -92,13 +25,73 @@
       "title": ""
     }
   ],
+  "data": [
+    {
+      "format": {
+        "parse": {
+          "error": "number",
+          "flux": "number",
+          "time": "date"
+        },
+        "type": "csv"
+      },
+      "name": "daea58ba-4c73-4942-8d87-78e7d340bbcd",
+      "url": "data_daea58ba-4c73-4942-8d87-78e7d340bbcd.csv"
+    }
+  ],
+  "height": 400,
+  "marks": [
+    {
+      "clip": true,
+      "description": "Markers",
+      "encode": {
+        "enter": {
+          "shape": {
+            "value": "circle"
+          },
+          "x": {
+            "field": "time",
+            "scale": "xscale"
+          },
+          "y": {
+            "field": "flux",
+            "scale": "yscale"
+          }
+        },
+        "update": {
+          "fill": {
+            "value": "#000000"
+          },
+          "fillOpacity": {
+            "value": 1
+          },
+          "shape": {
+            "value": "circle"
+          },
+          "size": {
+            "value": 20
+          },
+          "stroke": {
+            "value": "#000000"
+          },
+          "strokeOpacity": {
+            "value": 0.2
+          },
+          "strokeWidth": {
+            "value": 0
+          }
+        }
+      },
+      "from": {
+        "data": "daea58ba-4c73-4942-8d87-78e7d340bbcd"
+      },
+      "name": "452ec40a-3193-4a54-ae89-71105e503a67",
+      "type": "symbol"
+    }
+  ],
+  "padding": 0,
   "scales": [
     {
-      "name": "xscale",
-      "type": "time",
-      "range": "width",
-      "zero": false,
-      "padding": 36,
       "domain": [
         {
           "signal": "datetime(2016, 2, 22, 12, 30, 31)"
@@ -106,18 +99,25 @@
         {
           "signal": "datetime(2016, 2, 22, 12, 30, 43)"
         }
-      ]
+      ],
+      "name": "xscale",
+      "padding": 36,
+      "range": "width",
+      "type": "time",
+      "zero": false
     },
     {
-      "name": "yscale",
-      "type": "linear",
-      "range": "height",
-      "zero": false,
-      "padding": 36,
       "domain": [
         1.0,
         5.0
-      ]
+      ],
+      "name": "yscale",
+      "padding": 36,
+      "range": "height",
+      "type": "linear",
+      "zero": false
     }
-  ]
+  ],
+  "title": "Default",
+  "width": 600
 }
