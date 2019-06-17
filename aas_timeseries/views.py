@@ -13,7 +13,7 @@ __all__ = ['BaseView', 'View']
 
 VALID_TIME_FORMATS = {}
 VALID_TIME_FORMATS['absolute'] = ['jd', 'mjd', 'unix', 'iso', 'auto']
-VALID_TIME_FORMATS['relative'] = ['seconds']
+VALID_TIME_FORMATS['relative'] = ['seconds', 'hours', 'days', 'years']
 VALID_TIME_FORMATS['phase'] = ['unity', 'degrees', 'radians']
 
 VALID_TIME_MODES = ['absolute', 'relative', 'phase']
@@ -67,7 +67,7 @@ class BaseView:
             if self._time_mode == 'absolute':
                 return 'Time'
             elif self._time_mode == 'relative':
-                return 'Relative Time (s)'
+                return 'Relative Time ({0})'.format(self.time_format[0])
             elif self._time_mode == 'phase':
                 return 'Phase'
 
