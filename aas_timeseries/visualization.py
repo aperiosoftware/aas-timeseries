@@ -411,7 +411,7 @@ class InteractiveTimeSeriesFigure(BaseView):
                 x_input = 'seconds'
             elif view._time_mode == 'phase':
                 x_type = 'number'
-                x_input = 'phase'
+                x_input = 'unity'
 
             view_json['_extend'] = {'scales': [{'name': 'xscale',
                                                 'input': x_input,

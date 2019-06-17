@@ -396,7 +396,7 @@
       "_extend": {
         "scales": [
           {
-            "input": "phase",
+            "input": "unity",
             "name": "xscale",
             "output": "unity"
           }
@@ -584,7 +584,7 @@
       "_extend": {
         "scales": [
           {
-            "input": "phase",
+            "input": "unity",
             "name": "xscale",
             "output": "degrees"
           }
@@ -644,7 +644,7 @@
       "_extend": {
         "scales": [
           {
-            "input": "phase",
+            "input": "unity",
             "name": "xscale",
             "output": "radians"
           }
