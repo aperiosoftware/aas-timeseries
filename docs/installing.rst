@@ -1,8 +1,9 @@
 Installation
 ============
 
-To install the latest developer version of the **aas-timeseries** package as
-well as its dependencies, you can do::
+The **aas-timeseries** package requires Python 3.6 or later. To install the
+latest developer version of aas-timeseries as well as its dependencies, you can
+do::
 
     pip install git+https://github.com/aperiosoftware/aas-timeseries
 
