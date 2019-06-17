@@ -136,7 +136,7 @@ class BaseView:
             if self._time_mode == 'absolute':
                 return 'auto'
             elif self._time_mode == 'relative':
-                return 'auto'
+                return 'seconds'
             elif self._time_mode == 'phase':
                 return 'unity'
 

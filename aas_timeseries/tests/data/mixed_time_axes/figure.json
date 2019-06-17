@@ -458,7 +458,7 @@
           {
             "input": "seconds",
             "name": "xscale",
-            "output": "auto"
+            "output": "seconds"
           }
         ]
       },
