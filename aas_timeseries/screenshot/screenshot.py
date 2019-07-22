@@ -1,6 +1,6 @@
 # The main function in this module takes a JSON file and renders it to
 # a PNG file. This uses Qt to launch a WebEngine widget, and serves the
-# required files using flask, then saves the screenshot of the contents
+# required files using tornado, then saves the screenshot of the contents
 # of the widget with Qt.
 
 import os
