@@ -92,6 +92,14 @@ class BaseLayer(HasTraits):
         """
         return []
 
+    @property
+    def _required_tooltipdata(self):
+        """
+        Return a list of (data, column) tuples giving the data/columns required
+        for the tool tip of the layer.
+        """
+        return []
+
 
 class TimeDependentLayer(BaseLayer):
     """
@@ -205,6 +213,18 @@ class Markers(TimeDependentLayer):
     @property
     def _required_ydata(self):
         return [(self.data, self.column), (self.data, self.error)]
+
+    @property
+    def _required_tooltipdata(self):
+        if isinstance(self.tooltip, bool):
+            if self.tooltip:
+                return self._required_xdata + self._required_ydata
+            else:
+                return []
+        elif isinstance(self.tooltip, (tuple, list)):
+            return [(self.data, col) for col in self.tooltip]
+        elif isinstance(self.tooltip, dict):
+            return [(self.data, col) for col in self.tooltip.values()]
 
 
 class Line(TimeDependentLayer):
