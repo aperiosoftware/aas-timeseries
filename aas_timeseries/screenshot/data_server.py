@@ -12,7 +12,7 @@ __all__ = ['get_data_server']
 
 def get_data_server(verbose=False):
     """
-    This starts up a flask server and returns a handle to a DataServer
+    This starts up a tornado server and returns a handle to a DataServer
     object which can be used to register files to serve.
     """
 
