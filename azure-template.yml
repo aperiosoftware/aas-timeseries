@@ -1,6 +1,6 @@
 parameters:
   tox_pre: ''
-  tox_test_env: 'test'
+  tox_test_env: 'test-azure'
 
 jobs:
 - job: ${{ format(parameters.name) }}

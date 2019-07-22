@@ -1,11 +1,10 @@
 import uuid
 import weakref
-import numpy as np
 from traitlets import HasTraits
 from astropy import units as u
 from aas_timeseries.traits import (Unicode, CFloat, PositiveCFloat, Opacity, Color,
                                    UnicodeChoice, DataTrait, ColumnTrait, AstropyTime,
-                                   AstropyQuantity)
+                                   AstropyQuantity, Tooltip)
 
 __all__ = ['BaseLayer', 'Markers', 'Line', 'Range', 'VerticalLine',
            'VerticalRange', 'HorizontalLine', 'HorizontalRange', 'Text',
@@ -25,6 +24,19 @@ def time_to_vega(time):
     month -= 1
 
     return f'datetime({year}, {month}, {day}, {hour}, {minute}, {second})'
+
+
+def generate_tooltip(tooltip_option, default_tooltip):
+
+    if isinstance(tooltip_option, bool):
+        if tooltip_option:
+            return default_tooltip
+        else:
+            return None
+    elif isinstance(tooltip_option, (tuple, list)):
+        return {'signal': "{" + ', '.join(["'{0}': datum.{0}".format(col) for col in tooltip_option]) + "}"}
+    elif isinstance(tooltip_option, dict):
+        return {'signal': "{" + ', '.join(["'{0}': datum.{1}".format(val, key) for key, val in tooltip_option.items()]) + "}"}
 
 
 class BaseLayer(HasTraits):
@@ -80,6 +92,14 @@ class BaseLayer(HasTraits):
         """
         return []
 
+    @property
+    def _required_tooltipdata(self):
+        """
+        Return a list of (data, column) tuples giving the data/columns required
+        for the tool tip of the layer.
+        """
+        return []
+
 
 class TimeDependentLayer(BaseLayer):
     """
@@ -121,7 +141,14 @@ class Markers(TimeDependentLayer):
 
     error_width = PositiveCFloat(1, help='The width of the error bar, in pixels.')
 
+    tooltip = Tooltip(True, help='Whether to show a tooltip (`False` or '
+                                 '`True`). Can also be set to a list of data '
+                                 'columns to show, or a dictionary mapping the '
+                                 'display name to the column name.')
+
     def to_vega(self, yunit=None):
+
+        default_tooltip = {'signal': "{{'{0}': datum.{0}, '{1}': datum.{1}}}".format(self.time_column, self.column)}
 
         # The main markers
         vega = [{'type': 'symbol',
@@ -139,6 +166,10 @@ class Markers(TimeDependentLayer):
                                        'stroke': {'value': self.edge_color or DEFAULT_COLOR},
                                        'strokeOpacity': {'value': self.edge_opacity},
                                        'strokeWidth': {'value': self.edge_width}}}}]
+
+        if self.tooltip:
+            vega[0]['encode']['hover'] = {'size': {'value': self.size * 4},
+                                          'tooltip': generate_tooltip(self.tooltip, default_tooltip)}
 
         # The error bars (if requested)
         if self.error:
@@ -182,6 +213,16 @@ class Markers(TimeDependentLayer):
     @property
     def _required_ydata(self):
         return [(self.data, self.column), (self.data, self.error)]
+
+    @property
+    def _required_tooltipdata(self):
+        if isinstance(self.tooltip, bool):
+            if self.tooltip:
+                return self._required_xdata + self._required_ydata
+            else:
+                return []
+        elif isinstance(self.tooltip, (tuple, list, dict)):
+            return [(self.data, col) for col in self.tooltip]
 
 
 class Line(TimeDependentLayer):
@@ -445,8 +486,8 @@ class HorizontalRange(BaseLayer):
         value_upper = self.value_upper.to_value(yunit)
 
         ax.fill_between([-1e30, 1e30], value_lower, value_upper,
-                         color=self.color or DEFAULT_COLOR,
-                         alpha=self.opacity)
+                        color=self.color or DEFAULT_COLOR,
+                        alpha=self.opacity)
 
 
 class Text(BaseLayer):

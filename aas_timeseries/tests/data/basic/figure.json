@@ -58,6 +58,14 @@
             "scale": "yscale"
           }
         },
+        "hover": {
+          "size": {
+            "value": 80
+          },
+          "tooltip": {
+            "signal": "{'time': datum.time, 'flux': datum.flux}"
+          }
+        },
         "update": {
           "fill": {
             "value": "#a6cee3"
@@ -133,6 +141,14 @@
           "y": {
             "field": "flux",
             "scale": "yscale"
+          }
+        },
+        "hover": {
+          "size": {
+            "value": 80
+          },
+          "tooltip": {
+            "signal": "{'time': datum.time, 'flux': datum.flux}"
           }
         },
         "update": {

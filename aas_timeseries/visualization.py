@@ -305,15 +305,19 @@ class InteractiveTimeSeriesFigure(BaseView):
         # that are needed.
         required_xdata = []
         required_ydata = []
+        required_tooltipdata = []
         for layer in self._layers:
             required_xdata.extend(layer._required_xdata)
             required_ydata.extend(layer._required_ydata)
+            required_tooltipdata.extend(layer._required_tooltipdata)
         for view in self._views:
             for layer in view['view']._layers:
                 required_xdata.extend(layer._required_xdata)
                 required_ydata.extend(layer._required_ydata)
+                required_tooltipdata.extend(layer._required_tooltipdata)
         required_xdata = set(required_xdata)
         required_ydata = set(required_ydata)
+        required_tooltipdata = set(required_tooltipdata)
 
         json['data'] = []
 
@@ -328,7 +332,7 @@ class InteractiveTimeSeriesFigure(BaseView):
             table = Table()
             time_columns = []
             for colname in data.time_series.colnames:
-                if (not minimize_data or (data, colname) in required_xdata | required_ydata):
+                if (not minimize_data or (data, colname) in required_xdata | required_ydata | required_tooltipdata):
                     column = data.time_series[colname]
                     if isinstance(column, Time):
                         table[colname] = np.char.add(column.utc.isot, 'Z')

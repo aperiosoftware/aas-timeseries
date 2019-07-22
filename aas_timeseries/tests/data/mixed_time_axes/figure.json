@@ -19,6 +19,14 @@
               "scale": "yscale"
             }
           },
+          "hover": {
+            "size": {
+              "value": 200
+            },
+            "tooltip": {
+              "signal": "{'phase': datum.phase, 'flux': datum.flux}"
+            }
+          },
           "update": {
             "fill": {
               "value": "#ffa500"
@@ -112,6 +120,14 @@
             "y": {
               "field": "flux",
               "scale": "yscale"
+            }
+          },
+          "hover": {
+            "size": {
+              "value": 200
+            },
+            "tooltip": {
+              "signal": "{'relative_s': datum.relative_s, 'flux': datum.flux}"
             }
           },
           "update": {
@@ -209,6 +225,14 @@
               "scale": "yscale"
             }
           },
+          "hover": {
+            "size": {
+              "value": 200
+            },
+            "tooltip": {
+              "signal": "{'phase': datum.phase, 'flux': datum.flux}"
+            }
+          },
           "update": {
             "fill": {
               "value": "#ffa500"
@@ -302,6 +326,14 @@
             "y": {
               "field": "flux",
               "scale": "yscale"
+            }
+          },
+          "hover": {
+            "size": {
+              "value": 200
+            },
+            "tooltip": {
+              "signal": "{'phase': datum.phase, 'flux': datum.flux}"
             }
           },
           "update": {
@@ -750,6 +782,14 @@
           "y": {
             "field": "flux",
             "scale": "yscale"
+          }
+        },
+        "hover": {
+          "size": {
+            "value": 200
+          },
+          "tooltip": {
+            "signal": "{'time': datum.time, 'flux': datum.flux}"
           }
         },
         "update": {

@@ -57,6 +57,14 @@
             "scale": "yscale"
           }
         },
+        "hover": {
+          "size": {
+            "value": 80
+          },
+          "tooltip": {
+            "signal": "{'time': datum.time, 'flux': datum.flux}"
+          }
+        },
         "update": {
           "fill": {
             "value": "#000000"

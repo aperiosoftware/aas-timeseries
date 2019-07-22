@@ -49,6 +49,11 @@ except ImportError:
 
 from aas_timeseries.data import Data
 
+__all__ = ['Any', 'Bool', 'CFloat', 'PositiveCFloat', 'Int', 'Unicode',
+           'UnicodeChoice', 'AstropyQuantity', 'DataTrait', 'ColumnTrait',
+           'AstropyTime', 'Color', 'Opacity', 'Tooltip']
+
+
 # We inherit the original trait classes to make sure that the docstrings are set
 
 
@@ -226,3 +231,20 @@ class Opacity(OriginalCFloat):
             return value
         else:
             raise TraitError("opacity must be a value in the range [0:1]")
+
+
+class Tooltip(TraitType):
+
+    default = False
+    info_text = "'Whether or not to show a tooltip, and optionally a list or dictionary of values to show'"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.help:
+            self.__doc__ = self.help
+
+    def validate(self, obj, value):
+        if isinstance(value, (bool, tuple, list, dict)):
+            return value
+        else:
+            raise TraitError('value should be a boolean, tuple, list, or dictionary')

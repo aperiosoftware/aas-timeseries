@@ -5,7 +5,7 @@ jobs:
     name: Linux
     os: linux
     tox_pre: DISPLAY=:99.0
-    tox_test_env: imagetest
+    tox_test_env: imagetest-azure
 
 - template: azure-template.yml
   parameters:

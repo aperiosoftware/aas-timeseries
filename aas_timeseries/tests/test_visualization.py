@@ -303,6 +303,32 @@ class TestUnit:
             self.figure.save_vega_json(tmpdir.join('figure.json').strpath)
         assert exc.value.args[0] == "'mJy' (spectral flux density) and '' (dimensionless) are not convertible"
 
+    def test_tooltip(self, tmpdir, deterministic_uuid):
+
+        # Check that if a custom tooltip is specified, which uses columns other
+        # than the ones used for the plotting, these other columns are included
+        # in the output data file.
+
+        self.ts['other1'] = [1, 2, 3, 4, 5]
+        self.ts['other2'] = [1, 2, 3, 4, 5]
+        self.ts['other3'] = [1, 2, 3, 4, 5]
+        self.ts['other4'] = [1, 2, 3, 4, 5]
+
+        figure = InteractiveTimeSeriesFigure()
+        figure.add_markers(time_series=self.ts, column='flux', label='Markers',
+                           tooltip=['time', 'flux', 'other1'])
+        figure.add_markers(time_series=self.ts, column='flux', label='Markers',
+                           tooltip={'other3': 'Other'})
+
+        json_file = tmpdir.join('figure.json').strpath
+
+        figure.save_vega_json(json_file)
+
+        ts = TimeSeries.read(tmpdir.join('data_daea58ba-4c73-4942-8d87-78e7d340bbcd.csv').strpath,
+                             format='ascii.basic', delimiter=',')
+
+        assert ts.colnames == ['time', 'flux', 'other1', 'other3']
+
 
 class TestTimeAxes:
 
