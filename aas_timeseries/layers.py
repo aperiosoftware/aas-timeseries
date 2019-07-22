@@ -486,8 +486,8 @@ class HorizontalRange(BaseLayer):
         value_upper = self.value_upper.to_value(yunit)
 
         ax.fill_between([-1e30, 1e30], value_lower, value_upper,
-                         color=self.color or DEFAULT_COLOR,
-                         alpha=self.opacity)
+                        color=self.color or DEFAULT_COLOR,
+                        alpha=self.opacity)
 
 
 class Text(BaseLayer):

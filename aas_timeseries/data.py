@@ -1,6 +1,8 @@
 import uuid
 
-from astropy.units import Quantity, UnitsError, UnitBase
+from astropy.units import Quantity, UnitsError
+
+__all__ = ['Data']
 
 
 class Data:

@@ -303,7 +303,6 @@ class TestUnit:
             self.figure.save_vega_json(tmpdir.join('figure.json').strpath)
         assert exc.value.args[0] == "'mJy' (spectral flux density) and '' (dimensionless) are not convertible"
 
-
     def test_tooltip(self, tmpdir, deterministic_uuid):
 
         # Check that if a custom tooltip is specified, which uses columns other

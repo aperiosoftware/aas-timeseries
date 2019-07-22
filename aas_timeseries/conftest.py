@@ -56,12 +56,12 @@ from astropy.tests.helper import enable_deprecations_as_exceptions
 # except NameError:   # Needed to support Astropy <= 1.0.0
 #     pass
 
-import uuid
-import pytest
-from faker import Faker
+import uuid  # noqa
+import pytest  # noqa
+from faker import Faker  # noqa
 
 try:
-    import qtpy
+    import qtpy  # noqa
 except ImportError:
     QT_INSTALLED = False
 else:
