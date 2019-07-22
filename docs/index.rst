@@ -27,6 +27,7 @@ User guide
    getting_started
    layers
    views
+   tooltips
    timeaxes
    saving
    submitting

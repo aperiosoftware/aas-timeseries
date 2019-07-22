@@ -319,7 +319,7 @@ class TestUnit:
         figure.add_markers(time_series=self.ts, column='flux', label='Markers',
                            tooltip=['time', 'flux', 'other1'])
         figure.add_markers(time_series=self.ts, column='flux', label='Markers',
-                           tooltip={'Other': 'other3'})
+                           tooltip={'other3': 'Other'})
 
         json_file = tmpdir.join('figure.json').strpath
 

@@ -30,6 +30,6 @@ def test_tooltip_options():
     tooltip = marker.to_vega()[0]['encode']['hover']['tooltip']
     assert tooltip == {'signal': "{'the_flux': datum.the_flux}"}
 
-    marker.tooltip = {'Time': 'the_time', 'Flux': 'the_flux'}
+    marker.tooltip = {'the_time': 'Time', 'the_flux': 'Flux'}
     tooltip = marker.to_vega()[0]['encode']['hover']['tooltip']
     assert tooltip == {'signal': "{'Time': datum.the_time, 'Flux': datum.the_flux}"}

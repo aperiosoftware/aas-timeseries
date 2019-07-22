@@ -36,7 +36,7 @@ def generate_tooltip(tooltip_option, default_tooltip):
     elif isinstance(tooltip_option, (tuple, list)):
         return {'signal': "{" + ', '.join(["'{0}': datum.{0}".format(col) for col in tooltip_option]) + "}"}
     elif isinstance(tooltip_option, dict):
-        return {'signal': "{" + ', '.join(["'{0}': datum.{1}".format(key, val) for key, val in tooltip_option.items()]) + "}"}
+        return {'signal': "{" + ', '.join(["'{0}': datum.{1}".format(val, key) for key, val in tooltip_option.items()]) + "}"}
 
 
 class BaseLayer(HasTraits):
@@ -221,10 +221,8 @@ class Markers(TimeDependentLayer):
                 return self._required_xdata + self._required_ydata
             else:
                 return []
-        elif isinstance(self.tooltip, (tuple, list)):
+        elif isinstance(self.tooltip, (tuple, list, dict)):
             return [(self.data, col) for col in self.tooltip]
-        elif isinstance(self.tooltip, dict):
-            return [(self.data, col) for col in self.tooltip.values()]
 
 
 class Line(TimeDependentLayer):
