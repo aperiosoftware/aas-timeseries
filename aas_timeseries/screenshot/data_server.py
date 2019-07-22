@@ -3,6 +3,7 @@ import os
 import time
 import socket
 import logging
+import asyncio
 from hashlib import md5
 from threading import Thread
 
@@ -15,32 +16,28 @@ def get_data_server(verbose=False):
     object which can be used to register files to serve.
     """
 
-    from flask import Flask
-    from flask_cors import CORS
+    from tornado.ioloop import IOLoop
+    from tornado.web import RequestHandler, Application
+    from tornado.routing import PathMatches
 
-    class FlaskWrapper(Flask):
+    class WebServer(Application):
 
-        port = None
         host = None
+        port = None
 
-        def run(self, *args, **kwargs):
-            self.host = kwargs.get('host', None)
-            self.port = kwargs.get('port', None)
+        def run(self, host=None, port=8886):
+            self.host = host
+            self.port = port
             try:
-                super(FlaskWrapper, self).run(*args, **kwargs)
+                self.listen(port)
+                IOLoop.instance().start()
             finally:
                 self.host = None
                 self.port = None
 
-    app = FlaskWrapper('DataServer')
-    CORS(app)
-    if verbose:
-        log = logging.getLogger('werkzeug')
-        log.setLevel(logging.ERROR)
-
     class DataServer(object):
 
-        def __init__(self):
+        def start(self, app):
             self._files = {}
             self._thread = Thread(target=self.start_app)
             self._thread.daemon = True
@@ -59,15 +56,19 @@ def get_data_server(verbose=False):
 
         def start_app(self):
 
+            asyncio.set_event_loop(asyncio.new_event_loop())
+
             host = socket.gethostbyname('localhost')
 
-            # Find free port
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.bind(('localhost', 0))
             port = sock.getsockname()[1]
             sock.close()
 
-            return app.run(host=host, port=port)
+            access_log = logging.getLogger("tornado.access")
+            access_log.setLevel('ERROR')
+
+            self._app.run(host=host, port=port)
 
         def serve_file(self, filename, real_name=True, extension=''):
             with open(filename, 'rb') as f:
@@ -85,8 +86,12 @@ def get_data_server(verbose=False):
 
     ds = DataServer()
 
-    @app.route("/data/<hash>")
-    def data(hash):
-        return ds.get_file_contents(hash)
+    class DataHandler(RequestHandler):
+        async def get(self, hash):
+            self.write(ds.get_file_contents(hash))
+
+    app = WebServer([(PathMatches(r"/data/(?P<hash>\S+)"), DataHandler)])
+
+    ds.start(app)
 
     return ds
