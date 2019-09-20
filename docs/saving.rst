@@ -20,7 +20,7 @@ HTML file to view your interactive figure to a zip file by using the
 :meth:`~aas_timeseries.InteractiveTimeSeriesFigure.export_interactive_bundle`
 method::
 
-    fig.export_interactive_bundle('my_figure.zip', zip_bundle=True)
+    fig.export_interactive_bundle('my_figure.zip')
 
 Saving static figures
 ---------------------
