@@ -1,3 +1,11 @@
+resources:
+  repositories:
+  - repository: OpenAstronomy
+    type: github
+    endpoint: aperiosoftware
+    name: OpenAstronomy/azure-pipelines-templates
+    ref: master
+
 jobs:
 
 - template: azure-template.yml
@@ -16,3 +24,15 @@ jobs:
   parameters:
     name: Windows
     os: windows
+
+- template: publish.yml@OpenAstronomy
+  parameters:
+    ${{ if startsWith(variables['Build.SourceBranch'], 'refs/tags/') }}:
+      pypi_connection_name: 'pypi_endpoint'
+    targets:
+    - sdist
+    - wheels_universal
+    dependsOn:
+    - Linux
+    - MacOSX
+    - Windows
