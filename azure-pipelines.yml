@@ -32,3 +32,7 @@ jobs:
     targets:
     - sdist
     - wheels_universal
+    dependsOn:
+    - Linux
+    - MacOSX
+    - Windows
