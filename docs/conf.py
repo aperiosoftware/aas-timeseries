@@ -92,7 +92,7 @@ release = version
 
 
 html_theme = "sphinx_rtd_theme"
-html_logo = 'images/aas_logo.svg'
+html_logo = 'images/aas_logo.png'
 
 
 # Custom sidebar templates, maps document names to template names.
@@ -171,4 +171,3 @@ html_js_files = [
 
 # Use developer docs for astropy
 intersphinx_mapping['astropy'] = ('https://docs.astropy.org/en/latest/', None)
-
