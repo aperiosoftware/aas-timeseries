@@ -21,6 +21,14 @@ jobs:
 
     xvfb: true
     coverage: codecov
+    libraries:
+      apt:
+        - libxkbcommon-x11-0
+        - pandoc
+      brew:
+        - pandoc
+      choco:
+        - pandoc
 
     envs:
 
