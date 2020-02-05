@@ -32,7 +32,6 @@ jobs:
 
     envs:
 
-    - linux: py36-imagetest
     - linux: py37-imagetest
     - linux: py38-imagetest
     - linux: py38-notebook
