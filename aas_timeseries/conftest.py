@@ -93,8 +93,8 @@ def pytest_configure(config):
 
 @pytest.fixture(scope='function')
 def deterministic_uuid():
+    Faker.seed(12345)
     faker = Faker()
-    faker.seed(12345)
     uuid.uuid4 = faker.uuid4
     yield
     uuid.uuid4 = UUID4_ORIGINAL
