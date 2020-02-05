@@ -14,6 +14,7 @@ class TimeSeriesWebEnginePage(QWebEnginePage):
 
     def __init__(self, parent=None):
         super(TimeSeriesWebEnginePage, self).__init__(parent=parent)
+        self.profile().clearHttpCache()
         if not WEBENGINE:
             self._frame = self.mainFrame()
 

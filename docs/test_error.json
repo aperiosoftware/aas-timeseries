@@ -1,0 +1,179 @@
+{
+  "$schema": "https://vega.github.io/schema/vega/v4.json",
+  "_extend": {
+    "scales": [
+      {
+        "input": "iso",
+        "name": "xscale",
+        "output": "auto"
+      }
+    ]
+  },
+  "autosize": {
+    "resize": false,
+    "type": "fit"
+  },
+  "axes": [
+    {
+      "orient": "bottom",
+      "scale": "xscale",
+      "title": "Time"
+    },
+    {
+      "orient": "left",
+      "scale": "yscale",
+      "title": ""
+    }
+  ],
+  "data": [
+    {
+      "format": {
+        "parse": {
+          "error": "number",
+          "flux": "number",
+          "time": "date"
+        },
+        "type": "csv"
+      },
+      "name": "85a72ac9-d612-41fc-b1b9-e2ae632be913",
+      "url": "data_85a72ac9-d612-41fc-b1b9-e2ae632be913.csv"
+    }
+  ],
+  "height": 400,
+  "marks": [
+    {
+      "clip": true,
+      "description": "Flux",
+      "encode": {
+        "enter": {
+          "shape": {
+            "value": "circle"
+          },
+          "x": {
+            "field": "time",
+            "scale": "xscale"
+          },
+          "y": {
+            "field": "flux",
+            "scale": "yscale"
+          }
+        },
+        "hover": {
+          "size": {
+            "value": 160
+          },
+          "tooltip": {
+            "signal": "{'time': datum.time, 'flux': datum.flux}"
+          }
+        },
+        "update": {
+          "fill": {
+            "value": "#000000"
+          },
+          "fillOpacity": {
+            "value": 1
+          },
+          "shape": {
+            "value": "circle"
+          },
+          "size": {
+            "value": 40
+          },
+          "stroke": {
+            "value": "#000000"
+          },
+          "strokeOpacity": {
+            "value": 0.2
+          },
+          "strokeWidth": {
+            "value": 0
+          }
+        }
+      },
+      "from": {
+        "data": "85a72ac9-d612-41fc-b1b9-e2ae632be913"
+      },
+      "name": "4c96ef49-10ed-4cd3-9e1e-342acdb32837",
+      "type": "symbol"
+    },
+    {
+      "clip": true,
+      "description": "Flux",
+      "encode": {
+        "enter": {
+          "x": {
+            "field": "time",
+            "scale": "xscale"
+          },
+          "y": {
+            "scale": "yscale",
+            "signal": "datum['flux'] - datum['error']"
+          },
+          "y2": {
+            "scale": "yscale",
+            "signal": "datum['flux'] + datum['error']"
+          }
+        },
+        "update": {
+          "fill": {
+            "value": "#000000"
+          },
+          "fillOpacity": {
+            "value": 1
+          },
+          "shape": {
+            "value": "circle"
+          },
+          "stroke": {
+            "value": "#000000"
+          },
+          "strokeOpacity": {
+            "value": 0.2
+          },
+          "strokeWidth": {
+            "value": 0
+          },
+          "width": {
+            "value": 1
+          }
+        }
+      },
+      "from": {
+        "data": "85a72ac9-d612-41fc-b1b9-e2ae632be913"
+      },
+      "name": "f64aa6c4-3a7f-4985-aca2-ad3d554f706f",
+      "type": "rect"
+    }
+  ],
+  "padding": 0,
+  "scales": [
+    {
+      "domain": [
+        {
+          "signal": "datetime(2016, 2, 22, 12, 30, 31)"
+        },
+        {
+          "signal": "datetime(2016, 2, 22, 12, 30, 58)"
+        }
+      ],
+      "name": "xscale",
+      "padding": 36,
+      "range": "width",
+      "type": "time",
+      "zero": false
+    },
+    {
+      "domain": [
+        2.0,
+        12.0
+      ],
+      "name": "yscale",
+      "padding": 36,
+      "range": "height",
+      "type": "linear",
+      "zero": false
+    }
+  ],
+  "title": "Default",
+  "width": 600
+}

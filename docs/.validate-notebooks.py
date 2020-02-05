@@ -4,7 +4,7 @@ import glob
 import nbformat
 from nbconvert.preprocessors import ExecutePreprocessor
 
-for notebook in glob.glob('docs/**/*.ipynb', recursive=True):
+for notebook in glob.glob('**/*.ipynb', recursive=True):
 
     print("Running {0}".format(notebook))
 

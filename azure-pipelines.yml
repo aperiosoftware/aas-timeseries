@@ -16,22 +16,38 @@ trigger:
 
 jobs:
 
-- template: azure-template.yml
+- template: run-tox-env.yml@OpenAstronomy
   parameters:
-    name: Linux
-    os: linux
-    tox_pre: DISPLAY=:99.0
-    tox_test_env: imagetest-azure
 
-- template: azure-template.yml
-  parameters:
-    name: MacOSX
-    os: macosx
+    xvfb: true
+    coverage: codecov
+    libraries:
+      apt:
+        - libxkbcommon-x11-0
+        - pandoc
+      brew:
+        - pandoc
+      choco:
+        - pandoc
 
-- template: azure-template.yml
-  parameters:
-    name: Windows
-    os: windows
+    envs:
+
+    - linux: py37-imagetest
+    - linux: py38-imagetest
+    - linux: py38-notebook
+    - linux: py38-docs
+
+    - macos: py36-test
+    - macos: py37-test
+    - macos: py38-test
+    - macos: py38-notebook
+    - macos: py38-docs
+
+    - windows: py36-test
+    - windows: py37-test
+    - windows: py38-test
+    - windows: py38-notebook
+    - windows: py38-docs
 
 - template: publish.yml@OpenAstronomy
   parameters:
@@ -40,7 +56,3 @@ jobs:
     targets:
     - sdist
     - wheels_universal
-    dependsOn:
-    - Linux
-    - MacOSX
-    - Windows
