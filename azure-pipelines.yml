@@ -45,7 +45,6 @@ jobs:
 
     - windows: py36-test
     - windows: py37-test
-    - windows: py38-test
     - windows: py38-notebook
     - windows: py38-docs
 
